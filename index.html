@@ -1,0 +1,2688 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>IAM — ระบบตรวจสอบภายใน อปท.</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --r:#C8102E;--rd:#9B0C22;--rbg:#FFF0F1;--rmid:#FFCED3;--rglow:rgba(200,16,46,.14);
+  --bk:#0C0C0C;--bk2:#161616;--bk3:#222;--bk4:#2E2E2E;--bk5:#3C3C3C;
+  --wh:#fff;--bg:#F5F5F5;--bg2:#ECECEC;--line:#E0E0E0;--line2:#CACACA;
+  --t1:#111;--t2:#333;--t3:#666;--t4:#999;
+  --ok:#16A34A;--okbg:#F0FDF4;--okbr:#BBF7D0;--oktx:#14532D;
+  --wa:#D97706;--wabg:#FFFBEB;--wabr:#FDE68A;--watx:#92400E;
+  --bl:#2563EB;--blbg:#EFF6FF;--blbr:#BFDBFE;--bltx:#1E40AF;
+  --navw:238px;--hdr:52px;--rd2:8px;--rdlg:12px;
+  --font:'Sarabun',system-ui,sans-serif;
+  --mono:'IBM Plex Mono',monospace;
+  --sh:0 1px 4px rgba(0,0,0,.07),0 0 0 1px rgba(0,0,0,.04);
+  --shmd:0 4px 16px rgba(0,0,0,.12);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font);background:var(--bg);color:var(--t1);font-size:14px;line-height:1.6;display:flex}
+button{font-family:var(--font);cursor:pointer;border:none;background:none}
+input,select,textarea{font-family:var(--font);font-size:13px;color:var(--t1)}
+a{color:var(--r);text-decoration:none}a:hover{text-decoration:underline}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+input[type=number]{-moz-appearance:textfield}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:var(--line2);border-radius:4px}
+
+/* APP */
+#app{display:flex;height:100vh;width:100%;overflow:hidden}
+
+/* SIDEBAR */
+#sb{width:var(--navw);background:var(--bk);display:flex;flex-direction:column;flex-shrink:0;height:100%;position:relative}
+#sb::after{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:linear-gradient(180deg,var(--r),var(--rd));z-index:1}
+.sb-brand{padding:20px 16px 15px 18px;border-bottom:1px solid var(--bk3)}
+.sb-tag{font-family:var(--mono);font-size:9px;letter-spacing:.2em;color:var(--r);text-transform:uppercase;margin-bottom:5px}
+.sb-name{font-size:15px;font-weight:700;color:var(--wh)}
+.sb-sub{font-size:11px;color:rgba(255,255,255,.35);margin-top:1px}
+.nav-sec{padding:14px 16px 4px 18px;font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.22)}
+.ni{display:flex;align-items:center;gap:9px;width:calc(100% - 12px);margin:1px 6px;padding:8px 11px 8px 12px;border-radius:var(--rd2);color:rgba(255,255,255,.5);font-size:13px;text-align:left;transition:all .13s;position:relative}
+.ni:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.85)}
+.ni.on{background:rgba(200,16,46,.2);color:var(--wh);font-weight:600}
+.ni.on::before{content:'';position:absolute;left:-6px;top:20%;bottom:20%;width:3px;background:var(--r);border-radius:0 3px 3px 0}
+.ni .ic{font-size:14px;width:18px;text-align:center;flex-shrink:0}
+.nbdg{margin-left:auto;font-size:10px;padding:1px 7px;border-radius:10px;font-weight:700;flex-shrink:0}
+.nbdg.r{background:var(--r);color:#fff}.nbdg.g{background:var(--okbg);color:var(--ok);border:1px solid var(--okbr)}
+.sb-foot{margin-top:auto;padding:12px;border-top:1px solid var(--bk3)}
+.yr-box{background:var(--bk3);border-radius:var(--rd2);padding:8px 13px;display:flex;align-items:center;justify-content:space-between;border:1px solid var(--bk4)}
+.yr-box span{font-size:11px;color:rgba(255,255,255,.38)}
+.yr-box input{background:transparent;border:none;color:var(--wh);font-size:14px;font-weight:700;font-family:var(--font);width:58px;text-align:right;padding:0;outline:none}
+
+/* TOPBAR */
+#tb{height:var(--hdr);background:var(--wh);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:0 24px;flex-shrink:0}
+#tb-title{font-size:15px;font-weight:700;letter-spacing:-.02em}
+#tb-sub{font-size:12px;color:var(--t3);margin-top:1px}
+#tb-acts{margin-left:auto;display:flex;gap:8px}
+
+/* CONTENT */
+#cw{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+#ct{flex:1;overflow-y:auto;padding:24px 28px;max-width:1100px;width:100%}
+.pw{display:none}.pw.on{display:block}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:var(--rd2);border:1px solid var(--line2);background:var(--wh);color:var(--t2);font-size:13px;font-family:var(--font);transition:all .13s;white-space:nowrap;cursor:pointer}
+.btn:hover{background:var(--bg2)}.btn:active{transform:scale(.97)}
+.btn-p{background:var(--r);color:#fff;border-color:var(--r);font-weight:600}.btn-p:hover{background:var(--rd);border-color:var(--rd)}
+.btn-dk{background:var(--bk);color:#fff;border-color:var(--bk);font-weight:600}.btn-dk:hover{background:var(--bk2)}
+.btn-del{background:var(--rbg);color:var(--rd);border-color:var(--rmid)}.btn-del:hover{background:var(--rmid)}
+.btn-ok{background:var(--okbg);color:var(--ok);border-color:var(--okbr)}.btn-ok:hover{background:var(--okbr)}
+.btn-sm{padding:5px 12px;font-size:12px}.btn-xs{padding:3px 9px;font-size:11px}
+
+/* CARD */
+.card{background:var(--wh);border:1px solid var(--line);border-radius:var(--rdlg);padding:20px;box-shadow:var(--sh)}
+.card-sm{padding:14px 16px}
+.ct2{font-size:13px;font-weight:700;margin-bottom:13px;display:flex;align-items:center;gap:7px}
+
+/* STATS */
+.srow{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.sc{background:var(--wh);border:1px solid var(--line);border-radius:var(--rdlg);padding:18px 20px;box-shadow:var(--sh);position:relative;overflow:hidden;transition:transform .14s,box-shadow .14s}
+.sc:hover{transform:translateY(-2px);box-shadow:var(--shmd)}
+.sc::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--rdlg) var(--rdlg) 0 0}
+.sc-r::after{background:var(--r)}.sc-g::after{background:var(--ok)}.sc-b::after{background:var(--bl)}.sc-a::after{background:var(--wa)}
+.sn{font-size:28px;font-weight:800;letter-spacing:-.04em;font-family:var(--mono);line-height:1}
+.sl{font-size:10px;color:var(--t4);margin-top:6px;text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+.ss{font-size:12px;color:var(--t3);margin-top:7px}
+
+/* GRID */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.g23{display:grid;grid-template-columns:2fr 3fr;gap:14px}
+
+/* FORMS */
+.fg{margin-bottom:12px}
+.fl{display:block;font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px}
+.fi{width:100%;padding:8px 11px;border:1px solid var(--line2);border-radius:var(--rd2);background:var(--wh);font-size:13px;outline:none;transition:border .13s,box-shadow .13s;color:var(--t1);font-family:var(--font)}
+.fi:focus{border-color:var(--r);box-shadow:0 0 0 3px var(--rglow)}
+textarea.fi{resize:vertical;min-height:68px}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.r4{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.sepl{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t4);border-bottom:1px solid var(--line);padding-bottom:7px;margin:20px 0 14px;display:flex;align-items:center;gap:8px}
+.sepl::before{content:'';display:inline-block;width:14px;height:2px;background:var(--r);flex-shrink:0}
+
+/* PILLS */
+.pill{display:inline-flex;align-items:center;font-size:11px;font-weight:600;padding:2px 9px;border-radius:20px;white-space:nowrap;border:1px solid}
+.pl{background:var(--okbg);color:var(--oktx);border-color:var(--okbr)}
+.pm{background:var(--wabg);color:var(--watx);border-color:var(--wabr)}
+.ph2{background:var(--rbg);color:var(--rd);border-color:var(--rmid)}
+.pc{background:var(--r);color:#fff;border-color:var(--rd)}
+.pb{background:var(--blbg);color:var(--bltx);border-color:var(--blbr)}
+.pgr{background:var(--bg2);color:var(--t3);border-color:var(--line2)}
+.pdk{background:var(--bk);color:#fff;border-color:var(--bk)}
+
+/* TABLE */
+.tw{border:1px solid var(--line);border-radius:var(--rdlg);overflow:hidden;box-shadow:var(--sh)}
+.tb{width:100%;border-collapse:collapse;font-size:13px}
+.tb th{padding:9px 13px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;text-align:left;background:var(--bk);color:rgba(255,255,255,.7);border-bottom:2px solid var(--r)}
+.tb td{padding:10px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+.tb tr:last-child td{border-bottom:none}
+.tb tr:hover td{background:var(--rbg)}
+
+/* PROGRESS */
+.prog{background:var(--bg2);border-radius:20px;height:5px;overflow:hidden}
+.pf{height:100%;border-radius:20px;transition:width .4s}
+.pr{background:var(--r)}.pg{background:var(--ok)}.pa{background:var(--wa)}.pbl{background:var(--bl)}
+
+/* ALERTS */
+.alert{padding:11px 14px;border-radius:var(--rd2);font-size:12px;border:1px solid;line-height:1.65;margin-bottom:12px}
+.ai{background:var(--blbg);color:var(--bltx);border-color:var(--blbr)}
+.aw{background:var(--wabg);color:var(--watx);border-color:var(--wabr)}
+.ad{background:var(--rbg);color:var(--rd);border-color:var(--rmid)}
+.as{background:var(--okbg);color:var(--oktx);border-color:var(--okbr)}
+
+/* FILTER BAR */
+.fb{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.fb .fi{width:auto;padding:5px 10px;font-size:12px}
+.fb select.fi{min-width:110px}
+
+/* TABS */
+.tabs{display:flex;border-bottom:2px solid var(--line);margin-bottom:18px}
+.tbb{padding:9px 20px;border:none;background:transparent;color:var(--t3);font-size:13px;font-family:var(--font);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .13s;display:flex;align-items:center;gap:6px}
+.tbb:hover{color:var(--t1)}.tbb.on{color:var(--r);border-bottom-color:var(--r);font-weight:600}
+.tp{display:none}.tp.on{display:block}
+
+/* MATRIX */
+.mxg{display:inline-grid;grid-template-columns:20px repeat(5,50px);gap:3px;font-family:var(--mono)}
+.mxc{width:50px;height:50px;display:flex;align-items:center;justify-content:center;border-radius:6px;cursor:pointer;font-weight:700;font-size:14px;border:1px solid transparent;transition:transform .12s,opacity .12s}
+.mxc:hover{transform:scale(1.08);opacity:.8}
+.mx-ax{display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--t4)}
+.mxl{background:#DCFCE7;color:#166534;border-color:#86EFAC}
+.mxm{background:#FEF9C3;color:#854D0E;border-color:#FDE047}
+.mxh{background:var(--rbg);color:var(--rd);border-color:var(--rmid)}
+.mxcr{background:var(--r);color:#fff;border-color:var(--rd)}
+
+/* SCORE BOX */
+.sbox{display:flex;align-items:center;gap:18px;padding:16px 20px;border-radius:var(--rdlg);border:1px solid var(--line);background:var(--bg);margin:12px 0;transition:all .2s;position:relative;overflow:hidden}
+.sbox::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px}
+.lv-l::before{background:var(--ok)}.lv-m::before{background:var(--wa)}.lv-h::before{background:var(--r)}.lv-c{background:var(--bk)}.lv-c::before{background:var(--r)}
+.snum{font-size:44px;font-weight:800;font-family:var(--mono);letter-spacing:-.04em;line-height:1}
+.slv{font-size:16px;font-weight:700}.sdsc{font-size:12px;color:var(--t3);margin-top:3px}
+.lv-c .snum,.lv-c .slv,.lv-c .sdsc{color:var(--wh)}.lv-c .sdsc{color:rgba(255,255,255,.6)}
+
+/* SLIDER */
+.slr{display:flex;align-items:center;gap:10px;margin:5px 0}
+.slr input[type=range]{flex:1;accent-color:var(--r);border:none;padding:0;background:none}
+.slv2{font-size:18px;font-weight:800;font-family:var(--mono);color:var(--r);min-width:24px;text-align:right}
+
+/* CHECKLIST */
+.ckg{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t4);padding:10px 0 5px;display:flex;align-items:center;gap:7px}
+.ckg::after{content:'';flex:1;height:1px;background:var(--line)}
+.cki{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:var(--rd2);border:1px solid var(--line);margin-bottom:5px;background:var(--wh);cursor:pointer;transition:all .12s}
+.cki:hover{border-color:var(--rmid);background:var(--rbg)}.cki.done{background:var(--okbg);border-color:var(--okbr)}
+.cki.done .ckt{color:var(--t4);text-decoration:line-through}
+.ckcb{width:15px;height:15px;accent-color:var(--r);flex-shrink:0;margin-top:2px;cursor:pointer}
+.ckt{font-size:13px;flex:1}.ckl{font-size:11px;color:var(--t4);margin-top:2px;font-family:var(--mono)}
+.ckp{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:600;flex-shrink:0}
+.cpm{background:var(--rbg);color:var(--rd)}.cps{background:var(--wabg);color:var(--watx)}.cpn{background:var(--blbg);color:var(--bltx)}
+
+/* FOLLOW-UP */
+.fur{display:flex;align-items:flex-start;gap:11px;padding:11px 14px;border:1px solid var(--line);border-radius:var(--rd2);background:var(--wh);margin-bottom:7px;transition:border .12s}
+.fur:hover{border-color:var(--line2)}
+.fud{width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.fu-o{background:var(--r)}.fu-p{background:var(--wa)}.fu-d{background:var(--ok)}
+
+/* PLAN CARD */
+.pc3{background:var(--wh);border:1px solid var(--line);border-radius:var(--rdlg);padding:15px 18px;margin-bottom:9px;box-shadow:var(--sh);transition:all .14s}
+.pc3:hover{border-color:var(--rmid);box-shadow:0 4px 16px rgba(200,16,46,.08)}.pc3.dc{opacity:.55}
+
+/* UPLOAD PANEL */
+.upp{background:var(--wh);border:1px solid var(--line);border-radius:var(--rdlg);margin-top:20px;overflow:hidden;box-shadow:var(--sh)}
+.upph{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:linear-gradient(135deg,var(--bk) 0%,var(--bk3) 100%);border-bottom:2px solid var(--r);cursor:pointer;user-select:none}
+.upphl{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--wh)}
+.upphr{display:flex;align-items:center;gap:8px}
+.uppb{padding:16px;display:none}.uppb.on{display:block}
+.updz{border:2px dashed var(--line2);border-radius:var(--rd2);padding:22px 16px;text-align:center;cursor:pointer;transition:all .14s;background:var(--bg)}
+.updz:hover,.updz.dg{border-color:var(--r);background:var(--rbg)}
+.upfr{display:flex;align-items:center;gap:9px;padding:9px 12px;border:1px solid var(--line);border-radius:var(--rd2);background:var(--wh);margin-bottom:6px;transition:border .12s}
+.upfr:hover{border-color:var(--rmid)}
+.upfi{flex:1;min-width:0}
+.upfn{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.upfm{font-size:11px;color:var(--t4);margin-top:2px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.upbdg{font-size:10px;background:var(--okbg);color:var(--ok);border:1px solid var(--okbr);border-radius:10px;padding:1px 7px;font-weight:600}
+.upbdg.sy{background:var(--blbg);color:var(--bl);border-color:var(--blbr)}
+.upct{font-size:10px;background:var(--r);color:#fff;border-radius:10px;padding:1px 8px;font-weight:700}
+.updl{font-size:12px;color:rgba(255,255,255,.6);display:flex;align-items:center;gap:5px;text-decoration:none;transition:color .12s}
+.updl:hover{color:var(--wh);text-decoration:none}
+
+/* DOC */
+.dcit{display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid var(--line);border-radius:var(--rd2);background:var(--wh);margin-bottom:7px;transition:border .12s}
+.dcit:hover{border-color:var(--rmid)}
+.dcin{flex:1;min-width:0}
+.dcnm{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dcmt{font-size:11px;color:var(--t4);margin-top:1px}
+
+/* UPLOAD ZONE (charter) */
+.upz{border:2px dashed var(--line2);border-radius:var(--rdlg);padding:34px 20px;text-align:center;cursor:pointer;transition:all .14s;background:var(--wh)}
+.upz:hover,.upz.dg{border-color:var(--r);background:var(--rbg)}
+
+/* ANNUAL */
+.abl{background:var(--wh);border:1px solid var(--line);border-radius:var(--rdlg);margin-bottom:13px;overflow:hidden;box-shadow:var(--sh)}
+.ablh{padding:12px 18px;background:linear-gradient(135deg,var(--bk) 0%,var(--bk3) 100%);border-bottom:2px solid var(--r);font-size:13px;font-weight:600;color:var(--wh);display:flex;align-items:center;gap:8px}
+.ablb{padding:16px 18px}
+
+/* FINDING CARD */
+.fcard{border:1px solid var(--line);border-radius:var(--rdlg);overflow:hidden;margin-bottom:9px;background:var(--wh)}
+.fhd{padding:9px 13px;background:var(--bg);display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:600;color:var(--t2);border-bottom:1px solid var(--line)}
+
+/* EMPTY */
+.empty{text-align:center;padding:52px 20px;color:var(--t4)}
+.eic{font-size:34px;margin-bottom:11px;opacity:.4}
+.empty h3{font-size:14px;color:var(--t3);margin-bottom:5px;font-weight:500}
+.empty p{font-size:12px}
+
+/* TOAST */
+#toast{position:fixed;bottom:22px;right:22px;background:var(--bk);color:#fff;padding:11px 18px;border-radius:var(--rdlg);font-size:13px;font-weight:500;opacity:0;transform:translateY(8px);transition:all .22s;pointer-events:none;z-index:9999;max-width:300px;border-left:3px solid var(--r);box-shadow:0 8px 24px rgba(0,0,0,.35)}
+#toast.on{opacity:1;transform:translateY(0)}
+
+/* LAW CARD */
+.lc{border:1px solid var(--line);border-radius:var(--rdlg);overflow:hidden;margin-bottom:9px}
+.lch{padding:11px 15px;background:var(--bg);font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line)}
+.lcb{padding:10px 15px;font-size:12px;color:var(--t2);line-height:1.7}
+
+/* RESPONSIVE */
+@media(max-width:900px){#sb{display:none}.srow,.g2,.g23{grid-template-columns:1fr}.r3,.r4{grid-template-columns:1fr 1fr}#ct{padding:16px}}
+@media print{#sb,#tb,.upp,.fb,.btn{display:none!important}#ct{padding:0}body{overflow:auto}.tb th{background:#000!important;color:#fff!important;-webkit-print-color-adjust:exact}}
+
+/* ═══ LANDING PAGE ═══ */
+#app{display:none}
+#landing{display:flex;min-height:100vh;width:100%;background:var(--bk);position:relative;overflow:hidden;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px}
+#landing::before{content:'';position:absolute;inset:0;
+  background:
+    radial-gradient(circle at 12% 8%,var(--rglow) 0%,transparent 38%),
+    radial-gradient(circle at 88% 92%,var(--rglow) 0%,transparent 42%),
+    linear-gradient(180deg,var(--bk) 0%,var(--bk2) 100%);
+  pointer-events:none}
+#landing::after{content:'';position:absolute;inset:0;opacity:.5;pointer-events:none;
+  background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+  background-size:42px 42px}
+#landing-art{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.ld-wrap{position:relative;z-index:1;width:100%;max-width:1100px;display:flex;flex-direction:column;align-items:center}
+.ld-brand{text-align:center;margin-bottom:52px}
+.ld-tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.22em;color:var(--r);
+  border:1px solid rgba(200,16,46,.4);background:rgba(200,16,46,.08);border-radius:999px;padding:6px 16px;margin-bottom:22px}
+.ld-tag::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--r);box-shadow:0 0 8px 2px var(--rglow)}
+.ld-title{font-size:78px;font-weight:800;color:var(--wh);line-height:1.08;letter-spacing:-.025em;text-shadow:0 8px 44px rgba(200,16,46,.45),0 2px 0 rgba(0,0,0,.35)}
+.ld-title b{color:var(--r);font-weight:800}
+.ld-devtag{margin-top:14px;color:var(--bk5);font-size:11px;letter-spacing:.04em;font-family:var(--mono)}
+.ld-sub{margin-top:16px;color:#9A9A9A;font-size:15px}
+.ld-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;width:100%}
+.ld-card{position:relative;background:linear-gradient(155deg,var(--bk3) 0%,var(--bk2) 100%);border:1px solid var(--bk5);
+  border-radius:16px;padding:30px 26px 26px;cursor:pointer;overflow:hidden;
+  transition:transform .22s cubic-bezier(.2,.8,.2,1),border-color .22s,box-shadow .22s}
+.ld-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--r),var(--rd));
+  opacity:0;transition:opacity .22s}
+.ld-card:hover{transform:translateY(-6px);border-color:rgba(200,16,46,.55);box-shadow:0 20px 44px rgba(0,0,0,.45),0 0 0 1px rgba(200,16,46,.15)}
+.ld-card:hover::before{opacity:1}
+.ld-num{font-family:var(--mono);font-size:12px;color:var(--bk5);font-weight:700;letter-spacing:.08em;margin-bottom:18px}
+.ld-icon{width:54px;height:54px;border-radius:14px;background:rgba(200,16,46,.12);border:1px solid rgba(200,16,46,.3);
+  display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:20px;transition:background .22s,transform .22s}
+.ld-card:hover .ld-icon{background:var(--r);transform:scale(1.06)}
+.ld-card h3{color:var(--wh);font-size:19px;font-weight:700;margin-bottom:9px}
+.ld-card p{color:#9E9E9E;font-size:13px;line-height:1.7;min-height:66px}
+.ld-cta{display:inline-flex;align-items:center;gap:6px;margin-top:16px;font-size:13px;font-weight:700;color:var(--r);
+  transition:gap .18s}
+.ld-card:hover .ld-cta{gap:11px}
+.ld-badge{position:absolute;top:22px;right:22px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;
+  color:var(--wa);background:rgba(217,119,6,.14);border:1px solid rgba(217,119,6,.4);border-radius:999px;padding:4px 10px}
+.ld-card-soon{opacity:.82}
+.ld-card-soon .ld-cta{color:var(--wa)}
+.ld-card-soon:hover{transform:translateY(-3px);border-color:rgba(217,119,6,.5)}
+.ld-card-soon:hover::before{background:linear-gradient(180deg,var(--wa),#92400E)}
+.ld-card-soon:hover .ld-icon{background:var(--wa)}
+.ld-foot{margin-top:44px;color:var(--bk5);font-size:12px;letter-spacing:.04em;text-align:center}
+.ld-foot b{color:#666}
+@media (max-width:860px){.ld-cards{grid-template-columns:1fr}.ld-title{font-size:46px}}
+@media (max-width:480px){.ld-title{font-size:36px}}
+
+/* Coming soon page */
+#pg-comingsoon{display:none;min-height:100vh;width:100%;background:var(--bk);position:relative;overflow:hidden;
+  flex-direction:column;align-items:center;justify-content:center;padding:24px}
+#pg-comingsoon::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at 50% 30%,rgba(217,119,6,.12) 0%,transparent 45%),linear-gradient(180deg,var(--bk) 0%,var(--bk2) 100%);
+  pointer-events:none}
+.cs-wrap{position:relative;z-index:1;max-width:520px;text-align:center}
+.cs-back{position:absolute;top:-64px;left:0;display:inline-flex;align-items:center;gap:6px;color:#9A9A9A;font-size:13px;
+  background:transparent;border:1px solid var(--bk5);border-radius:999px;padding:8px 16px;transition:all .18s}
+.cs-back:hover{color:var(--wh);border-color:var(--r);background:rgba(200,16,46,.1)}
+.cs-icon{width:76px;height:76px;border-radius:20px;background:rgba(217,119,6,.14);border:1px solid rgba(217,119,6,.4);
+  display:flex;align-items:center;justify-content:center;font-size:34px;margin:0 auto 26px}
+.cs-wrap h2{color:var(--wh);font-size:26px;font-weight:800;margin-bottom:12px}
+.cs-wrap p{color:#9E9E9E;font-size:14px;line-height:1.85;margin-bottom:8px}
+.cs-list{text-align:left;background:var(--bk3);border:1px solid var(--bk5);border-radius:14px;padding:20px 22px;margin:26px 0;
+  display:flex;flex-direction:column;gap:11px}
+.cs-list div{display:flex;align-items:flex-start;gap:10px;color:#C4C4C4;font-size:13px;line-height:1.6}
+.cs-list div::before{content:'○';color:var(--wa);flex-shrink:0;margin-top:1px}
+
+/* LOGIN / AUTH */
+.sb-auth{margin-top:10px;padding-top:10px;border-top:1px solid var(--bk3)}
+.sb-auth-name{font-size:12px;color:var(--wh);font-weight:600;margin-bottom:4px}
+.sb-auth-role{font-size:10px;letter-spacing:.03em;padding:4px 9px;border-radius:999px;display:inline-block}
+.sb-auth-role.sys{background:rgba(200,16,46,.16);color:#ff8a9c;border:1px solid rgba(200,16,46,.4)}
+.sb-auth-role.gen{background:rgba(255,255,255,.06);color:rgba(255,255,255,.45);border:1px solid var(--bk4)}
+.ld-login-btn{position:absolute;top:24px;right:28px;z-index:2;display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;letter-spacing:.05em;color:#C4C4C4;background:rgba(255,255,255,.05);border:1px solid var(--bk5);border-radius:999px;padding:8px 16px;cursor:pointer;transition:all .18s}
+.ld-login-btn:hover{border-color:var(--r);color:var(--wh);background:rgba(200,16,46,.12)}
+</style></head>
+<body>
+<div id="landing">
+  <svg id="landing-art" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <g opacity=".08">
+      <path d="M600 88 L742 140 L742 342 C742 464 682 546 600 588 C518 546 458 464 458 342 L458 140 Z" fill="none" stroke="var(--r)" stroke-width="3"/>
+      <text x="600" y="360" text-anchor="middle" font-family="var(--mono)" font-size="88" font-weight="700" fill="var(--wh)">AI</text>
+      <circle cx="600" cy="88" r="5" fill="var(--r)"/><circle cx="742" cy="140" r="5" fill="var(--r)"/>
+      <circle cx="458" cy="140" r="5" fill="var(--r)"/><circle cx="600" cy="588" r="5" fill="var(--r)"/>
+      <line x1="600" y1="88" x2="600" y2="14" stroke="var(--r)" stroke-width="2"/>
+      <line x1="458" y1="140" x2="322" y2="86" stroke="var(--r)" stroke-width="2"/>
+      <line x1="742" y1="140" x2="878" y2="86" stroke="var(--r)" stroke-width="2"/>
+      <line x1="600" y1="588" x2="600" y2="706" stroke="var(--r)" stroke-width="2"/>
+    </g>
+    <g opacity=".11" font-family="var(--mono)" font-weight="700" fill="var(--wh)" style="letter-spacing:2px">
+      <text x="70" y="104" font-size="21" transform="rotate(-6 70 104)">RISK ASSESSMENT</text>
+      <text x="866" y="82" font-size="19" transform="rotate(4 866 82)">GOVERNANCE</text>
+      <text x="50" y="702" font-size="19" transform="rotate(3 50 702)">COMPLIANCE</text>
+      <text x="838" y="726" font-size="21" transform="rotate(-4 838 726)">DATA ANALYTICS</text>
+      <text x="972" y="410" font-size="18" transform="rotate(-90 972 410)">REPORTING</text>
+      <text x="56" y="410" font-size="18" transform="rotate(-90 56 410)">CONTROL</text>
+      <text x="352" y="748" font-size="17">FINDINGS</text>
+      <text x="690" y="46" font-size="17">PLANNING</text>
+    </g>
+    <g opacity=".06" stroke="var(--wh)" stroke-width="1.4" fill="none">
+      <rect x="118" y="600" width="17" height="58"/><rect x="143" y="568" width="17" height="90"/>
+      <rect x="168" y="536" width="17" height="122"/><rect x="193" y="582" width="17" height="76"/>
+      <circle cx="1030" cy="622" r="68"/><circle cx="1030" cy="622" r="44"/>
+      <path d="M1030 554 L1030 690 M962 622 L1098 622"/>
+    </g>
+  </svg>
+  <button class="ld-login-btn" id="ld-login-btn" onclick="openLogin()">🔒 เข้าสู่ระบบ</button>
+  <div class="ld-wrap">
+    <div class="ld-brand">
+      <div class="ld-tag">IAM · INTERNAL AUDIT MANAGEMENT SYSTEM</div>
+      <h1 class="ld-title">I AM <b>AUDIT</b></h1>
+      <p class="ld-devtag">ระบบสารสนเทศงานตรวจสอบภายใน · Dev by Panupong Thungprong</p>
+      <p class="ld-sub">เลือกภารกิจที่ต้องการเข้าใช้งาน</p>
+    </div>
+    <div class="ld-cards">
+      <div class="ld-card" onclick="enterApp()">
+        <div class="ld-num">01 / GOVERNANCE</div>
+        <div class="ld-icon">🔍</div>
+        <h3>งานตรวจสอบภายใน</h3>
+        <p>Internal Audit — กฎบัตร แผนการตรวจสอบ เข้าตรวจ/Checklist รายงานผล ติดตามผล และรายงานประจำปี</p>
+        <span class="ld-cta">เข้าสู่ระบบ →</span>
+      </div>
+      <div class="ld-card ld-card-soon" onclick="showComingSoon('control')">
+        <span class="ld-badge">เร็ว ๆ นี้</span>
+        <div class="ld-num">02 / CONTROL</div>
+        <div class="ld-icon">🛡️</div>
+        <h3>งานควบคุมภายใน</h3>
+        <p>Internal Control — ประเมินระบบการควบคุมภายในตามหลักเกณฑ์กระทรวงการคลัง (COSO)</p>
+        <span class="ld-cta">ดูรายละเอียด →</span>
+      </div>
+      <div class="ld-card ld-card-soon" onclick="showComingSoon('riskmgmt')">
+        <span class="ld-badge">เร็ว ๆ นี้</span>
+        <div class="ld-num">03 / RISK</div>
+        <div class="ld-icon">⬡</div>
+        <h3>งานบริหารความเสี่ยง</h3>
+        <p>Risk Management — บริหารความเสี่ยงระดับองค์กร (Enterprise Risk Management) แยกจากการประเมินความเสี่ยงเพื่อวางแผนตรวจสอบ</p>
+        <span class="ld-cta">ดูรายละเอียด →</span>
+      </div>
+    </div>
+    <div class="ld-foot">หน่วยตรวจสอบภายใน <b>เทศบาลตำบลแม่ลานนา</b> · IAM Single-File Web App</div>
+  </div>
+</div>
+
+<div id="pg-comingsoon">
+  <div class="cs-wrap">
+    <button class="cs-back" onclick="backToLanding()">← กลับหน้าหลัก</button>
+    <div class="cs-icon" id="cs-icon">🛡️</div>
+    <h2 id="cs-title">งานควบคุมภายใน</h2>
+    <p id="cs-desc">โมดูลนี้กำลังอยู่ระหว่างการพัฒนา และยังไม่พร้อมใช้งานในเวอร์ชันนี้</p>
+    <div class="cs-list" id="cs-list"></div>
+    <button class="btn btn-p" id="cs-cta" onclick="enterApp('au')" style="margin:0 auto">ไปที่ Audit Universe ระหว่างรอ →</button>
+  </div>
+</div>
+
+<div id="app">
+<nav id="sb">
+  <div class="sb-brand" onclick="backToLanding()" style="cursor:pointer" title="กลับหน้าหลัก"><div class="sb-tag">IAM · Internal Audit</div><div class="sb-name">ระบบตรวจสอบภายใน</div><div class="sb-sub">องค์กรปกครองส่วนท้องถิ่น</div></div>
+  <div class="nav-sec">กระบวนการหลัก</div>
+  <button class="ni on" data-p="dash" onclick="G('dash',this)"><span class="ic">◈</span> ภาพรวม Dashboard</button>
+  <button class="ni" data-p="charter" onclick="G('charter',this)"><span class="ic">📋</span> 1. กฎบัตรตรวจสอบ</button>
+  <button class="ni" data-p="au" onclick="G('au',this)"><span class="ic">🌐</span> 2. Audit Universe <span class="nbdg g" id="nb-au">0</span></button>
+  <button class="ni" data-p="risk" onclick="G('risk',this)"><span class="ic">⬡</span> 3. ประเมินความเสี่ยง <span class="nbdg r" id="nb-r">0</span></button>
+  <button class="ni" data-p="plan" onclick="G('plan',this)"><span class="ic">📅</span> 4. แผนการตรวจสอบ</button>
+  <button class="ni" data-p="fw" onclick="G('fw',this)"><span class="ic">🔍</span> 5. เข้าตรวจ / Checklist</button>
+  <button class="ni" data-p="report" onclick="G('report',this)"><span class="ic">📄</span> 6. รายงานผลการตรวจ <span class="nbdg g" id="nb-rp">0</span></button>
+  <button class="ni" data-p="fu" onclick="G('fu',this)"><span class="ic">🔄</span> 6.2 ติดตามผล <span class="nbdg r" id="nb-fu">0</span></button>
+  <button class="ni" data-p="annual" onclick="G('annual',this)"><span class="ic">📊</span> 7. รายงานประจำปี</button>
+  <div class="nav-sec">เครื่องมือ</div>
+  <button class="ni" data-p="docs" onclick="G('docs',this)"><span class="ic">🗂️</span> ศูนย์เอกสาร <span class="nbdg g" id="nb-docs">0</span></button>
+  <button class="ni" data-p="laws" onclick="G('laws',this)"><span class="ic">⚖️</span> ฐานกฎหมาย / ระเบียบ</button>
+  <button class="ni" onclick="doExport()"><span class="ic">↓</span> ส่งออก CSV</button>
+  <div class="sb-foot">
+    <div class="yr-box">
+      <span>ปีงบประมาณ</span>
+      <input type="number" id="gy" value="2568" min="2500" max="2600"
+        onchange="onYrChg()" oninput="if(this.value.length===4)onYrChg()"
+        onkeydown="if(event.key==='Enter')onYrChg()">
+    </div>
+    <div class="sb-auth" id="sb-auth"></div>
+  </div>
+</nav>
+<div id="cw">
+  <div id="tb">
+    <div><div id="tb-title">ภาพรวม Dashboard</div><div id="tb-sub">ปีงบประมาณ 2568</div></div>
+    <div id="tb-acts"></div>
+  </div>
+  <div id="ct">
+
+<!-- DASHBOARD -->
+<div id="pg-dash" class="pw on">
+  <div class="srow" id="d-stats"></div>
+  <div class="g23" style="margin-bottom:14px">
+    <div class="card card-sm"><div class="ct2">⬡ ระดับความเสี่ยง</div><div id="d-bars"></div></div>
+    <div class="card card-sm"><div class="ct2">📅 แผนการตรวจสอบ</div><div id="d-plans"></div></div>
+  </div>
+  <div class="g2">
+    <div class="card card-sm"><div class="ct2">⚠️ ความเสี่ยงวิกฤต / สูง</div><div id="d-highs"></div></div>
+    <div class="card card-sm"><div class="ct2">🔄 รายการรอติดตาม</div><div id="d-fu"></div></div>
+  </div>
+</div>
+
+<!-- CHARTER -->
+<div id="pg-charter" class="pw">
+  <div class="alert ai" style="margin-bottom:14px">กฎบัตรกำหนดขอบเขตและอำนาจหน้าที่ของหน่วยตรวจสอบภายใน ตามระเบียบกระทรวงการคลัง ว่าด้วยการตรวจสอบภายในของส่วนราชการ พ.ศ.2551 ต้องได้รับความเห็นชอบจากผู้บริหารสูงสุด</div>
+  <div class="tabs">
+    <button class="tbb on" onclick="ctab('form',this)"><span>📝</span> จัดทำกฎบัตร</button>
+    <button class="tbb" onclick="ctab('docs',this)"><span>📁</span> เอกสารแนบ <span class="upct" id="cdocbdg" style="display:none">0</span></button>
+  </div>
+  <div id="ct-form" class="tp on">
+    <div class="g2">
+      <div>
+        <div class="sepl">ข้อมูลองค์กร</div>
+        <div class="fg"><label class="fl">ชื่อองค์กร (อปท.)</label><input type="text" id="c-org" class="fi" placeholder="เช่น เทศบาลตำบลสันทราย จ.เชียงใหม่"></div>
+        <div class="r2"><div class="fg"><label class="fl">ปีงบประมาณ</label><input type="number" id="c-yr" class="fi" value="2568" min="2500" max="2600"></div>
+        <div class="fg"><label class="fl">วันที่อนุมัติ</label><input type="date" id="c-date" class="fi"></div></div>
+        <div class="fg"><label class="fl">ผู้บริหารสูงสุด</label><input type="text" id="c-ceo" class="fi" placeholder="ชื่อ-นามสกุล ตำแหน่ง"></div>
+        <div class="fg"><label class="fl">หัวหน้าหน่วยตรวจสอบภายใน</label><input type="text" id="c-head" class="fi"></div>
+        <div class="fg"><label class="fl">วัตถุประสงค์</label><textarea id="c-obj" class="fi" rows="3" placeholder="เพื่อให้ความเชื่อมั่นและคำปรึกษาอย่างเป็นอิสระ..."></textarea></div>
+        <div class="fg"><label class="fl">ขอบเขต</label><textarea id="c-scope" class="fi" rows="3" placeholder="ครอบคลุมการตรวจสอบการเงิน พัสดุ บุคลากร โครงการ..."></textarea></div>
+      </div>
+      <div>
+        <div class="sepl">อำนาจ ความเป็นอิสระ และมาตรฐาน</div>
+        <div class="fg"><label class="fl">อำนาจหน้าที่</label><textarea id="c-auth" class="fi" rows="3" placeholder="เข้าถึงข้อมูล เอกสาร บุคลากร ทรัพย์สินทุกประเภท..."></textarea></div>
+        <div class="fg"><label class="fl">ความเป็นอิสระ</label><textarea id="c-indep" class="fi" rows="2" placeholder="ปฏิบัติงานโดยอิสระ รายงานตรงต่อผู้บริหารสูงสุด..."></textarea></div>
+        <div class="fg"><label class="fl">มาตรฐานที่ใช้</label><textarea id="c-std" class="fi" rows="2" placeholder="มาตรฐานการตรวจสอบภายในของส่วนราชการ + IIA..."></textarea></div>
+        <div class="fg"><label class="fl">การรายงาน</label><textarea id="c-rep" class="fi" rows="2" placeholder="รายงานต่อผู้บริหารและสภา อปท. อย่างน้อยปีละ 2 ครั้ง..."></textarea></div>
+        <div class="fg"><label class="fl">หมายเหตุ</label><textarea id="c-note" class="fi" rows="2"></textarea></div>
+        <div class="sepl">สถานะ</div>
+        <div class="alert as" id="c-st">ยังไม่ได้บันทึกกฎบัตร</div>
+        <button class="btn btn-p" onclick="saveC()" style="width:100%;justify-content:center">💾 บันทึกและรับรองกฎบัตร</button>
+      </div>
+    </div>
+  </div>
+  <div id="ct-docs" class="tp">
+    <div class="g2" style="align-items:start">
+      <div>
+        <div class="sepl">อัพโหลดเอกสาร</div>
+        <div class="upz" id="c-dz"
+          onclick="document.getElementById('c-fi').click()"
+          ondragover="event.preventDefault();this.classList.add('dg')"
+          ondragleave="this.classList.remove('dg')"
+          ondrop="event.preventDefault();this.classList.remove('dg');cDocUp(event.dataTransfer.files)">
+          <div style="font-size:36px;opacity:.4;margin-bottom:8px">📂</div>
+          <div style="font-size:14px;font-weight:500;margin-bottom:4px">คลิกเลือกไฟล์ หรือลากมาวาง</div>
+          <div style="font-size:12px;color:var(--t4)">PDF, Word, Excel, รูปภาพ — สูงสุด 10MB</div>
+        </div>
+        <input type="file" id="c-fi" style="display:none" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.pptx" onchange="cDocUp(this.files);this.value=''">
+        <div class="sepl" style="margin-top:16px">ประเภทเอกสารที่แนะนำ</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          <span class="pill pgr">กฎบัตรที่ลงนาม</span><span class="pill pgr">หนังสืออนุมัติ</span>
+          <span class="pill pgr">คำสั่งแต่งตั้ง</span><span class="pill pgr">รายงานการประชุม</span>
+        </div>
+      </div>
+      <div>
+        <div class="sepl">เอกสารที่อัพโหลด <span id="cdoctotal" style="color:var(--t4);font-weight:400">(0 ไฟล์)</span></div>
+        <div id="cdoclist"><div class="empty" style="padding:28px"><div class="eic">📄</div><h3>ยังไม่มีเอกสาร</h3></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RISK -->
+<div id="pg-risk" class="pw">
+  <div class="tabs">
+    <button class="tbb on" onclick="rtab('form',this)">+ เพิ่มรายการ</button>
+    <button class="tbb" onclick="rtab('matrix',this)">⬡ Risk Matrix</button>
+    <button class="tbb" onclick="rtab('list',this)">☰ รายการทั้งหมด</button>
+  </div>
+  <div id="rt-form" class="tp on">
+    <div class="card">
+      <div class="r4">
+        <div class="fg"><label class="fl">ปีงบประมาณ</label><input type="number" id="r-yr" class="fi" value="2568" min="2500" max="2600"></div>
+        <div class="fg"><label class="fl">สำนัก / กอง</label>
+          <select id="r-dept" class="fi" onchange="document.getElementById('r-dg').style.display=this.value==='x'?'block':'none'">
+            <option value="">-- เลือก --</option><option>สำนักปลัด</option><option>กองคลัง</option><option>กองช่าง</option>
+            <option>กองการศึกษา</option><option>กองสาธารณสุข</option><option>กองสวัสดิการสังคม</option>
+            <option>กองยุทธศาสตร์และงบประมาณ</option><option value="x">อื่น ๆ</option></select></div>
+        <div class="fg" id="r-dg" style="display:none"><label class="fl">ระบุกอง</label><input type="text" id="r-do" class="fi"></div>
+        <div class="fg"><label class="fl">ประเภทการตรวจ</label>
+          <select id="r-type" class="fi" onchange="document.getElementById('r-tg').style.display=this.value==='x'?'block':'none'">
+            <option value="">-- เลือก --</option><option>การจัดซื้อจัดจ้าง</option><option>การเงินและบัญชี</option>
+            <option>งบประมาณ</option><option>บริหารงานบุคคล</option><option>การบริหารสินทรัพย์</option>
+            <option>โครงการ/งานก่อสร้าง</option><option>เทคโนโลยีสารสนเทศ</option><option>ธรรมาภิบาล</option>
+            <option value="x">อื่น ๆ</option></select></div>
+        <div class="fg" id="r-tg" style="display:none"><label class="fl">ระบุประเภท</label><input type="text" id="r-to" class="fi"></div>
+      </div>
+      <div class="fg"><label class="fl">เรื่องที่ตรวจ / ประเด็นความเสี่ยง *</label><input type="text" id="r-topic" class="fi" placeholder="เช่น การจัดซื้อโดยวิธีเฉพาะเจาะจงเกินวงเงิน"></div>
+      <div class="r2" style="margin-top:4px">
+        <div><label class="fl">โอกาสที่จะเกิด <span id="rpv" style="font-family:var(--mono);font-weight:800;color:var(--r)">3</span>/5</label>
+          <div class="slr"><input type="range" id="r-prob" min="1" max="5" value="3" oninput="syncS()"><span class="slv2" id="rpval">3</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t4)"><span>น้อยมาก</span><span>แน่นอน</span></div></div>
+        <div><label class="fl">ผลกระทบ <span id="riv" style="font-family:var(--mono);font-weight:800;color:var(--r)">3</span>/5</label>
+          <div class="slr"><input type="range" id="r-impact" min="1" max="5" value="3" oninput="syncS()"><span class="slv2" id="rival">3</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t4)"><span>เล็กน้อย</span><span>วิกฤต</span></div></div>
+      </div>
+      <div class="sbox lv-h" id="sbox">
+        <div class="snum" id="s-n">9</div>
+        <div style="flex:1"><div class="slv" id="s-lv">ความเสี่ยงสูง</div><div class="sdsc" id="s-d">ควรรวมอยู่ในแผนการตรวจสอบปีนี้</div></div>
+        <span class="pill" id="s-pill">สูง</span>
+      </div>
+      <div class="r2">
+        <div class="fg"><label class="fl">สาเหตุความเสี่ยง</label><textarea id="r-cause" class="fi" placeholder="ปัจจัยหรือต้นเหตุ"></textarea></div>
+        <div class="fg"><label class="fl">แนวทางการตรวจสอบ</label><textarea id="r-appr" class="fi" placeholder="วิธีการและขั้นตอน"></textarea></div>
+      </div>
+      <div class="r2">
+        <div class="fg"><label class="fl">ลำดับความสำคัญ</label>
+          <select id="r-prio" class="fi"><option value="1">1 — ด่วนที่สุด</option><option value="2">2 — ไตรมาสแรก</option><option value="3" selected>3 — ครึ่งปีแรก</option><option value="4">4 — ตามแผนปกติ</option></select></div>
+        <div class="fg"><label class="fl">ผู้รับผิดชอบ</label><input type="text" id="r-aud" class="fi"></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-p" onclick="saveR()" style="flex:1;justify-content:center">💾 บันทึกรายการความเสี่ยง</button>
+        <button class="btn" onclick="clrR()">ล้าง</button>
+      </div>
+    </div>
+    <div id="up-pg-risk"></div>
+  </div>
+  <div id="rt-matrix" class="tp">
+    <div class="g23">
+      <div class="card card-sm">
+        <div class="ct2">⬡ Risk Heat Map</div>
+        <div style="display:flex;gap:8px;margin-bottom:10px">
+          <input type="number" id="mx-yr" class="fi" placeholder="ทุกปี" min="2500" max="2600" oninput="if(this.value===''||this.value.length===4)rMx()" style="width:90px;font-size:12px;padding:5px 9px">
+          <select id="mx-dp" class="fi" onchange="rMx()" style="width:auto;font-size:12px;padding:5px 9px"><option value="">ทุกกอง</option></select>
+        </div>
+        <div id="mx-con"></div>
+        <div style="display:flex;flex-wrap:wrap;gap:9px;margin-top:9px;font-size:11px;color:var(--t3)">
+          <span><b style="display:inline-block;width:10px;height:10px;background:#DCFCE7;border:1px solid #86EFAC;border-radius:2px;vertical-align:middle;margin-right:3px"></b>ต่ำ</span>
+          <span><b style="display:inline-block;width:10px;height:10px;background:#FEF9C3;border:1px solid #FDE047;border-radius:2px;vertical-align:middle;margin-right:3px"></b>ปานกลาง</span>
+          <span><b style="display:inline-block;width:10px;height:10px;background:var(--rbg);border:1px solid var(--rmid);border-radius:2px;vertical-align:middle;margin-right:3px"></b>สูง</span>
+          <span><b style="display:inline-block;width:10px;height:10px;background:var(--r);border-radius:2px;vertical-align:middle;margin-right:3px"></b>วิกฤต</span>
+        </div>
+      </div>
+      <div class="card card-sm"><div class="ct2">📋 รายการที่เลือก</div><div id="mx-det" style="color:var(--t4);font-size:13px">คลิกช่องใน Matrix</div></div>
+    </div>
+    <div style="margin-top:14px"><div class="sepl">แยกตามกอง</div><div id="mx-bd"></div></div>
+  </div>
+  <div id="rt-list" class="tp">
+    <div class="fb">
+      <input type="number" id="rl-yr" class="fi" placeholder="ทุกปี" min="2500" max="2600" oninput="if(this.value===''||this.value.length===4)rRL()">
+      <select id="rl-dp" class="fi" onchange="rRL()"><option value="">ทุกกอง</option></select>
+      <select id="rl-lv" class="fi" onchange="rRL()"><option value="">ทุกระดับ</option><option>วิกฤต</option><option>สูง</option><option>ปานกลาง</option><option>ต่ำ</option></select>
+    </div>
+    <div class="tw"><table class="tb"><thead><tr><th>#</th><th>เรื่องที่ตรวจ</th><th>กอง</th><th>ประเภท</th><th>ปี</th><th>คะแนน</th><th>ระดับ</th><th>ลำดับ</th><th></th></tr></thead><tbody id="rl-body"></tbody></table></div>
+  </div>
+</div>
+
+<!-- AUDIT UNIVERSE -->
+<div id="pg-au" class="pw">
+  <div class="tabs">
+    <button class="tbb on" onclick="autab('form',this)">+ เพิ่ม/แก้ไขหน่วยรับตรวจ</button>
+    <button class="tbb" onclick="autab('summary',this)">📊 ภาพรวม</button>
+    <button class="tbb" onclick="autab('list',this)">☰ รายการทั้งหมด</button>
+  </div>
+
+  <div id="aut-form" class="tp on">
+    <div class="card">
+      <input type="hidden" id="au-editid" value="">
+      <div class="r4">
+        <div class="fg"><label class="fl">ปีงบประมาณที่ควรเริ่มตรวจ</label><input type="number" id="au-yr" class="fi" value="2570" min="2500" max="2600"></div>
+        <div class="fg"><label class="fl">หน่วยรับตรวจ / กอง</label>
+          <select id="au-dept" class="fi" onchange="document.getElementById('au-dg').style.display=this.value==='x'?'block':'none'">
+            <option value="">-- เลือก --</option><option>สำนักปลัด</option><option>กองคลัง</option><option>กองช่าง</option>
+            <option>กองการศึกษา</option><option>กองสาธารณสุข</option><option>กองสวัสดิการสังคม</option>
+            <option>กองยุทธศาสตร์และงบประมาณ</option><option value="x">อื่น ๆ</option></select></div>
+        <div class="fg" id="au-dg" style="display:none"><label class="fl">ระบุกอง</label><input type="text" id="au-do" class="fi"></div>
+        <div class="fg"><label class="fl">ประเภทการตรวจสอบ</label><input type="text" id="au-type" class="fi" placeholder="เช่น การเงิน/การดำเนินงาน"></div>
+      </div>
+      <div class="fg"><label class="fl">งาน/กิจกรรม (Auditable Unit) *</label><input type="text" id="au-name" class="fi" placeholder="เช่น งานการเงินและบัญชี"></div>
+      <div class="fg"><label class="fl">ขอบเขตงานโดยสังเขป</label><textarea id="au-scope" class="fi" placeholder="ขอบเขตงาน/กิจกรรมที่เกี่ยวข้อง"></textarea></div>
+
+      <div class="sepl">ให้คะแนนความเสี่ยงรายปัจจัย (1 = น้อยที่สุด, 5 = มากที่สุด)</div>
+      <div class="r2">
+        <div><label class="fl">ความเสี่ยงด้านการเงิน <span id="au-fv" style="font-family:var(--mono);font-weight:800;color:var(--r)">3</span>/5</label>
+          <div class="slr"><input type="range" id="au-f" min="1" max="5" value="3" oninput="auSync()"><span class="slv2" id="au-fval">3</span></div></div>
+        <div><label class="fl">ความเสี่ยงด้านการปฏิบัติตามกฎหมาย/ระเบียบ <span id="au-gv" style="font-family:var(--mono);font-weight:800;color:var(--r)">3</span>/5</label>
+          <div class="slr"><input type="range" id="au-g" min="1" max="5" value="3" oninput="auSync()"><span class="slv2" id="au-gval">3</span></div></div>
+      </div>
+      <div class="r2" style="margin-top:4px">
+        <div><label class="fl">ความเสี่ยงด้านการดำเนินงาน/ควบคุมภายใน <span id="au-hv" style="font-family:var(--mono);font-weight:800;color:var(--r)">3</span>/5</label>
+          <div class="slr"><input type="range" id="au-h" min="1" max="5" value="3" oninput="auSync()"><span class="slv2" id="au-hval">3</span></div></div>
+        <div><label class="fl">ความเสี่ยงด้านผลกระทบต่อประชาชน/ชื่อเสียง <span id="au-iv" style="font-family:var(--mono);font-weight:800;color:var(--r)">3</span>/5</label>
+          <div class="slr"><input type="range" id="au-i" min="1" max="5" value="3" oninput="auSync()"><span class="slv2" id="au-ival">3</span></div></div>
+      </div>
+
+      <div class="sbox lv-h" id="au-sbox" style="margin-top:14px">
+        <div class="snum" id="au-s-n">3.00</div>
+        <div style="flex:1"><div class="slv" id="au-s-lv">ความเสี่ยงปานกลาง</div><div class="sdsc" id="au-s-d">ตรวจสอบทุก 2 ปี</div></div>
+        <span class="pill" id="au-s-pill">ปานกลาง</span>
+      </div>
+
+      <div class="r2" style="margin-top:14px">
+        <div class="fg"><label class="fl">วันที่ตรวจสอบล่าสุด</label><input type="text" id="au-last" class="fi" placeholder="ยังไม่เคยตรวจสอบ"></div>
+        <div class="fg"><label class="fl">หมายเหตุ</label><input type="text" id="au-note" class="fi"></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-p" onclick="auSave()" style="flex:1;justify-content:center">💾 บันทึกหน่วยรับตรวจ</button>
+        <button class="btn" onclick="auClr()">ล้าง</button>
+      </div>
+    </div>
+    <div id="up-pg-au"></div>
+  </div>
+
+  <div id="aut-summary" class="tp">
+    <div class="srow" id="au-stats"></div>
+    <div class="sepl">สรุปแยกตามหน่วยรับตรวจ</div>
+    <div id="au-bd"></div>
+  </div>
+
+  <div id="aut-list" class="tp">
+    <div class="fb">
+      <input type="number" id="aul-yr" class="fi" placeholder="ทุกปี" min="2500" max="2600" oninput="if(this.value===''||this.value.length===4)auRList()">
+      <select id="aul-dp" class="fi" onchange="auRList()"><option value="">ทุกกอง</option></select>
+      <select id="aul-lv" class="fi" onchange="auRList()"><option value="">ทุกระดับ</option><option>สูง</option><option>ปานกลาง</option><option>ต่ำ</option></select>
+    </div>
+    <div class="tw"><table class="tb"><thead><tr><th>#</th><th>หน่วยงาน</th><th>งาน/กิจกรรม</th><th>คะแนนเฉลี่ย</th><th>ระดับ</th><th>ความถี่</th><th>ปีเริ่มตรวจ</th><th></th></tr></thead><tbody id="aul-body"></tbody></table></div>
+  </div>
+</div>
+
+<!-- PLAN -->
+<div id="pg-plan" class="pw">
+  <div id="plan-fw" style="display:none" class="card" style="margin-bottom:16px">
+    <div class="ct2">📅 เพิ่มแผนการตรวจสอบ</div>
+    <div class="r3">
+      <div class="fg"><label class="fl">ปีงบประมาณ</label><input type="number" id="p-yr" class="fi" value="2568" min="2500" max="2600"></div>
+      <div class="fg"><label class="fl">สำนัก / กอง</label><select id="p-dept" class="fi"><option value="">-- เลือก --</option><option>สำนักปลัด</option><option>กองคลัง</option><option>กองช่าง</option><option>กองการศึกษา</option><option>กองสาธารณสุข</option><option>กองสวัสดิการสังคม</option><option>กองยุทธศาสตร์และงบประมาณ</option></select></div>
+      <div class="fg"><label class="fl">ประเภทการตรวจ</label><select id="p-type" class="fi"><option>การจัดซื้อจัดจ้าง</option><option>การเงินและบัญชี</option><option>งบประมาณ</option><option>บริหารงานบุคคล</option><option>การบริหารสินทรัพย์</option><option>โครงการ/งานก่อสร้าง</option></select></div>
+    </div>
+    <div class="fg"><label class="fl">ชื่องานตรวจสอบ *</label><input type="text" id="p-name" class="fi"></div>
+    <div class="r4">
+      <div class="fg"><label class="fl">วันที่เริ่ม</label><input type="date" id="p-s" class="fi"></div>
+      <div class="fg"><label class="fl">วันที่สิ้นสุด</label><input type="date" id="p-e" class="fi"></div>
+      <div class="fg"><label class="fl">ผู้รับผิดชอบ</label><input type="text" id="p-aud" class="fi"></div>
+      <div class="fg"><label class="fl">สถานะ</label><select id="p-st" class="fi"><option value="planned">วางแผน</option><option value="inprogress">กำลังดำเนินการ</option><option value="done">เสร็จสิ้น</option></select></div>
+    </div>
+    <div class="fg"><label class="fl">วัตถุประสงค์</label><textarea id="p-obj" class="fi" rows="2"></textarea></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-p" onclick="saveP()" style="flex:1;justify-content:center">💾 บันทึกแผน</button>
+      <button class="btn" onclick="document.getElementById('plan-fw').style.display='none'">ยกเลิก</button>
+    </div>
+  </div>
+  <div class="fb">
+    <input type="number" id="pl-yr" class="fi" placeholder="ทุกปี" min="2500" max="2600" oninput="if(this.value===''||this.value.length===4)rPlan()">
+    <select id="pl-st" class="fi" onchange="rPlan()"><option value="">ทุกสถานะ</option><option value="planned">วางแผน</option><option value="inprogress">กำลังดำเนินการ</option><option value="done">เสร็จสิ้น</option></select>
+  </div>
+  <div id="plan-list"></div>
+  <div id="up-pg-plan"></div>
+</div>
+
+<!-- FIELDWORK -->
+<div id="pg-fw" class="pw">
+  <div class="card card-sm" style="margin-bottom:14px">
+    <div class="r3">
+      <div class="fg"><label class="fl">อ้างอิงแผนงาน</label><select id="fw-ref" class="fi"><option value="">-- เลือกจากแผน --</option></select></div>
+      <div class="fg"><label class="fl">วันที่เข้าตรวจ</label><input type="date" id="fw-date" class="fi"></div>
+      <div class="fg"><label class="fl">ผู้ตรวจสอบ</label><input type="text" id="fw-aud" class="fi"></div>
+    </div>
+    <div class="fg" style="margin-bottom:0"><label class="fl">ประเภทการตรวจสอบ</label>
+      <select id="fw-type" class="fi" onchange="loadCL()">
+        <option value="">-- เลือกประเภท --</option>
+        <option value="proc">การจัดซื้อจัดจ้าง</option><option value="fin">การเงินและบัญชี</option>
+        <option value="bud">งบประมาณ</option><option value="hr">บริหารงานบุคคล</option>
+        <option value="asset">การบริหารสินทรัพย์</option><option value="proj">โครงการ/งานก่อสร้าง</option>
+        <option value="it">เทคโนโลยีสารสนเทศ</option>
+      </select></div>
+  </div>
+  <div id="fw-prog" style="display:none" class="card card-sm" style="margin-bottom:13px">
+    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--t3);margin-bottom:5px">
+      <span id="fw-plbl">ความครบถ้วน</span><span id="fw-pct" style="font-weight:700;font-family:var(--mono)">0/0</span></div>
+    <div class="prog"><div class="pf pr" id="fw-pb" style="width:0%"></div></div>
+  </div>
+  <div id="fw-cl"><div class="empty"><div class="eic">🔍</div><h3>เลือกประเภทการตรวจสอบ</h3></div></div>
+  <div id="fw-note-w" style="display:none" class="card card-sm" style="margin-top:13px">
+    <div class="ct2">📝 บันทึกข้อสังเกต</div>
+    <textarea id="fw-note" class="fi" rows="4" placeholder="บันทึกข้อสังเกต ข้อผิดพลาด หรือประเด็นที่พบ (ระบบสร้างรายการติดตามอัตโนมัติ)"></textarea>
+    <button class="btn btn-p" onclick="saveFW()" style="width:100%;justify-content:center;margin-top:8px">💾 บันทึกผลการตรวจสอบ</button>
+  </div>
+  <div id="up-pg-fw"></div>
+</div>
+
+<!-- REPORT -->
+<div id="pg-report" class="pw">
+  <div id="rpt-fw" style="display:none" class="card" style="margin-bottom:16px">
+    <div class="ct2">📄 จัดทำรายงานผลการตรวจสอบ</div>
+    <div class="r3">
+      <div class="fg"><label class="fl">อ้างอิงแผนงาน</label><select id="rp-ref" class="fi"><option value="">-- เลือกแผน --</option></select></div>
+      <div class="fg"><label class="fl">วันที่รายงาน</label><input type="date" id="rp-date" class="fi"></div>
+      <div class="fg"><label class="fl">ผู้จัดทำ</label><input type="text" id="rp-auth" class="fi"></div>
+    </div>
+    <div class="sepl">บทสรุปผู้บริหาร</div>
+    <div class="fg"><label class="fl">สรุปผลการตรวจสอบโดยรวม *</label><textarea id="rp-sum" class="fi" rows="3"></textarea></div>
+    <div class="sepl">ข้อสังเกต</div>
+    <div id="find-con"></div>
+    <button class="btn btn-sm" onclick="addF()" style="margin-bottom:13px">+ เพิ่มข้อสังเกต</button>
+    <div class="sepl">ข้อเสนอแนะเชิงระบบ</div>
+    <div class="fg"><label class="fl">ข้อเสนอแนะภาพรวม</label><textarea id="rp-rec" class="fi" rows="3"></textarea></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-p" onclick="saveRpt()" style="flex:1;justify-content:center">💾 บันทึกรายงาน</button>
+      <button class="btn" onclick="document.getElementById('rpt-fw').style.display='none'">ยกเลิก</button>
+    </div>
+  </div>
+  <div class="fb">
+    <input type="number" id="rp-yr" class="fi" placeholder="ทุกปี" min="2500" max="2600" oninput="if(this.value===''||this.value.length===4)rRpts()">
+    <select id="rp-dp" class="fi" onchange="rRpts()"><option value="">ทุกกอง</option></select>
+  </div>
+  <div id="rpt-list"></div>
+  <div id="up-pg-report"></div>
+</div>
+
+<!-- FOLLOW-UP -->
+<div id="pg-fu" class="pw">
+  <div class="fb">
+    <input type="number" id="fu-yr" class="fi" placeholder="ทุกปี" min="2500" max="2600" oninput="if(this.value===''||this.value.length===4)rFU()">
+    <select id="fu-st" class="fi" onchange="rFU()"><option value="">ทุกสถานะ</option><option value="open">ยังไม่ดำเนินการ</option><option value="partial">บางส่วน</option><option value="done">เสร็จสิ้น</option></select>
+  </div>
+  <div id="fu-list"></div>
+  <div id="up-pg-fu"></div>
+</div>
+
+<!-- ANNUAL -->
+<div id="pg-annual" class="pw">
+  <div id="annual-con"></div>
+  <div id="up-pg-annual"></div>
+</div>
+
+<!-- DOCUMENT CENTER -->
+<div id="pg-docs" class="pw">
+
+  <!-- Upload zone + form -->
+  <div id="doc-upload-card" class="card" style="margin-bottom:16px">
+    <div class="ct2">📤 อัพโหลดเอกสารใหม่</div>
+    <div class="g2" style="align-items:start;gap:16px">
+      <!-- Drop zone -->
+      <div class="updz" id="dc-dz" style="min-height:140px;display:flex;flex-direction:column;align-items:center;justify-content:center"
+        onclick="document.getElementById('dc-fi').click()"
+        ondragover="event.preventDefault();document.getElementById('dc-dz').classList.add('dg')"
+        ondragleave="document.getElementById('dc-dz').classList.remove('dg')"
+        ondrop="event.preventDefault();document.getElementById('dc-dz').classList.remove('dg');dcUpload(event.dataTransfer.files)">
+        <div style="font-size:36px;opacity:.4;margin-bottom:8px">📂</div>
+        <div style="font-size:14px;font-weight:600;color:var(--t2);margin-bottom:4px">คลิกเลือก หรือลากไฟล์มาวาง</div>
+        <div style="font-size:12px;color:var(--t4)">PDF, Word, Excel, รูปภาพ, CSV — สูงสุด 10MB / ไฟล์</div>
+      </div>
+      <input type="file" id="dc-fi" style="display:none" multiple
+        accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.pptx,.csv,.txt,.zip"
+        onchange="dcUpload(this.files);this.value=''">
+      <!-- Metadata form -->
+      <div>
+        <div class="r2">
+          <div class="fg"><label class="fl">หมวดหมู่เอกสาร</label>
+            <select id="dc-cat" class="fi">
+              <option value="กฎบัตร">กฎบัตรตรวจสอบ</option>
+              <option value="ความเสี่ยง">การประเมินความเสี่ยง</option>
+              <option value="แผน">แผนการตรวจสอบ</option>
+              <option value="fieldwork">เอกสารเข้าตรวจ</option>
+              <option value="รายงาน">รายงานผลการตรวจ</option>
+              <option value="ติดตามผล">ติดตามผล</option>
+              <option value="รายงานประจำปี">รายงานประจำปี</option>
+              <option value="กฎหมาย">กฎหมาย / ระเบียบ</option>
+              <option value="อื่น ๆ">อื่น ๆ</option>
+            </select></div>
+          <div class="fg"><label class="fl">ปีงบประมาณ</label>
+            <input type="number" id="dc-yr" class="fi" value="2568" min="2500" max="2600"></div>
+        </div>
+        <div class="r2">
+          <div class="fg"><label class="fl">สำนัก / กอง</label>
+            <select id="dc-dept" class="fi">
+              <option value="">-- ทั้งหมด --</option>
+              <option>สำนักปลัด</option><option>กองคลัง</option><option>กองช่าง</option>
+              <option>กองการศึกษา</option><option>กองสาธารณสุข</option>
+              <option>กองสวัสดิการสังคม</option><option>กองยุทธศาสตร์และงบประมาณ</option>
+            </select></div>
+          <div class="fg"><label class="fl">แท็ก (คั่นด้วยจุลภาค)</label>
+            <input type="text" id="dc-tags" class="fi" placeholder="เช่น 2568, จัดซื้อ, สำคัญ"></div>
+        </div>
+        <div class="fg"><label class="fl">ชื่อเอกสาร / คำอธิบาย</label>
+          <input type="text" id="dc-title" class="fi" placeholder="กรอกชื่อ หรือปล่อยว่างเพื่อใช้ชื่อไฟล์"></div>
+        <div class="fg"><label class="fl">หมายเหตุ</label>
+          <textarea id="dc-note" class="fi" rows="2" placeholder="บันทึกเพิ่มเติม..."></textarea></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+    <input type="text" id="dc-search" class="fi" placeholder="🔍 ค้นหาชื่อไฟล์ คำอธิบาย หรือแท็ก..." style="flex:1;min-width:200px" oninput="rDocs()">
+    <select id="dc-fcat" class="fi" onchange="rDocs()" style="width:auto">
+      <option value="">ทุกหมวด</option>
+      <option value="กฎบัตร">กฎบัตร</option>
+      <option value="ความเสี่ยง">ความเสี่ยง</option>
+      <option value="แผน">แผน</option>
+      <option value="fieldwork">Fieldwork</option>
+      <option value="รายงาน">รายงาน</option>
+      <option value="ติดตามผล">ติดตามผล</option>
+      <option value="รายงานประจำปี">รายงานประจำปี</option>
+      <option value="กฎหมาย">กฎหมาย</option>
+      <option value="อื่น ๆ">อื่น ๆ</option>
+    </select>
+    <select id="dc-fdept" class="fi" onchange="rDocs()" style="width:auto">
+      <option value="">ทุกกอง</option>
+      <option>สำนักปลัด</option><option>กองคลัง</option><option>กองช่าง</option>
+      <option>กองการศึกษา</option><option>กองสาธารณสุข</option>
+      <option>กองสวัสดิการสังคม</option><option>กองยุทธศาสตร์และงบประมาณ</option>
+    </select>
+    <input type="number" id="dc-fyr" class="fi" placeholder="ปี..." min="2500" max="2600" oninput="if(this.value===''||this.value.length===4)rDocs()" style="width:80px">
+    <select id="dc-sort" class="fi" onchange="rDocs()" style="width:auto">
+      <option value="date-desc">ล่าสุดก่อน</option>
+      <option value="date-asc">เก่าสุดก่อน</option>
+      <option value="name-asc">ชื่อ A-Z</option>
+      <option value="name-desc">ชื่อ Z-A</option>
+      <option value="size-desc">ขนาดใหญ่สุด</option>
+    </select>
+    <button class="btn btn-sm" onclick="dcClearFilters()">✕ ล้างตัวกรอง</button>
+  </div>
+
+  <!-- Stats bar -->
+  <div id="dc-stats-bar" style="display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap"></div>
+
+  <!-- View toggle -->
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+    <div id="dc-result-count" style="font-size:12px;color:var(--t4)"></div>
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-xs btn-p" id="dc-v-grid" onclick="dcView('grid')">⊞ Grid</button>
+      <button class="btn btn-xs" id="dc-v-list" onclick="dcView('list')">☰ List</button>
+    </div>
+  </div>
+
+  <!-- Document list -->
+  <div id="dc-list"></div>
+
+  <!-- Preview modal -->
+  <div id="dc-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:999;display:none;align-items:center;justify-content:center" onclick="if(event.target===this)dcCloseModal()">
+    <div style="background:var(--wh);border-radius:var(--rdlg);max-width:640px;width:90%;max-height:85vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,.4)">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--line);background:var(--bk)">
+        <div id="dc-modal-title" style="font-size:14px;font-weight:600;color:var(--wh)"></div>
+        <button class="btn btn-xs" onclick="dcCloseModal()" style="background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.2)">✕ ปิด</button>
+      </div>
+      <div id="dc-modal-body" style="flex:1;overflow-y:auto;padding:20px"></div>
+      <div style="padding:14px 20px;border-top:1px solid var(--line);display:flex;gap:8px;background:var(--bg)">
+        <button class="btn btn-p btn-sm" id="dc-modal-dl" onclick="">↓ ดาวน์โหลด</button>
+        <button class="btn btn-sm btn-del" id="dc-modal-del" onclick="">🗑 ลบเอกสาร</button>
+        <button class="btn btn-sm" onclick="dcCloseModal()">ปิด</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LAWS -->
+<div id="pg-laws" class="pw">
+  <div id="laws-con"></div>
+</div>
+
+  </div>
+</div>
+</div>
+<div id="toast"></div>
+<div id="login-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:3000;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeLogin()">
+  <div style="background:var(--bk2);border:1px solid var(--bk4);border-radius:var(--rdlg);max-width:380px;width:100%;padding:28px 26px;box-shadow:0 24px 64px rgba(0,0,0,.5)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+      <div style="font-size:17px;font-weight:800;color:var(--wh)">🔒 เข้าสู่ระบบ</div>
+      <button onclick="closeLogin()" style="background:transparent;border:none;color:var(--bk5);font-size:18px;cursor:pointer;line-height:1">✕</button>
+    </div>
+    <div style="font-size:12px;color:#9A9A9A;margin-bottom:18px;line-height:1.7">สำหรับ<b style="color:var(--wh)">ผู้ใช้งานระบบ</b> (เจ้าหน้าที่ตรวจสอบภายใน) เพื่อสิทธิ์แก้ไข/บันทึกข้อมูล — ผู้เยี่ยมชมทั่วไปดูและดาวน์โหลดเอกสารได้โดยไม่ต้องเข้าสู่ระบบ</div>
+    <div class="fg"><label class="fl">ชื่อผู้ใช้</label><input id="lg-u" type="text" class="fi" placeholder="username" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('lg-p').focus()"></div>
+    <div class="fg"><label class="fl">รหัสผ่าน</label><input id="lg-p" type="password" class="fi" placeholder="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div id="lg-err" style="display:none;color:#ff6b7d;font-size:12px;margin:-4px 0 10px">⚠ ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</div>
+    <button class="btn btn-p" style="width:100%;justify-content:center;margin-top:4px" onclick="doLogin()">เข้าสู่ระบบ</button>
+    <button class="btn btn-sm" style="width:100%;justify-content:center;margin-top:8px;background:transparent;color:#9A9A9A;border-color:var(--bk4)" onclick="closeLogin()">ดูข้อมูลแบบผู้เยี่ยมชม (ไม่ Login)</button>
+  </div>
+</div>
+<div id="changepwd-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:3000;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeChangePwd()">
+  <div style="background:var(--bk2);border:1px solid var(--bk4);border-radius:var(--rdlg);max-width:380px;width:100%;padding:28px 26px;box-shadow:0 24px 64px rgba(0,0,0,.5)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+      <div style="font-size:17px;font-weight:800;color:var(--wh)">🔑 เปลี่ยนชื่อผู้ใช้/รหัสผ่าน</div>
+      <button onclick="closeChangePwd()" style="background:transparent;border:none;color:var(--bk5);font-size:18px;cursor:pointer;line-height:1">✕</button>
+    </div>
+    <div style="font-size:12px;color:#9A9A9A;margin-bottom:18px;line-height:1.7">แก้ไขบัญชีที่กำลังเข้าสู่ระบบอยู่ในขณะนี้ ต้องยืนยันรหัสผ่านเดิมก่อน</div>
+    <div class="fg"><label class="fl">รหัสผ่านปัจจุบัน</label><input id="cp-cur" type="password" class="fi" placeholder="รหัสผ่านเดิม" autocomplete="current-password"></div>
+    <div class="fg"><label class="fl">ชื่อผู้ใช้ใหม่</label><input id="cp-u" type="text" class="fi" placeholder="username" autocomplete="username"></div>
+    <div class="fg"><label class="fl">รหัสผ่านใหม่</label><input id="cp-new" type="password" class="fi" placeholder="อย่างน้อย 4 ตัวอักษร" autocomplete="new-password"></div>
+    <div class="fg"><label class="fl">ยืนยันรหัสผ่านใหม่</label><input id="cp-new2" type="password" class="fi" placeholder="พิมพ์รหัสผ่านใหม่อีกครั้ง" autocomplete="new-password" onkeydown="if(event.key==='Enter')doChangePwd()"></div>
+    <div id="cp-err" style="display:none;color:#ff6b7d;font-size:12px;margin:-4px 0 10px">⚠ รหัสผ่านปัจจุบันไม่ถูกต้อง</div>
+    <button class="btn btn-p" style="width:100%;justify-content:center;margin-top:4px" onclick="doChangePwd()">บันทึกการเปลี่ยนแปลง</button>
+    <button class="btn btn-sm" style="width:100%;justify-content:center;margin-top:8px;background:transparent;color:#9A9A9A;border-color:var(--bk4)" onclick="closeChangePwd()">ยกเลิก</button>
+  </div>
+</div>
+<script>
+/* ═══ LANDING ═══ */
+function enterApp(page){
+  document.getElementById('landing').style.display='none';
+  document.getElementById('pg-comingsoon').style.display='none';
+  document.getElementById('app').style.display='flex';
+  if(page){
+    const btn=document.querySelector(`.ni[data-p="${page}"]`);
+    if(btn)G(page,btn);
+  }
+}
+const COMING_SOON_CONTENT = {
+  control: {
+    icon: '🛡️',
+    title: 'งานควบคุมภายใน',
+    desc: 'โมดูล "งานควบคุมภายใน" (Internal Control) กำลังอยู่ระหว่างการพัฒนา และยังไม่พร้อมใช้งานในเวอร์ชันนี้',
+    list: [
+      'ระบบปัจจุบันรองรับ "งานตรวจสอบภายใน" ครบถ้วนแล้ว ส่วน "งานบริหารความเสี่ยง" และ "งานควบคุมภายใน" อยู่ระหว่างพัฒนา',
+      'โมดูลงานควบคุมภายในจะรองรับการประเมินตนเอง (Control Self-Assessment) ตามกรอบ COSO และหลักเกณฑ์กระทรวงการคลัง',
+      'ระหว่างนี้สามารถบันทึกรายการ "งานระบบควบคุมภายในของหน่วยงาน" ผ่านโมดูล Audit Universe ไปก่อนได้',
+    ],
+    ctaLabel: 'ไปที่ Audit Universe ระหว่างรอ →',
+    ctaPage: 'au',
+  },
+  riskmgmt: {
+    icon: '⬡',
+    title: 'งานบริหารความเสี่ยง',
+    desc: 'โมดูล "งานบริหารความเสี่ยง" (Enterprise Risk Management) กำลังอยู่ระหว่างการพัฒนา และยังไม่พร้อมใช้งานในเวอร์ชันนี้',
+    list: [
+      'งานบริหารความเสี่ยงระดับองค์กร เป็นคนละภารกิจกับหน้า "ประเมินความเสี่ยง" ซึ่งใช้ประกอบการวางแผนตรวจสอบภายในเท่านั้น',
+      'โมดูลนี้จะรองรับการกำหนดความเสี่ยงที่ยอมรับได้ (Risk Appetite) การบริหารความเสี่ยงทั้งองค์กร และการติดตามมาตรการจัดการความเสี่ยง',
+      'ระหว่างนี้สามารถใช้หน้า "ประเมินความเสี่ยง" หรือ "Audit Universe" ในหมวดงานตรวจสอบภายในไปพลางก่อนได้',
+    ],
+    ctaLabel: 'ไปที่หน้าประเมินความเสี่ยง ระหว่างรอ →',
+    ctaPage: 'risk',
+  },
+};
+
+function showComingSoon(key){
+  const c = COMING_SOON_CONTENT[key] || COMING_SOON_CONTENT.control;
+  document.getElementById('cs-icon').textContent = c.icon;
+  document.getElementById('cs-title').textContent = c.title;
+  document.getElementById('cs-desc').textContent = c.desc;
+  document.getElementById('cs-list').innerHTML = c.list.map(t=>`<div>${t}</div>`).join('');
+  const cta = document.getElementById('cs-cta');
+  cta.textContent = c.ctaLabel;
+  cta.onclick = () => enterApp(c.ctaPage);
+  document.getElementById('landing').style.display='none';
+  document.getElementById('pg-comingsoon').style.display='flex';
+}
+function backToLanding(){
+  document.getElementById('pg-comingsoon').style.display='none';
+  document.getElementById('app').style.display='none';
+  document.getElementById('landing').style.display='flex';
+}
+
+/* ═══ STORAGE ═══ */
+const K='iam_v5';
+const db={
+  load(){try{return JSON.parse(localStorage.getItem(K)||'{}')}catch{return{}}},
+  save(d){try{localStorage.setItem(K,JSON.stringify(d))}catch(e){}},
+  get(k,def){const d=this.load();return d[k]!==undefined?d[k]:def},
+  set(k,v){const d=this.load();d[k]=v;this.save(d)}
+};
+
+/* ═══ AUTH ═══ */
+const AUTH_K='iam_auth_session', ACC_K='iam_accounts';
+const DEFAULT_ACCOUNTS=[
+  {u:'zypanupong',p:'zy510610628',role:'system',name:'เจ้าหน้าที่ตรวจสอบภายใน'},
+  {u:'user',p:'user2569',role:'general',name:'ผู้ใช้งานทั่วไป'}
+];
+function getAccounts(){
+  try{
+    let a=JSON.parse(localStorage.getItem(ACC_K)||'null');
+    if(!Array.isArray(a)||!a.length){a=DEFAULT_ACCOUNTS.slice();localStorage.setItem(ACC_K,JSON.stringify(a));}
+    return a;
+  }catch{return DEFAULT_ACCOUNTS.slice();}
+}
+function getSession(){try{return JSON.parse(localStorage.getItem(AUTH_K)||'null');}catch{return null;}}
+function setSession(s){try{localStorage.setItem(AUTH_K,JSON.stringify(s));}catch(e){}}
+function clearSession(){try{localStorage.removeItem(AUTH_K);}catch(e){}}
+function getRole(){const s=getSession();return(s&&s.role==='system')?'system':(s&&s.role==='general'?'general':'guest');}
+function isSystem(){return getRole()==='system';}
+function authz(){
+  if(isSystem())return true;
+  toast('🔒 กรุณาเข้าสู่ระบบในฐานะผู้ใช้งานระบบ เพื่อแก้ไข/บันทึกข้อมูล');
+  openLogin();
+  return false;
+}
+function openLogin(){
+  const u=document.getElementById('lg-u'),p=document.getElementById('lg-p'),e=document.getElementById('lg-err');
+  if(u)u.value='';if(p)p.value='';if(e)e.style.display='none';
+  document.getElementById('login-modal').style.display='flex';
+}
+function closeLogin(){document.getElementById('login-modal').style.display='none';}
+function doLogin(){
+  const u=document.getElementById('lg-u').value.trim();
+  const p=document.getElementById('lg-p').value;
+  const err=document.getElementById('lg-err');
+  const acc=getAccounts().find(a=>a.u===u&&a.p===p);
+  if(!acc){err.style.display='block';return;}
+  err.style.display='none';
+  setSession({u:acc.u,role:acc.role,name:acc.name,ts:Date.now()});
+  closeLogin();
+  toast(`✅ เข้าสู่ระบบสำเร็จ: ${acc.name}`);
+  applyRoleUI();
+  const activeBtn=document.querySelector('#sb .ni.on[data-p]');
+  if(activeBtn)G(activeBtn.dataset.p,activeBtn);
+}
+function doLogout(){
+  clearSession();
+  toast('ออกจากระบบแล้ว');
+  applyRoleUI();
+  const activeBtn=document.querySelector('#sb .ni.on[data-p]');
+  if(activeBtn)G(activeBtn.dataset.p,activeBtn);
+}
+function applyRoleUI(){
+  const s=getSession();
+  const box=document.getElementById('sb-auth');
+  if(box){
+    if(s&&s.role==='system'){
+      box.innerHTML=`<div class="sb-auth-name">👤 ${s.name}</div><div class="sb-auth-role sys">🔓 ผู้ใช้งานระบบ · แก้ไขได้</div><button class="btn btn-xs" style="width:100%;margin-top:7px;justify-content:center" onclick="openChangePwd()">🔑 เปลี่ยนชื่อผู้ใช้/รหัสผ่าน</button><button class="btn btn-xs" style="width:100%;margin-top:5px;justify-content:center" onclick="doLogout()">ออกจากระบบ</button>`;
+    }else if(s&&s.role==='general'){
+      box.innerHTML=`<div class="sb-auth-name">👤 ${s.name}</div><div class="sb-auth-role gen">👁 ผู้ใช้งานทั่วไป · ดู/ดาวน์โหลด</div><button class="btn btn-xs" style="width:100%;margin-top:7px;justify-content:center" onclick="doLogout()">ออกจากระบบ</button><button class="btn btn-xs btn-p" style="width:100%;margin-top:5px;justify-content:center" onclick="openLogin()">เข้าสู่ระบบผู้ใช้งานระบบ</button>`;
+    }else{
+      box.innerHTML=`<div class="sb-auth-role gen">👁 โหมดผู้เยี่ยมชม · ดู/ดาวน์โหลด</div><button class="btn btn-xs btn-p" style="width:100%;margin-top:7px;justify-content:center" onclick="openLogin()">🔒 เข้าสู่ระบบ</button>`;
+    }
+  }
+  const ldBtn=document.getElementById('ld-login-btn');
+  if(ldBtn)ldBtn.textContent=(s&&s.role==='system')?`👤 ${s.name}`:'🔒 เข้าสู่ระบบ';
+}
+function openChangePwd(){
+  const s=getSession();
+  if(!s){toast('กรุณาเข้าสู่ระบบก่อน');openLogin();return;}
+  document.getElementById('cp-cur').value='';
+  document.getElementById('cp-u').value=s.u;
+  document.getElementById('cp-new').value='';
+  document.getElementById('cp-new2').value='';
+  document.getElementById('cp-err').style.display='none';
+  document.getElementById('changepwd-modal').style.display='flex';
+}
+function closeChangePwd(){document.getElementById('changepwd-modal').style.display='none';}
+function doChangePwd(){
+  const s=getSession();
+  const err=document.getElementById('cp-err');
+  if(!s){err.textContent='กรุณาเข้าสู่ระบบก่อน';err.style.display='block';return;}
+  const cur=document.getElementById('cp-cur').value;
+  const newU=document.getElementById('cp-u').value.trim();
+  const newP=document.getElementById('cp-new').value;
+  const newP2=document.getElementById('cp-new2').value;
+  const accs=getAccounts();
+  const idx=accs.findIndex(a=>a.u===s.u);
+  if(idx<0||accs[idx].p!==cur){err.textContent='⚠ รหัสผ่านปัจจุบันไม่ถูกต้อง';err.style.display='block';return;}
+  if(!newU){err.textContent='⚠ กรุณาระบุชื่อผู้ใช้ใหม่';err.style.display='block';return;}
+  if(accs.some((a,i)=>i!==idx&&a.u===newU)){err.textContent='⚠ ชื่อผู้ใช้นี้ถูกใช้แล้ว';err.style.display='block';return;}
+  if(!newP||newP.length<4){err.textContent='⚠ รหัสผ่านใหม่ต้องมีอย่างน้อย 4 ตัวอักษร';err.style.display='block';return;}
+  if(newP!==newP2){err.textContent='⚠ รหัสผ่านใหม่ทั้งสองช่องไม่ตรงกัน';err.style.display='block';return;}
+  accs[idx]={...accs[idx],u:newU,p:newP};
+  localStorage.setItem(ACC_K,JSON.stringify(accs));
+  setSession({...s,u:newU,ts:Date.now()});
+  closeChangePwd();
+  toast('✅ เปลี่ยนชื่อผู้ใช้/รหัสผ่านสำเร็จ');
+  applyRoleUI();
+}
+
+/* ═══ UTILS ═══ */
+function toast(msg,t=2300){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.classList.add('on');
+  clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('on'),t);
+}
+function gyr(){return(document.getElementById('gy').value||'').trim()}
+function today(){return new Date().toISOString().slice(0,10)}
+function thd(){return new Date().toLocaleDateString('th-TH')}
+function uniq(a){return[...new Set(a)].filter(Boolean).sort()}
+function fsz(b){if(b<1024)return b+'B';if(b<1048576)return(b/1024).toFixed(1)+'KB';return(b/1048576).toFixed(1)+'MB'}
+function fic(n){const e=(n.split('.').pop()||'').toLowerCase();return{pdf:'📄',doc:'📝',docx:'📝',xls:'📊',xlsx:'📊',jpg:'🖼',jpeg:'🖼',png:'🖼',pptx:'📊',csv:'📋',txt:'📃'}[e]||'📎'}
+
+/* Risk */
+function sc(p,i){return p*i}
+function lv(s){if(s<=2)return'ต่ำ';if(s<=6)return'ปานกลาง';if(s<=15)return'สูง';return'วิกฤต'}
+function pCls(s){return{ต่ำ:'pl',ปานกลาง:'pm',สูง:'ph2',วิกฤต:'pc'}[lv(s)]||'pgr'}
+function lvNote(s){if(s<=2)return'ติดตามตามปกติ';if(s<=6)return'พิจารณารวมในแผน';if(s<=15)return'ควรรวมในแผนปีนี้';return'⚠️ ต้องตรวจสอบทันที!'}
+function mxc(s){if(s<=2)return'mxl';if(s<=6)return'mxm';if(s<=15)return'mxh';return'mxcr'}
+function sbc(s){return{ต่ำ:'lv-l',ปานกลาง:'lv-m',สูง:'lv-h',วิกฤต:'lv-c'}[lv(s)]}
+
+/* ═══ AUDIT UNIVERSE IMPORT ═══
+ * ข้อมูลจากไฟล์ Audit Universe เทศบาลตำบลแม่ลานนา (47 หน่วยรับตรวจ)
+ * แต่ละแถว: [กอง, ประเภทการตรวจ, งาน/กิจกรรม, ขอบเขตงานโดยสังเขป, โอกาสเกิด(1-5), ผลกระทบ(1-5), ลำดับความสำคัญ, ปีงบประมาณที่ควรเริ่มตรวจ]
+ * โอกาสเกิด/ผลกระทบ แปลงมาจากคะแนนเฉลี่ย 4 ปัจจัยเสี่ยง (การเงิน/กฎหมาย/ดำเนินงาน/ผลกระทบ) ในระบบ Audit Universe
+ * โดยคงระดับความเสี่ยงเดิมไว้ (สูง/ปานกลาง/ต่ำ) ให้ตรงกับเกณฑ์ของระบบนี้ (คะแนน<=2 ต่ำ, 3-6 ปานกลาง, 7-15 สูง, >15 วิกฤต)
+ */
+const AUDIT_UNIVERSE_SRC = 'audit_universe_2569';
+const AUDIT_UNIVERSE_DATA = [
+  ['สำนักปลัด','การดำเนินงาน/ควบคุมภายใน','งานธุรการและงานสารบรรณ','รับ-ส่งหนังสือราชการ ทะเบียนคำสั่ง/ประกาศ งานพัสดุและครุภัณฑ์สำนักปลัด งานยานพาหนะส่วนกลาง',1,3,3,2570],
+  ['สำนักปลัด','การดำเนินงาน/ควบคุมภายใน','งานบริหารงานทั่วไปและกิจการสภาเทศบาล','จัดประชุมพนักงาน/สภาเทศบาล งานรัฐพิธี งาน ITA งานประเมิน LPA',2,2,3,2570],
+  ['สำนักปลัด','การดำเนินงาน/ผลการดำเนินงาน','งานแผนพัฒนา งบประมาณ และวิชาการ','จัดทำแผนพัฒนาท้องถิ่น จัดทำงบประมาณรายจ่ายประจำปี วิเคราะห์รายรับ-รายจ่าย ติดตามประเมินผลแผนงาน/โครงการ',2,3,3,2570],
+  ['สำนักปลัด','การดำเนินงาน/ปฏิบัติตามกฎหมาย','งานป้องกันและบรรเทาสาธารณภัย และรักษาความสงบเรียบร้อย','แผนป้องกันและบรรเทาสาธารณภัย งานดับเพลิง งานอปพร. เวรยามสถานที่ราชการ',2,4,1,2570],
+  ['สำนักปลัด','การปฏิบัติตามกฎหมาย/ระเบียบ','งานการเจ้าหน้าที่/บริหารงานบุคคล','แผนอัตรากำลัง การบรรจุ แต่งตั้ง โอนย้าย เลื่อนระดับ/เลื่อนขั้นเงินเดือน การประเมินผลการปฏิบัติงาน วินัย บำเหน็จบำนาญ',2,4,1,2570],
+  ['สำนักปลัด','การปฏิบัติตามกฎหมาย/ระเบียบ','งานทะเบียนราษฎรและบัตรประจำตัวประชาชน','ทะเบียนบ้าน แจ้งเกิด-ตาย ย้ายที่อยู่ ออกบัตรประชาชน',2,2,3,2571],
+  ['สำนักปลัด','การปฏิบัติตามกฎหมาย/ระเบียบ','งานนิติการและเรื่องราวร้องทุกข์','งานร่างเทศบัญญัติ/ระเบียบ งานสอบสวนละเมิด งานรับเรื่องร้องเรียนร้องทุกข์',1,5,3,2570],
+  ['สำนักปลัด','การดำเนินงาน/ควบคุมภายใน','งานประชาสัมพันธ์และเทคโนโลยีสารสนเทศ','เผยแพร่ข้อมูลข่าวสาร เว็บไซต์หน่วยงาน จัดซื้อจัดจ้างสื่อประชาสัมพันธ์',1,3,3,2571],
+  ['สำนักปลัด','การดำเนินงาน/ปฏิบัติตามกฎหมาย','งานสาธารณสุขและสิ่งแวดล้อม','ป้องกันควบคุมโรคติดต่อ กองทุนหลักประกันสุขภาพท้องถิ่น การจัดเก็บและกำจัดขยะมูลฝอย',2,4,1,2570],
+  ['สำนักปลัด','การเงิน/ปฏิบัติตามกฎหมาย','งานพัฒนาชุมชนและสวัสดิการสังคม','งานสงเคราะห์และเบิกจ่ายเบี้ยยังชีพผู้สูงอายุ/ผู้พิการ/ผู้ป่วยเอดส์ งานส่งเสริมอาชีพและกลุ่มชุมชน',3,4,1,2570],
+  ['กองคลัง','การเงิน','งานการเงินและบัญชี','การรับ-จ่ายเงิน การเก็บรักษาเงิน การจัดทำบัญชีและงบการเงิน เงินยืม เงินอุดหนุน',3,5,1,2570],
+  ['กองคลัง','การเงิน/ปฏิบัติตามกฎหมาย','งานพัฒนาและจัดเก็บรายได้','จัดเก็บภาษีที่ดินและสิ่งปลูกสร้าง ภาษีป้าย ค่าธรรมเนียมและใบอนุญาตต่างๆ นำส่งเงินรายได้',3,4,1,2570],
+  ['กองคลัง','การเงิน/ปฏิบัติตามกฎหมาย','งานพัสดุและทรัพย์สิน','การจัดซื้อจัดจ้าง e-GP การตรวจรับพัสดุ ทะเบียนคุมทรัพย์สิน/ครุภัณฑ์',3,5,1,2570],
+  ['กองคลัง','การดำเนินงาน/สารสนเทศ','งานแผนที่ภาษีและทะเบียนทรัพย์สิน','จัดทำแผนที่ภาษี สำรวจและปรับปรุงข้อมูลทรัพย์สินเพื่อการจัดเก็บภาษี',2,2,3,2571],
+  ['กองคลัง','การดำเนินงาน/ควบคุมภายใน','งานธุรการกองคลัง','งานสารบรรณ งานธุรการทั่วไปของกองคลัง',1,1,4,2572],
+  ['กองช่าง','การดำเนินงาน/ควบคุมภายใน','งานธุรการกองช่าง','งานสารบรรณ งานดูแลสถานที่และวัสดุอุปกรณ์กองช่าง',1,1,4,2572],
+  ['กองช่าง','การเงิน/การดำเนินงาน','งานวิศวกรรมและออกแบบก่อสร้าง','ออกแบบ ประมาณราคา ควบคุมงานก่อสร้าง งานจัดซื้อจัดจ้างงานโยธา',2,4,1,2570],
+  ['กองช่าง','การปฏิบัติตามกฎหมาย/ระเบียบ','งานควบคุมอาคารและผังเมือง','ตรวจสอบแบบแปลนขออนุญาตก่อสร้างอาคาร การบังคับใช้กฎหมายผังเมือง',2,4,1,2570],
+  ['กองช่าง','การเงิน/การดำเนินงาน','งานสาธารณูปโภคและระบบประปา','งานก่อสร้าง/ซ่อมบำรุงถนน ทางเท้า ท่อระบายน้ำ ระบบประปาหมู่บ้าน',2,3,3,2571],
+  ['กองช่าง','การดำเนินงาน/ควบคุมภายใน','งานไฟฟ้าสาธารณะและซ่อมบำรุงครุภัณฑ์ช่าง','ติดตั้ง/ซ่อมบำรุงไฟฟ้าสาธารณะ ดูแลรักษาเครื่องจักรกลและครุภัณฑ์ช่าง',2,2,3,2571],
+  ['กองการศึกษา','การเงิน/ปฏิบัติตามกฎหมาย','งานบริหารการศึกษาและศูนย์พัฒนาเด็กเล็ก','การจัดการศึกษาปฐมวัย อาหารกลางวัน/อาหารเสริม(นม) เงินอุดหนุนศูนย์พัฒนาเด็กเล็ก',3,5,1,2570],
+  ['กองการศึกษา','การดำเนินงาน/ควบคุมภายใน','งานส่งเสริมการศึกษา ศาสนาและวัฒนธรรม','จัดกิจกรรมศาสนา ประเพณี วัฒนธรรมท้องถิ่น งานกีฬาและนันทนาการ',2,2,3,2571],
+  ['กองการศึกษา','การดำเนินงาน/ผลการดำเนินงาน','งานแผนและงบประมาณกองการศึกษา','จัดทำแผนพัฒนาการศึกษา งบประมาณกองการศึกษา งานธุรการและสารสนเทศ',2,2,3,2571],
+  ['กองการศึกษา','การดำเนินงาน/ควบคุมภายใน','งานกีฬาและนันทนาการ','จัดกิจกรรมกีฬาและนันทนาการสำหรับเด็ก เยาวชน และประชาชนในพื้นที่',1,1,4,2572],
+  ['สำนักปลัด','การเงิน/ปฏิบัติตามกฎหมาย','งานสิทธิสวัสดิการเจ้าหน้าที่ (ค่าเช่าบ้าน ค่าเล่าเรียนบุตร ค่ารักษาพยาบาล)','ตรวจสอบการเบิกจ่ายสิทธิสวัสดิการค่าเช่าบ้านและค่าเล่าเรียนบุตรของพนักงานเทศบาล/ลูกจ้าง ให้เป็นไปตามระเบียบ',3,4,1,2570],
+  ['สำนักปลัด','การปฏิบัติตามกฎหมาย/ระเบียบ','งานออกใบอนุญาตกิจการที่เป็นอันตรายต่อสุขภาพและสถานที่จำหน่าย สะสมอาหาร','การพิจารณาออกใบอนุญาต/ต่ออายุใบอนุญาตสถานประกอบกิจการที่เป็นอันตรายต่อสุขภาพ และสถานที่จำหน่าย สะสมอาหาร ตามกฎหมายว่าด้วยการสาธารณสุข',1,5,3,2571],
+  ['สำนักปลัด','การเงิน/การดำเนินงาน','งานค่าใช้จ่ายเดินทางไปราชการ ค่าตอบแทนนอกเวลา และพัฒนาบุคลากร/ฝึกอบรมสัมมนาสำนักปลัด','การเบิกจ่ายค่าใช้จ่ายเดินทางไปราชการ ค่าตอบแทนการปฏิบัติงานนอกเวลาราชการ และการพัฒนาบุคลากร/ฝึกอบรมสัมมนาของสำนักปลัด',1,3,3,2572],
+  ['สำนักปลัด','การดำเนินงาน/ควบคุมภายใน','งานการใช้และดูแลรักษารถยนต์ราชการ (สำนักปลัด)','การควบคุมการใช้รถยนต์ส่วนกลาง สมุดบันทึกการใช้รถ การบำรุงรักษา และเกณฑ์การใช้น้ำมันเชื้อเพลิงของสำนักปลัด',1,3,3,2572],
+  ['สำนักปลัด','การดำเนินงาน/ควบคุมภายใน','งานระบบควบคุมภายในของหน่วยงาน (สำนักปลัด)','การจัดทำและติดตามรายงานการประเมินระบบการควบคุมภายในตามหลักเกณฑ์กระทรวงการคลัง',1,5,3,2570],
+  ['สำนักปลัด','การดำเนินงาน/ควบคุมภายใน','งานบริหารความเสี่ยงของหน่วยงาน (สำนักปลัด)','การจัดทำแผนบริหารความเสี่ยงและติดตามรายงานผลการบริหารความเสี่ยงประจำปีของหน่วยงาน',2,2,3,2571],
+  ['กองคลัง','การเงิน/ปฏิบัติตามกฎหมาย','งานลูกหนี้ภาษีค้างชำระและติดตามเร่งรัดจัดเก็บ','การติดตามเร่งรัดจัดเก็บภาษีที่ดินและสิ่งปลูกสร้าง/ภาษีป้ายค้างชำระ และการดำเนินการตามกฎหมายกับผู้ค้างชำระ',1,5,3,2570],
+  ['กองคลัง','การเงิน/สารสนเทศ','งานบันทึกบัญชีในระบบบัญชีคอมพิวเตอร์ขององค์กรปกครองส่วนท้องถิ่น (e-LAAS)','ความถูกต้องครบถ้วนของการบันทึกรายการรับ-จ่ายและปิดบัญชีในระบบ e-LAAS ให้ตรงกับเอกสารหลักฐาน',1,5,3,2571],
+  ['กองคลัง','การเงิน','งานเก็บรักษาเงินประจำวันและการควบคุมเงินสด','การเก็บรักษาเงิน การนำฝากธนาคาร และการตรวจนับเงินสดคงเหลือประจำวันตามระเบียบการเก็บรักษาเงิน',1,5,3,2570],
+  ['กองคลัง','การเงิน/การดำเนินงาน','งานค่าใช้จ่ายเดินทางไปราชการ ค่าตอบแทนนอกเวลา และพัฒนาบุคลากร/ฝึกอบรมสัมมนากองคลัง','การเบิกจ่ายค่าใช้จ่ายเดินทางไปราชการ ค่าตอบแทนการปฏิบัติงานนอกเวลาราชการ และการพัฒนาบุคลากร/ฝึกอบรมสัมมนาของกองคลัง',1,3,3,2572],
+  ['กองคลัง','การดำเนินงาน/ควบคุมภายใน','งานการใช้และดูแลรักษารถยนต์ราชการ (กองคลัง)','การควบคุมการใช้รถยนต์ส่วนกลาง สมุดบันทึกการใช้รถ การบำรุงรักษา และเกณฑ์การใช้น้ำมันเชื้อเพลิงของกองคลัง',1,3,3,2572],
+  ['กองคลัง','การดำเนินงาน/ควบคุมภายใน','งานระบบควบคุมภายในของหน่วยงาน (กองคลัง)','การจัดทำและติดตามรายงานการประเมินระบบการควบคุมภายในตามหลักเกณฑ์กระทรวงการคลัง',1,5,3,2570],
+  ['กองคลัง','การดำเนินงาน/ควบคุมภายใน','งานบริหารความเสี่ยงของหน่วยงาน (กองคลัง)','การจัดทำแผนบริหารความเสี่ยงและติดตามรายงานผลการบริหารความเสี่ยงประจำปีของหน่วยงาน',2,2,3,2571],
+  ['กองช่าง','การเงิน/การดำเนินงาน','งานคำนวณราคากลางงานก่อสร้างและเบิกค่าตอบแทนควบคุมงานก่อสร้าง','การคำนวณราคากลางงานก่อสร้างตามหลักเกณฑ์ราคากลาง และการเบิกจ่ายค่าตอบแทนผู้ควบคุมงานก่อสร้าง',1,5,3,2570],
+  ['กองช่าง','การปฏิบัติตามกฎหมาย/ระเบียบ','งานขออนุญาตขุดดิน ถมดิน ตามกฎหมายว่าด้วยการขุดดินและถมดิน','การพิจารณาอนุญาตการขุดดิน ถมดิน และการตรวจสอบการดำเนินการให้เป็นไปตามกฎหมายว่าด้วยการขุดดินและถมดิน',1,5,3,2571],
+  ['กองช่าง','การเงิน/การดำเนินงาน','งานค่าใช้จ่ายเดินทางไปราชการ ค่าตอบแทนนอกเวลา และพัฒนาบุคลากร/ฝึกอบรมสัมมนากองช่าง','การเบิกจ่ายค่าใช้จ่ายเดินทางไปราชการ ค่าตอบแทนการปฏิบัติงานนอกเวลาราชการ และการพัฒนาบุคลากร/ฝึกอบรมสัมมนาของกองช่าง',1,3,3,2572],
+  ['กองช่าง','การดำเนินงาน/ควบคุมภายใน','งานการใช้และดูแลรักษารถยนต์ราชการ (กองช่าง)','การควบคุมการใช้รถยนต์และเครื่องจักรกลส่วนกลาง สมุดบันทึกการใช้รถ การบำรุงรักษา และเกณฑ์การใช้น้ำมันเชื้อเพลิงของกองช่าง',1,3,3,2572],
+  ['กองช่าง','การดำเนินงาน/ควบคุมภายใน','งานระบบควบคุมภายในของหน่วยงาน (กองช่าง)','การจัดทำและติดตามรายงานการประเมินระบบการควบคุมภายในตามหลักเกณฑ์กระทรวงการคลัง',1,5,3,2570],
+  ['กองช่าง','การดำเนินงาน/ควบคุมภายใน','งานบริหารความเสี่ยงของหน่วยงาน (กองช่าง)','การจัดทำแผนบริหารความเสี่ยงและติดตามรายงานผลการบริหารความเสี่ยงประจำปีของหน่วยงาน',2,2,3,2571],
+  ['กองการศึกษา','การเงิน','งานบัญชีและรายงานการเงินของศูนย์พัฒนาเด็กเล็ก','การจัดทำบัญชีรับ-จ่ายและรายงานการเงินของศูนย์พัฒนาเด็กเล็ก รวมถึงเงินอุดหนุนอาหารกลางวัน/อาหารเสริม(นม)',1,5,3,2570],
+  ['กองการศึกษา','การเงิน/การดำเนินงาน','งานค่าใช้จ่ายเดินทางไปราชการ ค่าตอบแทนนอกเวลา และพัฒนาบุคลากร/ฝึกอบรมกองการศึกษา','การเบิกจ่ายค่าใช้จ่ายเดินทางไปราชการ ค่าตอบแทนการปฏิบัติงานนอกเวลาราชการ และการพัฒนาบุคลากร/ฝึกอบรมสัมมนาของกองการศึกษา',2,2,3,2571],
+  ['กองการศึกษา','การดำเนินงาน/ควบคุมภายใน','งานระบบควบคุมภายในของหน่วยงาน (กองการศึกษา)','การจัดทำและติดตามรายงานการประเมินระบบการควบคุมภายในตามหลักเกณฑ์กระทรวงการคลัง',1,5,3,2571],
+  ['กองการศึกษา','การดำเนินงาน/ควบคุมภายใน','งานบริหารความเสี่ยงของหน่วยงาน (กองการศึกษา)','การจัดทำแผนบริหารความเสี่ยงและติดตามรายงานผลการบริหารความเสี่ยงประจำปีของหน่วยงาน',2,2,3,2572]
+];
+
+function importAuditUniverse(){
+  if(!authz())return;
+  const existing = db.get('risks', []);
+  const already = existing.filter(r => r.src === AUDIT_UNIVERSE_SRC).length;
+  if(already > 0){
+    if(!confirm(`พบรายการที่นำเข้าจาก Audit Universe อยู่แล้ว ${already} รายการ ต้องการนำเข้าซ้ำอีกครั้งหรือไม่? (รายการเดิมจะไม่ถูกลบ)`)) return;
+  } else {
+    if(!confirm(`นำเข้าข้อมูลความเสี่ยงจาก Audit Universe จำนวน ${AUDIT_UNIVERSE_DATA.length} รายการ (4 กอง) เข้าสู่ระบบนี้หรือไม่?\n\nระบบจะแปลงคะแนน 4 ปัจจัยเสี่ยงเดิม เป็นคะแนนโอกาสเกิด x ผลกระทบ (1-5 x 1-5) โดยอัตโนมัติ ท่านสามารถปรับ Slider แก้ไขคะแนนแต่ละรายการภายหลังได้`)) return;
+  }
+  const risks = db.get('risks', []);
+  let t0 = Date.now();
+  AUDIT_UNIVERSE_DATA.forEach((row, idx) => {
+    const [dept, type, topic, cause, prob, impact, prio, yr] = row;
+    const score = prob*impact;
+    risks.push({
+      id: t0*1000 + idx,  // widely spaced to avoid collision with Date.now()-based ids from manual saves
+      yr: String(yr),
+      dept, type, topic,
+      prob, impact, score,
+      level: lv(score),
+      cause,
+      appr: '',
+      prio,
+      aud: '',
+      at: thd(),
+      src: AUDIT_UNIVERSE_SRC,
+    });
+  });
+  db.set('risks', risks);
+  toast(`นำเข้าข้อมูล Audit Universe แล้ว ${AUDIT_UNIVERSE_DATA.length} รายการ`);
+  updateBdg(); rDepts();
+  if(typeof rRL === 'function') rRL();
+  if(typeof rMx === 'function') rMx();
+}
+
+/* ═══ PAGE META ═══ */
+const META={
+  dash:    {title:'ภาพรวม Dashboard',        sub:'สรุปสถิติการตรวจสอบ', acts:[]},
+  docs:    {title:'ศูนย์จัดเก็บเอกสาร',      sub:'Document Center — อัพโหลด ค้นหา และดาวน์โหลดเอกสาร',
+            acts:[{l:'📤 อัพโหลดเอกสาร',c:'btn btn-sm btn-p',f:"document.getElementById('dc-fi').click()"}]},
+  charter: {title:'กฎบัตรการตรวจสอบภายใน',  sub:'Internal Audit Charter',
+            acts:[{l:'💾 บันทึก',c:'btn btn-sm',f:"saveC()"},{l:'🖨️ พิมพ์',c:'btn btn-sm btn-p',f:"printC()"}]},
+  risk:    {title:'การประเมินความเสี่ยง',    sub:'Risk Assessment', acts:[{l:'📥 นำเข้าจาก Audit Universe',c:'btn btn-sm btn-p',f:'importAuditUniverse()'}]},
+  au:      {title:'Audit Universe',          sub:'บัญชีหน่วยรับตรวจและการประเมินความเสี่ยงระยะยาว',
+            acts:[{l:'📥 นำเข้าข้อมูลตัวอย่าง 47 รายการ',c:'btn btn-sm btn-p',f:'auSeed()'}]},
+  plan:    {title:'แผนการตรวจสอบภายใน',    sub:'Audit Plan',
+            acts:[{l:'+ เพิ่มแผนงาน',c:'btn btn-sm btn-p',f:"document.getElementById('plan-fw').style.display='block'"}]},
+  fw:      {title:'เข้าตรวจ / Checklist',    sub:'Fieldwork', acts:[]},
+  report:  {title:'รายงานผลการตรวจสอบ',     sub:'Audit Report',
+            acts:[{l:'+ สร้างรายงาน',c:'btn btn-sm btn-p',f:"showRF()"}]},
+  fu:      {title:'ติดตามผลการตรวจสอบ',     sub:'Follow-up', acts:[]},
+  annual:  {title:'รายงานประจำปี',           sub:'Annual Report',
+            acts:[{l:'🖨️ พิมพ์',c:'btn btn-sm btn-p',f:"window.print()"}]},
+  laws:    {title:'ฐานกฎหมายและระเบียบ',    sub:'กฎหมาย ระเบียบ มาตรฐาน', acts:[]},
+};
+
+/* ═══ NAV ═══ */
+let cur='dash';
+function G(p,btn){
+  document.querySelector('.pw.on')?.classList.remove('on');
+  document.querySelector('.ni.on')?.classList.remove('on');
+  document.getElementById('pg-'+p).classList.add('on');
+  if(btn)btn.classList.add('on');
+  cur=p;
+  const m=META[p]||{};
+  document.getElementById('tb-title').textContent=m.title||p;
+  document.getElementById('tb-sub').textContent=m.sub||'';
+  document.getElementById('tb-acts').innerHTML=(m.acts||[]).map(a=>`<button class="${a.c}" onclick="${a.f}">${a.l}</button>`).join('');
+  const H={dash:rDash,charter:loadC,risk:()=>{syncS();rDepts()},
+    au:()=>{auSync();auRDepts();auRSummary();auRList()},
+    plan:()=>{rPlan();lPlanRefs()},fw:()=>lPlanRefs(),
+    report:()=>{rRpts();rDepts()},fu:rFU,annual:rAnnual,laws:rLaws,
+    docs:rDocs};
+  if(H[p])H[p]();
+  const uPages=['risk','plan','fw','report','fu','annual','au'];
+  if(uPages.includes(p))setTimeout(()=>rUpPanel(p),60);
+}
+function onYrChg(){
+  document.getElementById('tb-sub').textContent=`ปีงบประมาณ ${gyr()}`;
+  if(cur==='dash')rDash();
+  if(cur==='annual')rAnnual();
+}
+
+/* Tab helpers */
+function ctab(n,btn){
+  document.querySelectorAll('#pg-charter .tbb').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('#pg-charter .tp').forEach(p=>p.classList.remove('on'));
+  btn.classList.add('on');document.getElementById('ct-'+n).classList.add('on');
+  if(n==='docs')rCDocs();
+}
+function rtab(n,btn){
+  document.querySelectorAll('#pg-risk .tbb').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('#pg-risk .tp').forEach(p=>p.classList.remove('on'));
+  btn.classList.add('on');document.getElementById('rt-'+n).classList.add('on');
+  if(n==='matrix'){rDepts();rMx();}if(n==='list'){rDepts();rRL();}
+}
+
+function rDepts(){
+  const risks=db.get('risks',[]);
+  const dpts=uniq(risks.map(r=>r.dept));
+  ['mx-dp','rl-dp','rp-dp'].forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    const cur2=el.value;
+    el.innerHTML='<option value="">ทุกกอง</option>'+dpts.map(d=>`<option value="${d}">${d}</option>`).join('');
+    if(dpts.includes(cur2))el.value=cur2;
+  });
+  updateBdg();
+}
+
+function updateBdg(){
+  const risks=db.get('risks',[]);
+  const reports=db.get('reports',[]);
+  const fus=db.get('followups',[]);
+  const highR=risks.filter(r=>r.level==='วิกฤต'||r.level==='สูง').length;
+  const openFU=fus.filter(f=>f.status==='open').length;
+  const nb=document.getElementById('nb-r');
+  if(nb){nb.textContent=risks.length;nb.className='nbdg '+(highR>0?'r':'g');}
+  const nb2=document.getElementById('nb-rp');if(nb2)nb2.textContent=reports.length;
+  const nb3=document.getElementById('nb-fu');
+  if(nb3){nb3.textContent=openFU;nb3.className='nbdg '+(openFU>0?'r':'g');}
+  const au=db.get('auditUniverse',[]);
+  const nb4=document.getElementById('nb-au');
+  if(nb4){nb4.textContent=au.length;nb4.className='nbdg '+(au.length>0?'g':'g');}
+}
+
+/* ═══ DASHBOARD ═══ */
+function rDash(){
+  const yr=gyr();
+  document.getElementById('tb-sub').textContent=`ปีงบประมาณ ${yr}`;
+  const risks=db.get('risks',[]).filter(r=>!yr||r.yr===yr);
+  const plans=db.get('plans',[]).filter(p=>!yr||p.yr===yr);
+  const reports=db.get('reports',[]).filter(r=>!yr||r.yr===yr);
+  const fus=db.get('followups',[]);
+  const byLv={วิกฤต:0,สูง:0,ปานกลาง:0,ต่ำ:0};
+  risks.forEach(r=>byLv[r.level]=(byLv[r.level]||0)+1);
+  const pDone=plans.filter(p=>p.status==='done').length;
+  const fuOpen=fus.filter(f=>f.status==='open').length;
+  const fuDone=fus.filter(f=>f.status==='done').length;
+
+  document.getElementById('d-stats').innerHTML=`
+    <div class="sc sc-r"><div class="sn">${risks.length}</div><div class="sl">ประเด็นความเสี่ยง</div><div class="ss">${byLv.วิกฤต} วิกฤต · ${byLv.สูง} สูง</div></div>
+    <div class="sc sc-a"><div class="sn">${pDone}/${plans.length}</div><div class="sl">แผนตรวจสอบเสร็จ</div><div class="ss">ปีงบประมาณ ${yr}</div></div>
+    <div class="sc sc-b"><div class="sn">${reports.length}</div><div class="sl">รายงานที่จัดทำ</div><div class="ss">ปีงบประมาณ ${yr}</div></div>
+    <div class="sc ${fuOpen>0?'sc-r':'sc-g'}"><div class="sn">${fuOpen}</div><div class="sl">รอติดตามผล</div><div class="ss">${fuDone} รายการแก้ไขแล้ว</div></div>`;
+
+  const tot=risks.length||1;
+  document.getElementById('d-bars').innerHTML=risks.length===0
+    ?'<div style="font-size:12px;color:var(--t4);padding:8px 0">ยังไม่มีข้อมูลปีนี้</div>'
+    :['วิกฤต','สูง','ปานกลาง','ต่ำ'].map(l=>{
+        const n=byLv[l]||0;const p=Math.round(n/tot*100);
+        const pc={วิกฤต:'pr',สูง:'pr',ปานกลาง:'pa',ต่ำ:'pg'}[l];
+        return`<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--t3);margin-bottom:3px"><span>${l}</span><span>${n} (${p}%)</span></div>
+        <div class="prog"><div class="pf ${pc}" style="width:${p}%"></div></div></div>`;
+      }).join('');
+
+  const stl={planned:'pb',inprogress:'pgr',done:'pl'};
+  const stx={planned:'วางแผน',inprogress:'กำลังตรวจ',done:'เสร็จสิ้น'};
+  document.getElementById('d-plans').innerHTML=plans.length===0
+    ?'<div style="font-size:12px;color:var(--t4)">ยังไม่มีแผน</div>'
+    :plans.slice(0,6).map(p=>`<div class="fur" style="margin-bottom:6px;padding:9px 12px">
+      <div style="flex:1"><div style="font-size:13px;font-weight:600">${p.name}</div><div style="font-size:11px;color:var(--t4)">${p.dept} · ${p.startDate||'-'}</div></div>
+      <span class="pill ${stl[p.status]}">${stx[p.status]}</span></div>`).join('');
+
+  const highs=risks.filter(r=>r.level==='วิกฤต'||r.level==='สูง').sort((a,b)=>b.score-a.score).slice(0,5);
+  document.getElementById('d-highs').innerHTML=highs.length===0
+    ?'<div style="font-size:12px;color:var(--t4)">ไม่มีความเสี่ยงระดับสูง ✓</div>'
+    :highs.map(r=>`<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)">
+      <span style="font-size:24px;font-weight:800;color:var(--r);font-family:var(--mono);min-width:32px">${r.score}</span>
+      <div style="flex:1"><div style="font-size:13px;font-weight:600">${r.topic}</div><div style="font-size:11px;color:var(--t4)">${r.dept}</div></div>
+      <span class="pill ${pCls(r.score)}">${r.level}</span></div>`).join('');
+
+  const openFUs=fus.filter(f=>f.status==='open').slice(0,4);
+  document.getElementById('d-fu').innerHTML=openFUs.length===0
+    ?'<div style="font-size:12px;color:var(--t4)">ไม่มีรายการรอติดตาม ✓</div>'
+    :openFUs.map(f=>`<div class="fur" style="margin-bottom:5px;padding:9px 12px">
+      <div class="fud fu-o"></div>
+      <div style="flex:1"><div style="font-size:12px;font-weight:600">${f.finding.slice(0,70)}${f.finding.length>70?'…':''}</div>
+      <div style="font-size:11px;color:var(--t4)">${f.dept||'-'}</div></div></div>`).join('');
+}
+
+/* ═══ CHARTER ═══ */
+function loadC(){
+  const c=db.get('charter',{});
+  ['org','yr','date','ceo','head','obj','scope','auth','indep','std','rep','note'].forEach(f=>{
+    const el=document.getElementById('c-'+f);if(el&&c[f])el.value=c[f];
+  });
+  const st=document.getElementById('c-st');
+  if(c.savedAt){st.textContent=`✓ บันทึกล่าสุด: ${c.savedAt}`;st.className='alert as';}
+  rCDocBdg();
+}
+function saveC(){
+  if(!authz())return;
+  const c={};
+  ['org','yr','date','ceo','head','obj','scope','auth','indep','std','rep','note'].forEach(f=>{
+    const el=document.getElementById('c-'+f);if(el)c[f]=el.value;
+  });
+  c.savedAt=thd();db.set('charter',c);
+  document.getElementById('c-st').textContent=`✓ บันทึกและรับรองแล้ว — ${c.savedAt}`;
+  document.getElementById('c-st').className='alert as';
+  toast('💾 บันทึกกฎบัตรแล้ว');
+}
+function printC(){
+  const c=db.get('charter',{});
+  const w=window.open('','_blank');if(!w)return;
+  const rows=[['ชื่อองค์กร',c.org],['ปีงบประมาณ',c.yr],['วันที่อนุมัติ',c.date],['ผู้บริหารสูงสุด',c.ceo],['หัวหน้าหน่วยตรวจสอบ',c.head]]
+    .map(([l,v])=>`<tr><td style="color:#666;width:160px;padding:8px;border:1px solid #eee">${l}</td><td style="padding:8px;border:1px solid #eee">${v||'-'}</td></tr>`).join('');
+  const blocks=[['วัตถุประสงค์',c.obj],['ขอบเขต',c.scope],['อำนาจหน้าที่',c.auth],['ความเป็นอิสระ',c.indep],['มาตรฐาน',c.std],['การรายงาน',c.rep],['หมายเหตุ',c.note]]
+    .filter(([,v])=>v).map(([l,v])=>`<h3 style="font-size:14px;border-bottom:1px solid #eee;padding-bottom:5px;margin:18px 0 7px">${l}</h3><p style="font-size:14px;line-height:1.8;color:#333">${(v||'').replace(/\n/g,'<br>')}</p>`).join('');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>กฎบัตร</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600&display=swap" rel="stylesheet">
+    <style>body{font-family:'Sarabun',sans-serif;max-width:700px;margin:40px auto;padding:0 24px;font-size:14px;line-height:1.7}h1{text-align:center;font-size:20px;color:#C8102E;margin-bottom:4px}table{width:100%;border-collapse:collapse}h2{border-bottom:2px solid #C8102E;padding-bottom:4px;margin:22px 0 10px}</style>
+    </head><body><h1>กฎบัตรการตรวจสอบภายใน</h1>
+    <p style="text-align:center;color:#888;font-size:12px">${c.org||''} — ปีงบประมาณ ${c.yr||''}</p>
+    <h2>ข้อมูลองค์กร</h2><table>${rows}</table>${blocks}
+    <p style="margin-top:48px;font-size:11px;color:#aaa;text-align:center">บันทึก ${c.savedAt||'-'}</p></body></html>`);
+  w.print();
+}
+
+/* Charter docs */
+function cDocUp(files){
+  if(!authz())return;
+  if(!files||!files.length)return;
+  const MAX=10*1024*1024;
+  Array.from(files).forEach(file=>{
+    if(file.size>MAX){toast(`⚠️ ${file.name} เกิน 10MB`);return}
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const docs=db.get('charter_docs',[]);
+      docs.push({id:Date.now()+Math.random(),name:file.name,size:file.size,data:e.target.result,at:thd()});
+      db.set('charter_docs',docs);rCDocs();rCDocBdg();toast(`📁 บันทึก "${file.name}"`);
+    };reader.readAsDataURL(file);
+  });
+  document.getElementById('c-fi').value='';
+}
+function cDocDl(id){const d=db.get('charter_docs',[]).find(d=>d.id==id);if(!d)return;const a=document.createElement('a');a.href=d.data;a.download=d.name;a.click()}
+function cDocDel(id){if(!authz())return;if(!confirm('ลบเอกสารนี้?'))return;db.set('charter_docs',db.get('charter_docs',[]).filter(d=>d.id!=id));rCDocs();rCDocBdg();toast('ลบแล้ว')}
+function rCDocs(){
+  const docs=db.get('charter_docs',[]);
+  document.getElementById('cdoctotal').textContent=`(${docs.length} ไฟล์)`;
+  const list=document.getElementById('cdoclist');
+  if(!docs.length){list.innerHTML='<div class="empty" style="padding:28px"><div class="eic">📄</div><h3>ยังไม่มีเอกสาร</h3></div>';return}
+  list.innerHTML=docs.map(d=>`<div class="dcit">
+    <span style="font-size:22px;flex-shrink:0">${fic(d.name)}</span>
+    <div class="dcin"><div class="dcnm" title="${d.name}">${d.name}</div><div class="dcmt">${fsz(d.size)} · ${d.at}</div></div>
+    <div style="display:flex;gap:5px">
+      <button class="btn btn-xs btn-ok" onclick="cDocDl(${d.id})">↓ ดาวน์โหลด</button>
+      <button class="btn btn-xs btn-del" onclick="cDocDel(${d.id})">ลบ</button>
+    </div></div>`).join('');
+}
+function rCDocBdg(){
+  const docs=db.get('charter_docs',[]);
+  const b=document.getElementById('cdocbdg');if(!b)return;
+  if(docs.length){b.textContent=docs.length;b.style.display='inline-block';}else b.style.display='none';
+}
+
+/* ═══ RISK ═══ */
+function syncS(){
+  const p=+document.getElementById('r-prob').value;
+  const i=+document.getElementById('r-impact').value;
+  ['rpval','rpv'].forEach(id=>document.getElementById(id).textContent=p);
+  ['rival','riv'].forEach(id=>document.getElementById(id).textContent=i);
+  const s=p*i;const l=lv(s);
+  document.getElementById('s-n').textContent=s;
+  document.getElementById('s-lv').textContent='ความเสี่ยง'+l;
+  document.getElementById('s-d').textContent=lvNote(s);
+  const pill=document.getElementById('s-pill');pill.textContent=l;pill.className='pill '+pCls(s);
+  const box=document.getElementById('sbox');box.className='sbox '+sbc(s);
+}
+function gDept(){const v=document.getElementById('r-dept').value;return v==='x'?document.getElementById('r-do').value.trim():v}
+function gType(){const v=document.getElementById('r-type').value;return v==='x'?document.getElementById('r-to').value.trim():v}
+
+function saveR(){
+  if(!authz())return;
+  const topic=document.getElementById('r-topic').value.trim();if(!topic){toast('กรุณาระบุเรื่องที่ตรวจ');return}
+  const dept=gDept();if(!dept){toast('กรุณาเลือกสำนัก/กอง');return}
+  const p=+document.getElementById('r-prob').value,i=+document.getElementById('r-impact').value,s=p*i;
+  const item={id:Date.now(),yr:document.getElementById('r-yr').value,dept,type:gType(),topic,
+    prob:p,impact:i,score:s,level:lv(s),
+    cause:document.getElementById('r-cause').value.trim(),
+    appr:document.getElementById('r-appr').value.trim(),
+    prio:+document.getElementById('r-prio').value,
+    aud:document.getElementById('r-aud').value.trim(),at:thd()};
+  const risks=db.get('risks',[]);risks.push(item);db.set('risks',risks);
+  toast('💾 บันทึกรายการความเสี่ยงแล้ว');clrR();updateBdg();rDepts();
+}
+function clrR(){
+  ['r-topic','r-cause','r-appr','r-aud','r-do','r-to'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
+  document.getElementById('r-dept').value='';document.getElementById('r-type').value='';
+  document.getElementById('r-prio').value='3';
+  document.getElementById('r-prob').value=3;document.getElementById('r-impact').value=3;
+  document.getElementById('r-dg').style.display='none';document.getElementById('r-tg').style.display='none';
+  syncS();
+}
+function delR(id){
+  if(!authz())return;
+  if(!confirm('ลบรายการนี้?'))return;
+  db.set('risks',db.get('risks',[]).filter(r=>r.id!==id));
+  toast('ลบแล้ว');rRL();updateBdg();rDepts();
+}
+
+function rMx(){
+  const yr=document.getElementById('mx-yr')?.value||'';
+  const dp=document.getElementById('mx-dp')?.value||'';
+  let risks=db.get('risks',[]);
+  if(yr)risks=risks.filter(r=>r.yr===yr);
+  if(dp)risks=risks.filter(r=>r.dept===dp);
+  let html='<div class="mxg">';
+  for(let imp=5;imp>=1;imp--){
+    html+=`<div class="mx-ax" style="font-family:var(--mono)">${imp}</div>`;
+    for(let prob=1;prob<=5;prob++){
+      const s=prob*imp;const items=risks.filter(r=>r.prob===prob&&r.impact===imp);
+      html+=`<div class="mxc ${mxc(s)}" onclick="mxDet(${prob},${imp})" title="P${prob}×I${imp}=${s}">
+        ${items.length?`<span>${items.length}</span>`:`<span style="font-size:9px;opacity:.3">${s}</span>`}
+      </div>`;
+    }
+  }
+  html+='<div></div>';
+  for(let p=1;p<=5;p++)html+=`<div class="mx-ax" style="font-family:var(--mono)">${p}</div>`;
+  html+='</div><div style="font-size:10px;color:var(--t4);margin-top:5px;display:flex;gap:16px"><span>↑ ผลกระทบ</span><span>โอกาสเกิด →</span></div>';
+  document.getElementById('mx-con').innerHTML=html;
+
+  const dpts=uniq(risks.map(r=>r.dept));
+  document.getElementById('mx-bd').innerHTML=!dpts.length?'<div style="font-size:12px;color:var(--t4)">ไม่มีข้อมูล</div>':
+    `<div class="tw"><table class="tb"><thead><tr><th>สำนัก/กอง</th><th>รายการ</th><th>วิกฤต</th><th>สูง</th><th>ปานกลาง</th><th>ต่ำ</th></tr></thead><tbody>`+
+    dpts.map(d=>{
+      const dr=risks.filter(r=>r.dept===d);
+      const c={วิกฤต:0,สูง:0,ปานกลาง:0,ต่ำ:0};dr.forEach(r=>c[r.level]=(c[r.level]||0)+1);
+      return`<tr><td style="font-weight:600">${d}</td><td style="font-family:var(--mono)">${dr.length}</td>
+        <td><span class="pill pc">${c.วิกฤต}</span></td><td><span class="pill ph2">${c.สูง}</span></td>
+        <td><span class="pill pm">${c.ปานกลาง}</span></td><td><span class="pill pl">${c.ต่ำ}</span></td></tr>`;
+    }).join('')+'</tbody></table></div>';
+}
+function mxDet(prob,impact){
+  const risks=db.get('risks',[]);
+  const items=risks.filter(r=>r.prob===prob&&r.impact===impact);
+  const s=prob*impact;
+  const p=document.getElementById('mx-det');
+  if(!items.length){p.innerHTML=`<div style="color:var(--t4)">ไม่มีรายการ (P${prob}×I${impact}=${s})</div>`;return}
+  p.innerHTML=`<div style="font-weight:700;margin-bottom:10px">P${prob}×I${impact}=<span style="font-family:var(--mono)">${s}</span> <span class="pill ${pCls(s)}">${lv(s)}</span></div>`+
+    items.map(r=>`<div style="border:1px solid var(--line);border-radius:var(--rd2);padding:10px 12px;margin-bottom:6px">
+      <div style="font-weight:600;font-size:13px">${r.topic}</div>
+      <div style="font-size:11px;color:var(--t4);margin-top:2px">${r.dept} · ${r.type} · ปี ${r.yr}</div>
+      ${r.cause?`<div style="font-size:11px;color:var(--t3);margin-top:2px">สาเหตุ: ${r.cause}</div>`:''}
+    </div>`).join('');
+}
+function rRL(){
+  const yr=document.getElementById('rl-yr')?.value||'';
+  const dp=document.getElementById('rl-dp')?.value||'';
+  const lvf=document.getElementById('rl-lv')?.value||'';
+  let risks=db.get('risks',[]);
+  if(yr)risks=risks.filter(r=>r.yr===yr);
+  if(dp)risks=risks.filter(r=>r.dept===dp);
+  if(lvf)risks=risks.filter(r=>r.level===lvf);
+  risks.sort((a,b)=>b.score-a.score||a.prio-b.prio);
+  const tbody=document.getElementById('rl-body');
+  if(!risks.length){tbody.innerHTML=`<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--t4)">ไม่มีรายการ</td></tr>`;return}
+  tbody.innerHTML=risks.map((r,i)=>`<tr>
+    <td style="color:var(--t4);font-family:var(--mono)">${i+1}</td>
+    <td><div style="font-weight:600">${r.topic}</div>${r.cause?`<div style="font-size:11px;color:var(--t4)">${r.cause.slice(0,50)}</div>`:''}</td>
+    <td style="font-size:12px">${r.dept}</td><td style="font-size:12px">${r.type}</td>
+    <td style="font-family:var(--mono);font-size:12px">${r.yr}</td>
+    <td style="font-size:20px;font-weight:800;font-family:var(--mono);color:${r.score>=16?'var(--r)':r.score>=8?'var(--wa)':'var(--ok)'}">${r.score}</td>
+    <td><span class="pill ${pCls(r.score)}">${r.level}</span></td>
+    <td style="font-family:var(--mono);font-size:12px">${r.prio}</td>
+    <td><button class="btn btn-xs btn-del" onclick="delR(${r.id})">ลบ</button></td>
+  </tr>`).join('');
+}
+
+/* ═══ AUDIT UNIVERSE ═══ */
+function auLv(avg){ return avg>=4 ? 'สูง' : (avg>=2.5 ? 'ปานกลาง' : 'ต่ำ') }
+function auFreq(level){ return {สูง:'ตรวจทุกปี',ปานกลาง:'ตรวจทุก 2 ปี',ต่ำ:'ตรวจทุก 3 ปี'}[level] }
+function auPillCls(level){ return {สูง:'ph2',ปานกลาง:'pm',ต่ำ:'pl'}[level] }
+function auSbCls(level){ return {สูง:'lv-h',ปานกลาง:'lv-m',ต่ำ:'lv-l'}[level] }
+function auGDept(){ const v=document.getElementById('au-dept').value; return v==='x' ? document.getElementById('au-do').value.trim() : v }
+
+function auSync(){
+  const f=+document.getElementById('au-f').value, g=+document.getElementById('au-g').value,
+        h=+document.getElementById('au-h').value, i=+document.getElementById('au-i').value;
+  ['au-fv','au-fval'].forEach(id=>document.getElementById(id).textContent=f);
+  ['au-gv','au-gval'].forEach(id=>document.getElementById(id).textContent=g);
+  ['au-hv','au-hval'].forEach(id=>document.getElementById(id).textContent=h);
+  ['au-iv','au-ival'].forEach(id=>document.getElementById(id).textContent=i);
+  const avg=(f+g+h+i)/4, level=auLv(avg);
+  document.getElementById('au-s-n').textContent=avg.toFixed(2);
+  document.getElementById('au-s-lv').textContent='ความเสี่ยง'+level;
+  document.getElementById('au-s-d').textContent=auFreq(level);
+  const pill=document.getElementById('au-s-pill');pill.textContent=level;pill.className='pill '+auPillCls(level);
+  const box=document.getElementById('au-sbox');box.className='sbox '+auSbCls(level);
+}
+
+function auSave(){
+  if(!authz())return;
+  const name=document.getElementById('au-name').value.trim();
+  if(!name){toast('กรุณาระบุงาน/กิจกรรม');return}
+  const dept=auGDept();
+  if(!dept){toast('กรุณาเลือกหน่วยรับตรวจ/กอง');return}
+  const f=+document.getElementById('au-f').value, g=+document.getElementById('au-g').value,
+        h=+document.getElementById('au-h').value, i=+document.getElementById('au-i').value;
+  const avg=Math.round(((f+g+h+i)/4)*100)/100;
+  const level=auLv(avg);
+  const editId=document.getElementById('au-editid').value;
+  const item={
+    id: editId ? +editId : Date.now(),
+    yr: document.getElementById('au-yr').value,
+    dept, type: document.getElementById('au-type').value.trim(),
+    name, scope: document.getElementById('au-scope').value.trim(),
+    f,g,h,i, avg, level,
+    freq: auFreq(level),
+    last: document.getElementById('au-last').value.trim() || 'ยังไม่เคยตรวจสอบ',
+    note: document.getElementById('au-note').value.trim(),
+    at: thd(),
+  };
+  let list=db.get('auditUniverse',[]);
+  if(editId){
+    list=list.map(x=>String(x.id)===editId?item:x);
+  } else {
+    list.push(item);
+  }
+  db.set('auditUniverse',list);
+  toast(editId?'💾 แก้ไขหน่วยรับตรวจแล้ว':'💾 บันทึกหน่วยรับตรวจแล้ว');
+  auClr(); updateBdg(); auRDepts(); auRSummary(); auRList();
+}
+
+function auEdit(id){
+  const item=db.get('auditUniverse',[]).find(x=>String(x.id)===String(id));
+  if(!item)return;
+  document.getElementById('au-editid').value=item.id;
+  document.getElementById('au-yr').value=item.yr;
+  const deptSel=document.getElementById('au-dept');
+  const known=[...deptSel.options].some(o=>o.value===item.dept);
+  if(known){ deptSel.value=item.dept; document.getElementById('au-dg').style.display='none'; }
+  else{ deptSel.value='x'; document.getElementById('au-do').value=item.dept; document.getElementById('au-dg').style.display='block'; }
+  document.getElementById('au-type').value=item.type||'';
+  document.getElementById('au-name').value=item.name;
+  document.getElementById('au-scope').value=item.scope||'';
+  document.getElementById('au-f').value=item.f;
+  document.getElementById('au-g').value=item.g;
+  document.getElementById('au-h').value=item.h;
+  document.getElementById('au-i').value=item.i;
+  document.getElementById('au-last').value=item.last||'';
+  document.getElementById('au-note').value=item.note||'';
+  auSync();
+  document.querySelectorAll('#pg-au .tbb').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('#pg-au .tp').forEach(p=>p.classList.remove('on'));
+  document.querySelector('#pg-au .tbb').classList.add('on');
+  document.getElementById('aut-form').classList.add('on');
+  toast('แก้ไขรายการ — ปรับข้อมูลแล้วกดบันทึก');
+}
+
+function auDel(id){
+  if(!authz())return;
+  if(!confirm('ลบหน่วยรับตรวจนี้?'))return;
+  db.set('auditUniverse', db.get('auditUniverse',[]).filter(x=>String(x.id)!==String(id)));
+  toast('ลบแล้ว'); updateBdg(); auRDepts(); auRSummary(); auRList();
+}
+
+function auClr(){
+  document.getElementById('au-editid').value='';
+  ['au-name','au-scope','au-type','au-do','au-last','au-note'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
+  document.getElementById('au-dept').value='';
+  document.getElementById('au-dg').style.display='none';
+  document.getElementById('au-yr').value='2570';
+  document.getElementById('au-f').value=3;document.getElementById('au-g').value=3;
+  document.getElementById('au-h').value=3;document.getElementById('au-i').value=3;
+  auSync();
+}
+
+function autab(n,btn){
+  document.querySelectorAll('#pg-au .tbb').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('#pg-au .tp').forEach(p=>p.classList.remove('on'));
+  btn.classList.add('on');document.getElementById('aut-'+n).classList.add('on');
+  if(n==='summary'){auRSummary();}
+  if(n==='list'){auRDepts();auRList();}
+}
+
+function auRDepts(){
+  const list=db.get('auditUniverse',[]);
+  const dpts=uniq(list.map(x=>x.dept));
+  const el=document.getElementById('aul-dp');if(!el)return;
+  const cur=el.value;
+  el.innerHTML='<option value="">ทุกกอง</option>'+dpts.map(d=>`<option value="${d}">${d}</option>`).join('');
+  if(dpts.includes(cur))el.value=cur;
+}
+
+function auRSummary(){
+  const list=db.get('auditUniverse',[]);
+  const byLv={สูง:0,ปานกลาง:0,ต่ำ:0};
+  list.forEach(x=>byLv[x.level]=(byLv[x.level]||0)+1);
+  const statsEl=document.getElementById('au-stats');
+  if(statsEl){
+    statsEl.innerHTML=`
+      <div class="sc sc-b"><div class="sn">${list.length}</div><div class="sl">หน่วยรับตรวจทั้งหมด</div><div class="ss">Audit Universe</div></div>
+      <div class="sc sc-r"><div class="sn">${byLv.สูง}</div><div class="sl">ความเสี่ยงสูง</div><div class="ss">ตรวจทุกปี</div></div>
+      <div class="sc sc-a"><div class="sn">${byLv.ปานกลาง}</div><div class="sl">ความเสี่ยงปานกลาง</div><div class="ss">ตรวจทุก 2 ปี</div></div>
+      <div class="sc sc-g"><div class="sn">${byLv.ต่ำ}</div><div class="sl">ความเสี่ยงต่ำ</div><div class="ss">ตรวจทุก 3 ปี</div></div>`;
+  }
+  const bdEl=document.getElementById('au-bd');
+  if(!bdEl)return;
+  const dpts=uniq(list.map(x=>x.dept));
+  if(!dpts.length){bdEl.innerHTML='<div style="font-size:12px;color:var(--t4)">ยังไม่มีข้อมูล — กด "นำเข้าข้อมูลตัวอย่าง 47 รายการ" ด้านบนเพื่อเริ่มต้น</div>';return}
+  bdEl.innerHTML=`<div class="tw"><table class="tb"><thead><tr><th>หน่วยรับตรวจ / กอง</th><th>รวม</th><th>สูง</th><th>ปานกลาง</th><th>ต่ำ</th></tr></thead><tbody>`+
+    dpts.map(d=>{
+      const dr=list.filter(x=>x.dept===d);
+      const c={สูง:0,ปานกลาง:0,ต่ำ:0};dr.forEach(x=>c[x.level]=(c[x.level]||0)+1);
+      return `<tr><td style="font-weight:600">${d}</td><td style="font-family:var(--mono)">${dr.length}</td>
+        <td><span class="pill ph2">${c.สูง}</span></td><td><span class="pill pm">${c.ปานกลาง}</span></td><td><span class="pill pl">${c.ต่ำ}</span></td></tr>`;
+    }).join('')+'</tbody></table></div>';
+}
+
+function auRList(){
+  const yr=document.getElementById('aul-yr')?.value||'';
+  const dp=document.getElementById('aul-dp')?.value||'';
+  const lvf=document.getElementById('aul-lv')?.value||'';
+  let list=db.get('auditUniverse',[]);
+  if(yr)list=list.filter(x=>String(x.yr)===String(yr));
+  if(dp)list=list.filter(x=>x.dept===dp);
+  if(lvf)list=list.filter(x=>x.level===lvf);
+  list=[...list].sort((a,b)=>b.avg-a.avg);
+  const tbody=document.getElementById('aul-body');
+  if(!tbody)return;
+  if(!list.length){tbody.innerHTML=`<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--t4)">ไม่มีรายการ</td></tr>`;return}
+  tbody.innerHTML=list.map((x,idx)=>`<tr>
+    <td style="color:var(--t4);font-family:var(--mono)">${idx+1}</td>
+    <td style="font-size:12px">${x.dept}</td>
+    <td><div style="font-weight:600">${x.name}</div>${x.scope?`<div style="font-size:11px;color:var(--t4)">${x.scope.slice(0,60)}${x.scope.length>60?'…':''}</div>`:''}</td>
+    <td style="font-family:var(--mono);font-weight:700">${x.avg.toFixed(2)}</td>
+    <td><span class="pill ${auPillCls(x.level)}">${x.level}</span></td>
+    <td style="font-size:12px">${x.freq}</td>
+    <td style="font-family:var(--mono);font-size:12px">${x.yr||'-'}</td>
+    <td style="display:flex;gap:4px"><button class="btn btn-xs" onclick="auEdit(${x.id})">แก้ไข</button><button class="btn btn-xs btn-del" onclick="auDel(${x.id})">ลบ</button></td>
+  </tr>`).join('');
+}
+
+const AUDIT_UNIVERSE_SEED_SRC='audit_universe_seed_2569';
+const AUDIT_UNIVERSE_SEED = [
+  ['สำนักปลัด','งานธุรการและงานสารบรรณ','รับ-ส่งหนังสือราชการ ทะเบียนคำสั่ง/ประกาศ งานพัสดุและครุภัณฑ์สำนักปลัด งานยานพาหนะส่วนกลาง','การดำเนินงาน/ควบคุมภายใน',2,3,3,2,2570],
+  ['สำนักปลัด','งานบริหารงานทั่วไปและกิจการสภาเทศบาล','จัดประชุมพนักงาน/สภาเทศบาล งานรัฐพิธี งาน ITA งานประเมิน LPA','การดำเนินงาน/ควบคุมภายใน',2,4,3,3,2570],
+  ['สำนักปลัด','งานแผนพัฒนา งบประมาณ และวิชาการ','จัดทำแผนพัฒนาท้องถิ่น จัดทำงบประมาณรายจ่ายประจำปี วิเคราะห์รายรับ-รายจ่าย ติดตามประเมินผลแผนงาน/โครงการ','การดำเนินงาน/ผลการดำเนินงาน',3,4,4,4,2570],
+  ['สำนักปลัด','งานป้องกันและบรรเทาสาธารณภัย และรักษาความสงบเรียบร้อย','แผนป้องกันและบรรเทาสาธารณภัย งานดับเพลิง งานอปพร. เวรยามสถานที่ราชการ','การดำเนินงาน/ปฏิบัติตามกฎหมาย',3,4,4,5,2570],
+  ['สำนักปลัด','งานการเจ้าหน้าที่/บริหารงานบุคคล','แผนอัตรากำลัง การบรรจุ แต่งตั้ง โอนย้าย เลื่อนระดับ/เลื่อนขั้นเงินเดือน การประเมินผลการปฏิบัติงาน วินัย บำเหน็จบำนาญ','การปฏิบัติตามกฎหมาย/ระเบียบ',3,5,4,4,2570],
+  ['สำนักปลัด','งานทะเบียนราษฎรและบัตรประจำตัวประชาชน','ทะเบียนบ้าน แจ้งเกิด-ตาย ย้ายที่อยู่ ออกบัตรประชาชน','การปฏิบัติตามกฎหมาย/ระเบียบ',1,4,3,4,2571],
+  ['สำนักปลัด','งานนิติการและเรื่องราวร้องทุกข์','งานร่างเทศบัญญัติ/ระเบียบ งานสอบสวนละเมิด งานรับเรื่องร้องเรียนร้องทุกข์','การปฏิบัติตามกฎหมาย/ระเบียบ',2,5,3,4,2570],
+  ['สำนักปลัด','งานประชาสัมพันธ์และเทคโนโลยีสารสนเทศ','เผยแพร่ข้อมูลข่าวสาร เว็บไซต์หน่วยงาน จัดซื้อจัดจ้างสื่อประชาสัมพันธ์','การดำเนินงาน/ควบคุมภายใน',2,2,3,3,2571],
+  ['สำนักปลัด','งานสาธารณสุขและสิ่งแวดล้อม','ป้องกันควบคุมโรคติดต่อ กองทุนหลักประกันสุขภาพท้องถิ่น การจัดเก็บและกำจัดขยะมูลฝอย','การดำเนินงาน/ปฏิบัติตามกฎหมาย',3,4,4,5,2570],
+  ['สำนักปลัด','งานพัฒนาชุมชนและสวัสดิการสังคม','งานสงเคราะห์และเบิกจ่ายเบี้ยยังชีพผู้สูงอายุ/ผู้พิการ/ผู้ป่วยเอดส์ งานส่งเสริมอาชีพและกลุ่มชุมชน','การเงิน/ปฏิบัติตามกฎหมาย',4,4,4,5,2570],
+  ['กองคลัง','งานการเงินและบัญชี','การรับ-จ่ายเงิน การเก็บรักษาเงิน การจัดทำบัญชีและงบการเงิน เงินยืม เงินอุดหนุน','การเงิน',5,5,4,4,2570],
+  ['กองคลัง','งานพัฒนาและจัดเก็บรายได้','จัดเก็บภาษีที่ดินและสิ่งปลูกสร้าง ภาษีป้าย ค่าธรรมเนียมและใบอนุญาตต่างๆ นำส่งเงินรายได้','การเงิน/ปฏิบัติตามกฎหมาย',5,4,4,4,2570],
+  ['กองคลัง','งานพัสดุและทรัพย์สิน','การจัดซื้อจัดจ้าง e-GP การตรวจรับพัสดุ ทะเบียนคุมทรัพย์สิน/ครุภัณฑ์','การเงิน/ปฏิบัติตามกฎหมาย',5,5,4,4,2570],
+  ['กองคลัง','งานแผนที่ภาษีและทะเบียนทรัพย์สิน','จัดทำแผนที่ภาษี สำรวจและปรับปรุงข้อมูลทรัพย์สินเพื่อการจัดเก็บภาษี','การดำเนินงาน/สารสนเทศ',3,3,3,2,2571],
+  ['กองคลัง','งานธุรการกองคลัง','งานสารบรรณ งานธุรการทั่วไปของกองคลัง','การดำเนินงาน/ควบคุมภายใน',2,2,2,1,2572],
+  ['กองช่าง','งานธุรการกองช่าง','งานสารบรรณ งานดูแลสถานที่และวัสดุอุปกรณ์กองช่าง','การดำเนินงาน/ควบคุมภายใน',2,2,2,1,2572],
+  ['กองช่าง','งานวิศวกรรมและออกแบบก่อสร้าง','ออกแบบ ประมาณราคา ควบคุมงานก่อสร้าง งานจัดซื้อจัดจ้างงานโยธา','การเงิน/การดำเนินงาน',4,4,4,4,2570],
+  ['กองช่าง','งานควบคุมอาคารและผังเมือง','ตรวจสอบแบบแปลนขออนุญาตก่อสร้างอาคาร การบังคับใช้กฎหมายผังเมือง','การปฏิบัติตามกฎหมาย/ระเบียบ',3,5,4,4,2570],
+  ['กองช่าง','งานสาธารณูปโภคและระบบประปา','งานก่อสร้าง/ซ่อมบำรุงถนน ทางเท้า ท่อระบายน้ำ ระบบประปาหมู่บ้าน','การเงิน/การดำเนินงาน',4,3,4,4,2571],
+  ['กองช่าง','งานไฟฟ้าสาธารณะและซ่อมบำรุงครุภัณฑ์ช่าง','ติดตั้ง/ซ่อมบำรุงไฟฟ้าสาธารณะ ดูแลรักษาเครื่องจักรกลและครุภัณฑ์ช่าง','การดำเนินงาน/ควบคุมภายใน',3,2,3,3,2571],
+  ['กองการศึกษา','งานบริหารการศึกษาและศูนย์พัฒนาเด็กเล็ก','การจัดการศึกษาปฐมวัย อาหารกลางวัน/อาหารเสริม(นม) เงินอุดหนุนศูนย์พัฒนาเด็กเล็ก','การเงิน/ปฏิบัติตามกฎหมาย',5,4,4,5,2570],
+  ['กองการศึกษา','งานส่งเสริมการศึกษา ศาสนาและวัฒนธรรม','จัดกิจกรรมศาสนา ประเพณี วัฒนธรรมท้องถิ่น งานกีฬาและนันทนาการ','การดำเนินงาน/ควบคุมภายใน',2,3,3,3,2571],
+  ['กองการศึกษา','งานแผนและงบประมาณกองการศึกษา','จัดทำแผนพัฒนาการศึกษา งบประมาณกองการศึกษา งานธุรการและสารสนเทศ','การดำเนินงาน/ผลการดำเนินงาน',3,3,3,3,2571],
+  ['กองการศึกษา','งานกีฬาและนันทนาการ','จัดกิจกรรมกีฬาและนันทนาการสำหรับเด็ก เยาวชน และประชาชนในพื้นที่','การดำเนินงาน/ควบคุมภายใน',2,2,2,2,2572],
+  ['สำนักปลัด','งานสิทธิสวัสดิการเจ้าหน้าที่ (ค่าเช่าบ้าน ค่าเล่าเรียนบุตร ค่ารักษาพยาบาล)','ตรวจสอบการเบิกจ่ายสิทธิสวัสดิการค่าเช่าบ้านและค่าเล่าเรียนบุตรของพนักงานเทศบาล/ลูกจ้าง ให้เป็นไปตามระเบียบ','การเงิน/ปฏิบัติตามกฎหมาย',4,5,4,4,2570],
+  ['สำนักปลัด','งานออกใบอนุญาตกิจการที่เป็นอันตรายต่อสุขภาพและสถานที่จำหน่าย สะสมอาหาร','การพิจารณาออกใบอนุญาต/ต่ออายุใบอนุญาตสถานประกอบกิจการที่เป็นอันตรายต่อสุขภาพ และสถานที่จำหน่าย สะสมอาหาร ตามกฎหมายว่าด้วยการสาธารณสุข','การปฏิบัติตามกฎหมาย/ระเบียบ',2,5,3,4,2571],
+  ['สำนักปลัด','งานค่าใช้จ่ายเดินทางไปราชการ ค่าตอบแทนนอกเวลา และพัฒนาบุคลากร/ฝึกอบรมสัมมนาสำนักปลัด','การเบิกจ่ายค่าใช้จ่ายเดินทางไปราชการ ค่าตอบแทนการปฏิบัติงานนอกเวลาราชการ และการพัฒนาบุคลากร/ฝึกอบรมสัมมนาของสำนักปลัด','การเงิน/การดำเนินงาน',3,3,3,1,2572],
+  ['สำนักปลัด','งานการใช้และดูแลรักษารถยนต์ราชการ (สำนักปลัด)','การควบคุมการใช้รถยนต์ส่วนกลาง สมุดบันทึกการใช้รถ การบำรุงรักษา และเกณฑ์การใช้น้ำมันเชื้อเพลิงของสำนักปลัด','การดำเนินงาน/ควบคุมภายใน',2,3,3,2,2572],
+  ['สำนักปลัด','งานระบบควบคุมภายในของหน่วยงาน (สำนักปลัด)','การจัดทำและติดตามรายงานการประเมินระบบการควบคุมภายในตามหลักเกณฑ์กระทรวงการคลัง','การดำเนินงาน/ควบคุมภายใน',2,4,4,3,2570],
+  ['สำนักปลัด','งานบริหารความเสี่ยงของหน่วยงาน (สำนักปลัด)','การจัดทำแผนบริหารความเสี่ยงและติดตามรายงานผลการบริหารความเสี่ยงประจำปีของหน่วยงาน','การดำเนินงาน/ควบคุมภายใน',2,3,4,3,2571],
+  ['กองคลัง','งานลูกหนี้ภาษีค้างชำระและติดตามเร่งรัดจัดเก็บ','การติดตามเร่งรัดจัดเก็บภาษีที่ดินและสิ่งปลูกสร้าง/ภาษีป้ายค้างชำระ และการดำเนินการตามกฎหมายกับผู้ค้างชำระ','การเงิน/ปฏิบัติตามกฎหมาย',4,3,3,3,2570],
+  ['กองคลัง','งานบันทึกบัญชีในระบบบัญชีคอมพิวเตอร์ขององค์กรปกครองส่วนท้องถิ่น (e-LAAS)','ความถูกต้องครบถ้วนของการบันทึกรายการรับ-จ่ายและปิดบัญชีในระบบ e-LAAS ให้ตรงกับเอกสารหลักฐาน','การเงิน/สารสนเทศ',4,4,3,2,2571],
+  ['กองคลัง','งานเก็บรักษาเงินประจำวันและการควบคุมเงินสด','การเก็บรักษาเงิน การนำฝากธนาคาร และการตรวจนับเงินสดคงเหลือประจำวันตามระเบียบการเก็บรักษาเงิน','การเงิน',4,4,3,3,2570],
+  ['กองคลัง','งานค่าใช้จ่ายเดินทางไปราชการ ค่าตอบแทนนอกเวลา และพัฒนาบุคลากร/ฝึกอบรมสัมมนากองคลัง','การเบิกจ่ายค่าใช้จ่ายเดินทางไปราชการ ค่าตอบแทนการปฏิบัติงานนอกเวลาราชการ และการพัฒนาบุคลากร/ฝึกอบรมสัมมนาของกองคลัง','การเงิน/การดำเนินงาน',3,3,3,1,2572],
+  ['กองคลัง','งานการใช้และดูแลรักษารถยนต์ราชการ (กองคลัง)','การควบคุมการใช้รถยนต์ส่วนกลาง สมุดบันทึกการใช้รถ การบำรุงรักษา และเกณฑ์การใช้น้ำมันเชื้อเพลิงของกองคลัง','การดำเนินงาน/ควบคุมภายใน',2,3,3,2,2572],
+  ['กองคลัง','งานระบบควบคุมภายในของหน่วยงาน (กองคลัง)','การจัดทำและติดตามรายงานการประเมินระบบการควบคุมภายในตามหลักเกณฑ์กระทรวงการคลัง','การดำเนินงาน/ควบคุมภายใน',2,4,4,3,2570],
+  ['กองคลัง','งานบริหารความเสี่ยงของหน่วยงาน (กองคลัง)','การจัดทำแผนบริหารความเสี่ยงและติดตามรายงานผลการบริหารความเสี่ยงประจำปีของหน่วยงาน','การดำเนินงาน/ควบคุมภายใน',2,3,4,3,2571],
+  ['กองช่าง','งานคำนวณราคากลางงานก่อสร้างและเบิกค่าตอบแทนควบคุมงานก่อสร้าง','การคำนวณราคากลางงานก่อสร้างตามหลักเกณฑ์ราคากลาง และการเบิกจ่ายค่าตอบแทนผู้ควบคุมงานก่อสร้าง','การเงิน/การดำเนินงาน',4,4,3,3,2570],
+  ['กองช่าง','งานขออนุญาตขุดดิน ถมดิน ตามกฎหมายว่าด้วยการขุดดินและถมดิน','การพิจารณาอนุญาตการขุดดิน ถมดิน และการตรวจสอบการดำเนินการให้เป็นไปตามกฎหมายว่าด้วยการขุดดินและถมดิน','การปฏิบัติตามกฎหมาย/ระเบียบ',2,5,3,4,2571],
+  ['กองช่าง','งานค่าใช้จ่ายเดินทางไปราชการ ค่าตอบแทนนอกเวลา และพัฒนาบุคลากร/ฝึกอบรมสัมมนากองช่าง','การเบิกจ่ายค่าใช้จ่ายเดินทางไปราชการ ค่าตอบแทนการปฏิบัติงานนอกเวลาราชการ และการพัฒนาบุคลากร/ฝึกอบรมสัมมนาของกองช่าง','การเงิน/การดำเนินงาน',3,3,3,1,2572],
+  ['กองช่าง','งานการใช้และดูแลรักษารถยนต์ราชการ (กองช่าง)','การควบคุมการใช้รถยนต์และเครื่องจักรกลส่วนกลาง สมุดบันทึกการใช้รถ การบำรุงรักษา และเกณฑ์การใช้น้ำมันเชื้อเพลิงของกองช่าง','การดำเนินงาน/ควบคุมภายใน',2,3,3,2,2572],
+  ['กองช่าง','งานระบบควบคุมภายในของหน่วยงาน (กองช่าง)','การจัดทำและติดตามรายงานการประเมินระบบการควบคุมภายในตามหลักเกณฑ์กระทรวงการคลัง','การดำเนินงาน/ควบคุมภายใน',2,4,4,3,2570],
+  ['กองช่าง','งานบริหารความเสี่ยงของหน่วยงาน (กองช่าง)','การจัดทำแผนบริหารความเสี่ยงและติดตามรายงานผลการบริหารความเสี่ยงประจำปีของหน่วยงาน','การดำเนินงาน/ควบคุมภายใน',2,3,4,3,2571],
+  ['กองการศึกษา','งานบัญชีและรายงานการเงินของศูนย์พัฒนาเด็กเล็ก','การจัดทำบัญชีรับ-จ่ายและรายงานการเงินของศูนย์พัฒนาเด็กเล็ก รวมถึงเงินอุดหนุนอาหารกลางวัน/อาหารเสริม(นม)','การเงิน',4,4,3,3,2570],
+  ['กองการศึกษา','งานค่าใช้จ่ายเดินทางไปราชการ ค่าตอบแทนนอกเวลา และพัฒนาบุคลากร/ฝึกอบรมกองการศึกษา','การเบิกจ่ายค่าใช้จ่ายเดินทางไปราชการ ค่าตอบแทนการปฏิบัติงานนอกเวลาราชการ และการพัฒนาบุคลากร/ฝึกอบรมสัมมนาของกองการศึกษา','การเงิน/การดำเนินงาน',3,3,3,2,2571],
+  ['กองการศึกษา','งานระบบควบคุมภายในของหน่วยงาน (กองการศึกษา)','การจัดทำและติดตามรายงานการประเมินระบบการควบคุมภายในตามหลักเกณฑ์กระทรวงการคลัง','การดำเนินงาน/ควบคุมภายใน',2,4,4,3,2571],
+  ['กองการศึกษา','งานบริหารความเสี่ยงของหน่วยงาน (กองการศึกษา)','การจัดทำแผนบริหารความเสี่ยงและติดตามรายงานผลการบริหารความเสี่ยงประจำปีของหน่วยงาน','การดำเนินงาน/ควบคุมภายใน',2,3,4,3,2572]
+];
+
+function auSeed(){
+  if(!authz())return;
+  const existing=db.get('auditUniverse',[]);
+  const already=existing.filter(x=>x.seedSrc===AUDIT_UNIVERSE_SEED_SRC).length;
+  if(already>0){
+    if(!confirm(`พบข้อมูลตัวอย่างที่นำเข้าไว้แล้ว ${already} รายการ ต้องการนำเข้าซ้ำอีกครั้งหรือไม่? (รายการเดิมจะไม่ถูกลบ)`))return;
+  } else {
+    if(!confirm(`นำเข้าข้อมูลตัวอย่าง Audit Universe จำนวน ${AUDIT_UNIVERSE_SEED.length} รายการ (4 กอง) เข้าสู่โมดูลนี้หรือไม่? ท่านสามารถแก้ไข/ลบรายการภายหลังได้`))return;
+  }
+  const list=db.get('auditUniverse',[]);
+  let t0=Date.now();
+  AUDIT_UNIVERSE_SEED.forEach((row,idx)=>{
+    const [dept,name,scope,type,f,g,h,i,yr]=row;
+    const avg=Math.round(((f+g+h+i)/4)*100)/100;
+    const level=auLv(avg);
+    list.push({id:t0*1000+idx,yr:String(yr),dept,type,name,scope,f,g,h,i,avg,level,freq:auFreq(level),
+      last:'ยังไม่เคยตรวจสอบ',note:'',at:thd(),seedSrc:AUDIT_UNIVERSE_SEED_SRC});
+  });
+  db.set('auditUniverse',list);
+  toast(`นำเข้าข้อมูลตัวอย่างแล้ว ${AUDIT_UNIVERSE_SEED.length} รายการ`);
+  updateBdg(); auRDepts(); auRSummary(); auRList();
+}
+
+/* ═══ PLAN ═══ */
+function lPlanRefs(){
+  const plans=db.get('plans',[]);
+  ['fw-ref','rp-ref'].forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    el.innerHTML='<option value="">-- เลือกจากแผน --</option>'+plans.map(p=>`<option value="${p.id}">${p.name} (${p.yr})</option>`).join('');
+  });
+}
+function saveP(){
+  if(!authz())return;
+  const name=document.getElementById('p-name').value.trim();if(!name){toast('กรุณาระบุชื่องาน');return}
+  const item={id:Date.now(),yr:document.getElementById('p-yr').value,dept:document.getElementById('p-dept').value,
+    type:document.getElementById('p-type').value,name,
+    startDate:document.getElementById('p-s').value,endDate:document.getElementById('p-e').value,
+    aud:document.getElementById('p-aud').value,status:document.getElementById('p-st').value,
+    obj:document.getElementById('p-obj').value};
+  const plans=db.get('plans',[]);plans.push(item);db.set('plans',plans);
+  toast('💾 บันทึกแผนแล้ว');
+  document.getElementById('plan-fw').style.display='none';
+  ['p-name','p-s','p-e','p-aud','p-obj'].forEach(id=>document.getElementById(id).value='');
+  rPlan();lPlanRefs();
+}
+function rPlan(){
+  const yr=document.getElementById('pl-yr')?.value||'';
+  const st=document.getElementById('pl-st')?.value||'';
+  let plans=db.get('plans',[]);
+  if(yr)plans=plans.filter(p=>p.yr===yr);
+  if(st)plans=plans.filter(p=>p.status===st);
+  const stl={planned:'pb',inprogress:'pgr',done:'pl'};
+  const stx={planned:'วางแผน',inprogress:'กำลังดำเนินการ',done:'เสร็จสิ้น'};
+  const con=document.getElementById('plan-list');
+  if(!plans.length){con.innerHTML=`<div class="empty"><div class="eic">📅</div><h3>ยังไม่มีแผน</h3><p>กด "+ เพิ่มแผนงาน" ด้านบน</p></div>`;return}
+  con.innerHTML=plans.map(p=>`
+    <div class="pc3 ${p.status==='done'?'dc':''}">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap">
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:700;margin-bottom:5px">${p.name}</div>
+          <div style="font-size:12px;color:var(--t3);display:flex;gap:12px;flex-wrap:wrap">
+            <span>📁 ${p.dept}</span><span>🔍 ${p.type}</span>
+            <span>📅 ${p.startDate||'-'} → ${p.endDate||'-'}</span><span>👤 ${p.aud||'-'}</span>
+          </div>
+          ${p.obj?`<div style="font-size:12px;color:var(--t3);margin-top:5px">${p.obj.slice(0,100)}…</div>`:''}
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+          <span class="pill ${stl[p.status]}">${stx[p.status]}</span>
+          <button class="btn btn-xs" onclick="cycleP(${p.id})">${p.status==='done'?'↩ เปิด':'✓ เสร็จ'}</button>
+          <span class="pill pdk" style="font-size:10px">${p.yr}</span>
+        </div>
+      </div>
+    </div>`).join('');
+}
+function cycleP(id){
+  if(!authz())return;
+  const plans=db.get('plans',[]);const idx=plans.findIndex(p=>p.id===id);if(idx<0)return;
+  const cyc={planned:'inprogress',inprogress:'done',done:'planned'};
+  plans[idx].status=cyc[plans[idx].status]||'planned';
+  db.set('plans',plans);rPlan();
+}
+
+/* ═══ FIELDWORK ═══ */
+const CL={
+  proc:[
+    {g:'ก่อนดำเนินการ',items:[
+      {t:'กำหนดราคากลาง/ราคาอ้างอิงถูกต้อง',l:'พ.ร.บ.จัดซื้อจัดจ้างฯ ม.4',p:'m'},
+      {t:'ตั้งงบประมาณรองรับก่อนจัดซื้อ',l:'พ.ร.บ.วินัยการเงินฯ ม.38',p:'m'},
+      {t:'ประกาศแผนการจัดซื้อในระบบ EGP',l:'ม.11',p:'m'},
+      {t:'เลือกวิธีจัดซื้อเหมาะสมกับวงเงิน',l:'ระเบียบฯ ข้อ 56',p:'m'},
+    ]},
+    {g:'ระหว่างจัดซื้อ',items:[
+      {t:'คณะกรรมการจัดซื้อแต่งตั้งถูกต้อง',l:'ม.28-30',p:'m'},
+      {t:'ไม่มีการแบ่งซื้อแบ่งจ้างหลีกเลี่ยงวิธี',l:'ม.64',p:'m'},
+      {t:'ผู้เสนอราคาไม่ขัดแย้งทางผลประโยชน์',l:'ม.6',p:'m'},
+      {t:'ประกาศผู้ชนะใน EGP ภายในกำหนด',l:'ม.65',p:'s'},
+    ]},
+    {g:'สัญญาและตรวจรับ',items:[
+      {t:'สัญญาจัดทำครบถ้วนตามแบบที่กำหนด',l:'ข้อ 92',p:'m'},
+      {t:'หลักประกันสัญญาครบตลอดอายุ',l:'ม.99',p:'m'},
+      {t:'คณะกรรมการตรวจรับดำเนินการถูกต้อง',l:'ม.103',p:'m'},
+      {t:'หลักฐานเบิกจ่ายตรงกับสัญญาและใบส่งของ',l:'ข้อ 60',p:'m'},
+      {t:'จัดทำทะเบียนคุมพัสดุ/ครุภัณฑ์',l:'ระเบียบพัสดุ',p:'s'},
+    ]},
+  ],
+  fin:[
+    {g:'บัญชีและรายงาน',items:[
+      {t:'งบทดลองและบัญชีแยกประเภทถูกต้องตรงกัน',l:'ระเบียบการเงินฯ ข้อ 5',p:'m'},
+      {t:'รายงานทางการเงินจัดทำตามกำหนด',l:'ข้อ 95',p:'m'},
+      {t:'ยอดเงินสดและเงินฝากตรงกับบัญชี',l:'ข้อ 67',p:'m'},
+    ]},
+    {g:'รับ-จ่ายเงิน',items:[
+      {t:'ใบเสร็จรับเงินถูกต้องครบถ้วน',l:'ข้อ 38-44',p:'m'},
+      {t:'เอกสารหลักฐานประกอบการเบิกจ่ายครบ',l:'ข้อ 49',p:'m'},
+      {t:'การอนุมัติเบิกจ่ายอยู่ในอำนาจที่กำหนด',l:'ข้อ 14',p:'m'},
+      {t:'การสำรองจ่ายและยืมเงินถูกต้อง',l:'ข้อ 78',p:'s'},
+      {t:'ไม่มีรายการเงินค้างชำระเกินกำหนด',l:'ข้อ 85',p:'n'},
+    ]},
+  ],
+  bud:[
+    {g:'การจัดทำและบริหารงบประมาณ',items:[
+      {t:'จัดทำงบประมาณรายจ่ายประจำปีถูกต้อง',l:'พ.ร.บ.วินัยการเงินฯ ม.38',p:'m'},
+      {t:'ค่าใช้จ่ายตรงตามวัตถุประสงค์งบประมาณ',l:'ม.45',p:'m'},
+      {t:'การโอนงบประมาณได้รับอนุมัติถูกต้อง',l:'ม.46',p:'m'},
+      {t:'การกันเงินเหลื่อมปีถูกต้อง',l:'ม.48',p:'m'},
+      {t:'รายงานผลการใช้จ่ายตามกำหนดเวลา',l:'ม.62',p:'s'},
+    ]},
+  ],
+  hr:[
+    {g:'การบรรจุและแต่งตั้ง',items:[
+      {t:'บรรจุแต่งตั้งตามคุณสมบัติที่กำหนด',l:'พ.ร.บ.ระเบียบข้าราชการ ม.13',p:'m'},
+      {t:'อัตราเงินเดือนถูกต้องตามบัญชี',l:'ม.36',p:'m'},
+      {t:'เลื่อนขั้นเงินเดือนตามหลักเกณฑ์',l:'ม.57',p:'m'},
+    ]},
+    {g:'สิทธิและสวัสดิการ',items:[
+      {t:'การลาถูกต้องตามระเบียบ',l:'ระเบียบการลาฯ',p:'m'},
+      {t:'การประเมินผลปฏิบัติงานถูกต้อง',l:'ม.76',p:'s'},
+      {t:'สวัสดิการเป็นไปตามสิทธิที่พึงได้',l:'ระเบียบสวัสดิการฯ',p:'s'},
+    ]},
+  ],
+  asset:[
+    {g:'ทะเบียนและป้าย',items:[
+      {t:'ทะเบียนทรัพย์สินครบถ้วนและเป็นปัจจุบัน',l:'ระเบียบพัสดุ ข้อ 5',p:'m'},
+      {t:'ทรัพย์สินมีป้ายหมายเลขครุภัณฑ์',l:'ข้อ 152',p:'m'},
+      {t:'ตรวจนับทรัพย์สินประจำปีแล้ว',l:'ข้อ 155',p:'m'},
+      {t:'ทรัพย์สินเสื่อมสภาพดำเนินการถูกต้อง',l:'ข้อ 157-165',p:'s'},
+      {t:'ไม่มีทรัพย์สินสูญหายโดยไม่รายงาน',l:'ข้อ 156',p:'m'},
+    ]},
+  ],
+  proj:[
+    {g:'ก่อนก่อสร้าง',items:[
+      {t:'แบบรูปรายการได้รับอนุมัติถูกต้อง',l:'ระเบียบจัดซื้อฯ ม.57',p:'m'},
+      {t:'หลักประกันสัญญาครบตลอดอายุ',l:'ม.99',p:'m'},
+    ]},
+    {g:'ระหว่างก่อสร้าง',items:[
+      {t:'มีผู้ควบคุมงานตามสัญญา',l:'ม.59',p:'m'},
+      {t:'ปริมาณงานและวัสดุตรงตามสัญญา',l:'ม.103',p:'m'},
+      {t:'ส่งงานงวดตามกำหนดในสัญญา',l:'ม.105',p:'m'},
+      {t:'ค่าปรับดำเนินการถูกต้องกรณีล่าช้า',l:'ม.107',p:'s'},
+    ]},
+    {g:'หลังก่อสร้าง',items:[
+      {t:'ตรวจรับงานตรงตามสัญญาและแบบ',l:'ม.103',p:'m'},
+      {t:'ประชาชนได้รับประโยชน์ตามวัตถุประสงค์',l:'',p:'n'},
+    ]},
+  ],
+  it:[
+    {g:'ความมั่นคงปลอดภัย',items:[
+      {t:'มีนโยบายความมั่นคงปลอดภัยเป็นลายลักษณ์',l:'พ.ร.บ.PDPA',p:'m'},
+      {t:'ระบบสำรองข้อมูลและทดสอบกู้คืนได้',l:'',p:'m'},
+      {t:'ควบคุมการเข้าถึงด้วย Username/Password',l:'',p:'m'},
+    ]},
+    {g:'การใช้งานและข้อมูล',items:[
+      {t:'ซอฟต์แวร์มีลิขสิทธิ์ถูกต้อง',l:'พ.ร.บ.ลิขสิทธิ์',p:'m'},
+      {t:'บันทึก Log การเข้าใช้ระบบสำคัญ',l:'พ.ร.บ.คอมพิวเตอร์ฯ',p:'s'},
+      {t:'ข้อมูลส่วนบุคคลมีมาตรการคุ้มครองเพียงพอ',l:'พ.ร.บ.PDPA',p:'m'},
+    ]},
+  ],
+};
+const PL={m:'บังคับ',s:'ควรปฏิบัติ',n:'เพิ่มเติม'};
+const PC={m:'cpm',s:'cps',n:'cpn'};
+
+function loadCL(){
+  const type=document.getElementById('fw-type').value;
+  const data=CL[type];
+  const clw=document.getElementById('fw-cl');
+  const nw=document.getElementById('fw-note-w');
+  const pw=document.getElementById('fw-prog');
+  if(!data){
+    clw.innerHTML='<div class="empty"><div class="eic">🔍</div><h3>เลือกประเภทการตรวจสอบ</h3></div>';
+    [nw,pw].forEach(el=>el.style.display='none');return;
+  }
+  [pw,nw].forEach(el=>el.style.display='block');
+  let idx=0;
+  clw.innerHTML=data.map(g=>`
+    <div class="ckg">— ${g.g}</div>
+    ${g.items.map(item=>{const i=idx++;return`<div class="cki" id="ck-${i}" onclick="togCK(${i})">
+      <input type="checkbox" class="ckcb" id="cb-${i}" onchange="updFWProg()">
+      <div style="flex:1"><div class="ckt">${item.t}</div>${item.l?`<div class="ckl">📋 ${item.l}</div>`:''}</div>
+      <span class="ckp ${PC[item.p]}">${PL[item.p]}</span>
+    </div>`;}).join('')}`).join('');
+  updFWProg();
+}
+function togCK(i){const cb=document.getElementById('cb-'+i);cb.checked=!cb.checked;document.getElementById('ck-'+i).classList.toggle('done',cb.checked);updFWProg()}
+function updFWProg(){
+  const cbs=document.querySelectorAll('[id^="cb-"]');
+  const tot=cbs.length,done=[...cbs].filter(c=>c.checked).length;
+  const pct=tot?Math.round(done/tot*100):0;
+  document.getElementById('fw-pct').textContent=`${done}/${tot}`;
+  document.getElementById('fw-plbl').textContent=`ความครบถ้วน ${pct}%`;
+  const bar=document.getElementById('fw-pb');bar.style.width=pct+'%';
+  bar.className='pf '+(pct>=80?'pg':pct>=40?'pbl':'pr');
+}
+function saveFW(){
+  if(!authz())return;
+  const note=document.getElementById('fw-note').value.trim();if(!note){toast('กรุณาบันทึกข้อสังเกตก่อน');return}
+  const pid=document.getElementById('fw-ref').value;
+  const plan=db.get('plans',[]).find(p=>p.id==pid);
+  const rec={id:Date.now(),date:document.getElementById('fw-date').value||today(),
+    type:document.getElementById('fw-type').value,planId:pid,planName:plan?.name||'-',
+    aud:document.getElementById('fw-aud').value,note,at:thd()};
+  const list=db.get('fieldworks',[]);list.push(rec);db.set('fieldworks',list);
+  const fu={id:Date.now()+1,finding:note.slice(0,100),dept:plan?.dept||'-',
+    yr:plan?.yr||gyr(),status:'open',at:thd()};
+  const fus=db.get('followups',[]);fus.push(fu);db.set('followups',fus);
+  toast('💾 บันทึกผลการตรวจ + สร้างรายการติดตามอัตโนมัติ');
+  document.getElementById('fw-note').value='';updateBdg();
+}
+
+/* ═══ REPORT ═══ */
+let fIdx=0;
+function showRF(){
+  fIdx=0;document.getElementById('find-con').innerHTML='';
+  const plans=db.get('plans',[]);
+  document.getElementById('rp-ref').innerHTML='<option value="">-- เลือกแผน --</option>'+plans.map(p=>`<option value="${p.id}">${p.name} (${p.yr})</option>`).join('');
+  document.getElementById('rp-date').value=today();
+  document.getElementById('rpt-fw').style.display='block';
+}
+function addF(){
+  const i=fIdx++;const div=document.createElement('div');
+  div.className='fcard';div.id='fd-'+i;
+  div.innerHTML=`<div class="fhd">
+    <span>ข้อสังเกตที่ ${i+1}</span>
+    <button class="btn btn-xs btn-del" onclick="document.getElementById('fd-${i}').remove()">ลบ</button>
+  </div>
+  <div style="padding:14px">
+    <div class="r2"><div class="fg"><label class="fl">ประเด็น / ข้อสังเกต</label><textarea id="ft-${i}" class="fi" rows="3"></textarea></div>
+    <div class="fg"><label class="fl">กฎหมาย / ระเบียบ</label><textarea id="fl-${i}" class="fi" rows="3"></textarea></div></div>
+    <div class="r2"><div class="fg"><label class="fl">ข้อเสนอแนะ</label><textarea id="fr-${i}" class="fi" rows="2"></textarea></div>
+    <div class="fg"><label class="fl">ระดับ</label>
+      <select id="fs-${i}" class="fi">
+        <option value="low">ต่ำ — เล็กน้อย</option>
+        <option value="med" selected>ปานกลาง — ต้องแก้ไข</option>
+        <option value="high">สูง — เร่งด่วน</option>
+      </select></div></div>
+  </div>`;
+  document.getElementById('find-con').appendChild(div);
+}
+function saveRpt(){
+  if(!authz())return;
+  const sum=document.getElementById('rp-sum').value.trim();if(!sum){toast('กรุณากรอกบทสรุป');return}
+  const findings=[];
+  document.querySelectorAll('[id^="fd-"]').forEach(el=>{
+    const i=el.id.replace('fd-','');
+    findings.push({text:document.getElementById('ft-'+i)?.value||'',law:document.getElementById('fl-'+i)?.value||'',
+      rec:document.getElementById('fr-'+i)?.value||'',sev:document.getElementById('fs-'+i)?.value||'med'});
+  });
+  const pid=document.getElementById('rp-ref').value;
+  const plan=db.get('plans',[]).find(p=>p.id==pid);
+  const rep={id:Date.now(),planId:pid,planName:plan?.name||'-',dept:plan?.dept||'-',
+    yr:plan?.yr||gyr(),date:document.getElementById('rp-date').value,
+    auth:document.getElementById('rp-auth').value,sum,findings,
+    rec:document.getElementById('rp-rec').value,at:thd()};
+  const reports=db.get('reports',[]);reports.push(rep);db.set('reports',reports);
+  const fus=db.get('followups',[]);
+  findings.forEach(f=>{
+    if(f.sev==='high'||f.sev==='med'){
+      fus.push({id:Date.now()+Math.random(),finding:f.text.slice(0,100),
+        dept:rep.dept,yr:rep.yr,law:f.law,rec:f.rec,status:'open',at:rep.date});
+    }
+  });
+  db.set('followups',fus);
+  toast('💾 บันทึกรายงานแล้ว');
+  document.getElementById('rpt-fw').style.display='none';
+  rRpts();updateBdg();rDepts();
+}
+function rRpts(){
+  const yr=document.getElementById('rp-yr')?.value||'';
+  const dp=document.getElementById('rp-dp')?.value||'';
+  let reports=db.get('reports',[]);
+  if(yr)reports=reports.filter(r=>r.yr===yr);
+  if(dp)reports=reports.filter(r=>r.dept===dp);
+  const spl={low:'pl',med:'pm',high:'ph2'};
+  const slb={low:'ต่ำ',med:'ปานกลาง',high:'สูง'};
+  const sbd={high:'var(--r)',med:'var(--wa)',low:'var(--ok)'};
+  const con=document.getElementById('rpt-list');
+  if(!reports.length){con.innerHTML=`<div class="empty"><div class="eic">📄</div><h3>ยังไม่มีรายงาน</h3><p>กด "+ สร้างรายงาน" ด้านบน</p></div>`;return}
+  con.innerHTML=[...reports].reverse().map(r=>`
+    <div class="card card-sm" style="margin-bottom:11px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;flex-wrap:wrap;gap:7px">
+        <div><div style="font-size:14px;font-weight:700">${r.planName}</div>
+        <div style="font-size:12px;color:var(--t3);margin-top:2px">${r.dept} · ${r.date||'-'} · ผู้จัดทำ: ${r.auth||'-'}</div></div>
+        <span class="pill pdk">${r.yr}</span>
+      </div>
+      <div style="font-size:13px;color:var(--t2);border-left:3px solid var(--r);padding-left:10px;margin-bottom:10px">${r.sum}</div>
+      ${r.findings.length?`<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t4);margin-bottom:6px">ข้อสังเกต ${r.findings.length} รายการ</div>`+
+        r.findings.map(f=>`<div style="padding:8px 12px;border-left:3px solid ${sbd[f.sev]};margin-bottom:4px;background:var(--bg);border-radius:0 var(--rd2) var(--rd2) 0">
+          <div style="font-size:12px;font-weight:600">${f.text}</div>
+          ${f.law?`<div style="font-size:11px;color:var(--t4);font-family:var(--mono)">📋 ${f.law}</div>`:''}
+          <span class="pill ${spl[f.sev]}" style="margin-top:4px">${slb[f.sev]}</span>
+        </div>`).join(''):''}
+    </div>`).join('');
+}
+
+/* ═══ FOLLOW-UP ═══ */
+function rFU(){
+  const yr=document.getElementById('fu-yr')?.value||'';
+  const st=document.getElementById('fu-st')?.value||'';
+  let fus=db.get('followups',[]);
+  if(yr)fus=fus.filter(f=>f.yr===yr);
+  if(st)fus=fus.filter(f=>f.status===st);
+  const dc={open:'fu-o',partial:'fu-p',done:'fu-d'};
+  const sl={open:'ยังไม่ดำเนินการ',partial:'บางส่วน',done:'เสร็จสิ้น'};
+  const sp={open:'ph2',partial:'pm',done:'pl'};
+  const con=document.getElementById('fu-list');
+  if(!fus.length){con.innerHTML=`<div class="empty"><div class="eic">🔄</div><h3>ไม่มีรายการติดตาม</h3><p>รายการจะปรากฏหลังบันทึกรายงาน</p></div>`;return}
+  con.innerHTML=fus.map(f=>`
+    <div class="fur">
+      <div class="fud ${dc[f.status]}"></div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600">${f.finding}</div>
+        <div style="font-size:11px;color:var(--t4);margin-top:2px">${f.dept||'-'} · ปี ${f.yr||'-'} · ${f.at||'-'}</div>
+        ${f.law?`<div style="font-size:11px;color:var(--t3);font-family:var(--mono);margin-top:2px">📋 ${f.law}</div>`:''}
+        ${f.rec?`<div style="font-size:12px;color:var(--t2);margin-top:2px">→ ${f.rec}</div>`:''}
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0">
+        <span class="pill ${sp[f.status]}">${sl[f.status]}</span>
+        <select class="fi" style="font-size:11px;padding:3px 8px;width:auto" onchange="updFU(${f.id},this.value)">
+          <option value="open" ${f.status==='open'?'selected':''}>ยังไม่ดำเนินการ</option>
+          <option value="partial" ${f.status==='partial'?'selected':''}>บางส่วน</option>
+          <option value="done" ${f.status==='done'?'selected':''}>เสร็จสิ้น</option>
+        </select>
+      </div>
+    </div>`).join('');
+}
+function updFU(id,status){
+  if(!authz())return;
+  const fus=db.get('followups',[]);const idx=fus.findIndex(f=>f.id==id);if(idx<0)return;
+  fus[idx].status=status;db.set('followups',fus);toast('อัปเดตสถานะแล้ว');rFU();updateBdg();
+}
+
+/* ═══ ANNUAL ═══ */
+function rAnnual(){
+  const yr=document.getElementById('ar-yr')?.value||gyr();
+  const risks=db.get('risks',[]).filter(r=>r.yr===yr);
+  const plans=db.get('plans',[]).filter(p=>p.yr===yr);
+  const reports=db.get('reports',[]).filter(r=>r.yr===yr);
+  const fus=db.get('followups',[]).filter(f=>f.yr===yr);
+  const charter=db.get('charter',{});
+  const byLv={วิกฤต:0,สูง:0,ปานกลาง:0,ต่ำ:0};
+  risks.forEach(r=>byLv[r.level]=(byLv[r.level]||0)+1);
+  const pDone=plans.filter(p=>p.status==='done').length;
+  const fuDone=fus.filter(f=>f.status==='done').length;
+  const fuPct=fus.length?Math.round(fuDone/fus.length*100):0;
+  const byDept={};
+  risks.forEach(r=>{if(!byDept[r.dept])byDept[r.dept]={n:0,high:0};byDept[r.dept].n++;if(r.level==='วิกฤต'||r.level==='สูง')byDept[r.dept].high++});
+  const savedNote=db.get('ar-note-'+yr,'');
+
+  // Update topbar actions with year selector
+  document.getElementById('tb-acts').innerHTML=`
+    <select id="ar-yr" class="fi" style="font-size:13px;width:90px" onchange="rAnnual()">
+      <option value="2568" ${yr==='2568'?'selected':''}>2568</option>
+      <option value="2567" ${yr==='2567'?'selected':''}>2567</option>
+      <option value="2566" ${yr==='2566'?'selected':''}>2566</option>
+    </select>
+    <button class="btn btn-sm btn-p" onclick="window.print()">🖨️ พิมพ์</button>`;
+
+  document.getElementById('annual-con').innerHTML=`
+    <div class="abl">
+      <div class="ablh">📊 สรุปผลการตรวจสอบภายใน ปีงบประมาณ ${yr} — ${charter.org||'อปท.'}</div>
+      <div class="ablb">
+        <div class="srow">
+          <div class="sc sc-r"><div class="sn">${risks.length}</div><div class="sl">ประเด็นความเสี่ยง</div><div class="ss">${byLv.วิกฤต} วิกฤต · ${byLv.สูง} สูง</div></div>
+          <div class="sc sc-a"><div class="sn">${pDone}/${plans.length}</div><div class="sl">แผนตรวจสอบเสร็จ</div></div>
+          <div class="sc sc-b"><div class="sn">${reports.length}</div><div class="sl">รายงานที่จัดทำ</div></div>
+          <div class="sc ${fuPct>=70?'sc-g':'sc-r'}"><div class="sn">${fuPct}%</div><div class="sl">อัตราแก้ไข</div><div class="ss">${fuDone}/${fus.length} รายการ</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="g2" style="margin-bottom:13px">
+      <div class="abl" style="margin:0"><div class="ablh">⬡ ระดับความเสี่ยง</div><div class="ablb">
+        ${['วิกฤต','สูง','ปานกลาง','ต่ำ'].map(l=>{
+          const n=byLv[l]||0;const p=risks.length?Math.round(n/risks.length*100):0;
+          const pc={วิกฤต:'pr',สูง:'pr',ปานกลาง:'pa',ต่ำ:'pg'}[l];
+          return`<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--t3);margin-bottom:3px"><span>${l}</span><span>${n} (${p}%)</span></div>
+          <div class="prog"><div class="pf ${pc}" style="width:${p}%"></div></div></div>`;
+        }).join('')}
+      </div></div>
+      <div class="abl" style="margin:0"><div class="ablh">🔄 ผลการติดตาม</div>
+        <div class="ablb" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:140px">
+          <div style="font-size:56px;font-weight:800;color:${fuPct>=70?'var(--ok)':'var(--r)'};font-family:var(--mono);line-height:1">${fuPct}%</div>
+          <div style="font-size:13px;color:var(--t3);margin-top:6px">อัตราการดำเนินการแก้ไข</div>
+          <div style="font-size:12px;color:var(--t4);margin-top:3px">${fuDone} จาก ${fus.length} รายการ</div>
+          <div class="prog" style="width:100%;margin-top:12px"><div class="pf ${fuPct>=70?'pg':'pr'}" style="width:${fuPct}%"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="abl" style="margin-bottom:13px"><div class="ablh">🏢 แยกตามสำนัก/กอง</div><div class="ablb">
+      <div class="tw"><table class="tb"><thead><tr><th>สำนัก/กอง</th><th>รายการทั้งหมด</th><th>วิกฤต+สูง</th><th>สัดส่วน</th></tr></thead><tbody>
+        ${Object.entries(byDept).map(([d,v])=>{const p=Math.round(v.high/v.n*100);return`<tr>
+          <td style="font-weight:600">${d}</td><td style="font-family:var(--mono)">${v.n}</td>
+          <td><span class="pill ${v.high>0?'ph2':'pl'}">${v.high}</span></td>
+          <td><div style="display:flex;align-items:center;gap:8px"><div class="prog" style="width:80px"><div class="pf pr" style="width:${p}%"></div></div><span style="font-size:11px;font-family:var(--mono)">${p}%</span></div></td>
+        </tr>`}).join('')||'<tr><td colspan="4" style="text-align:center;color:var(--t4);padding:24px">ไม่มีข้อมูล</td></tr>'}
+      </tbody></table></div>
+    </div></div>
+    <div class="abl"><div class="ablh">📝 ข้อเสนอแนะสำหรับปีถัดไป</div><div class="ablb">
+      <textarea id="ar-note" class="fi" rows="5" placeholder="บันทึกข้อเสนอแนะเชิงนโยบาย ประเด็นปรับปรุงเชิงระบบ...">${savedNote}</textarea>
+      <button class="btn btn-sm btn-p" onclick="saveArNote('${yr}')" style="margin-top:8px">💾 บันทึก</button>
+    </div></div>`;
+}
+function saveArNote(yr){if(!authz())return;db.set('ar-note-'+yr,document.getElementById('ar-note').value);toast('💾 บันทึกแล้ว')}
+
+/* ═══ LAWS ═══ */
+function rLaws(){
+  const laws=[
+    ['⚖️','หลัก','พ.ร.บ.วินัยการเงินการคลังของรัฐ พ.ศ.2561','กำหนดวินัยการเงินการคลัง หลักเกณฑ์การใช้จ่าย และการรายงานทางการเงิน','pdk'],
+    ['⚖️','หลัก','พ.ร.บ.การจัดซื้อจัดจ้างและบริหารพัสดุภาครัฐ พ.ศ.2560','กำหนดวิธีจัดซื้อจัดจ้าง ราคากลาง การบริหารสัญญา และตรวจรับพัสดุ','pdk'],
+    ['📋','หลัก','ระเบียบกระทรวงการคลัง ว่าด้วยการตรวจสอบภายใน พ.ศ.2551','มาตรฐาน กรอบการตรวจสอบ รูปแบบรายงาน และความสัมพันธ์กับผู้บริหาร','pdk'],
+    ['💰','การเงิน','ระเบียบกระทรวงการคลัง ว่าด้วยการเบิกเงินจากคลัง การรับเงิน การจ่ายเงิน','วิธีปฏิบัติเกี่ยวกับการรับเงิน เบิกจ่ายเงิน และนำส่งเงินต่อคลัง','pm'],
+    ['👤','บุคลากร','พ.ร.บ.ระเบียบบริหารงานบุคคลส่วนท้องถิ่น พ.ศ.2542','หลักเกณฑ์การบรรจุแต่งตั้ง เลื่อนขั้น วินัย และสวัสดิการ','pb'],
+    ['💰','การเงิน','ระเบียบกระทรวงมหาดไทย ว่าด้วยการรับเงิน การเบิกจ่ายของ อปท.','ระเบียบเฉพาะสำหรับ อปท. ด้านการเงินการคลัง','pm'],
+    ['🌐','มาตรฐาน','มาตรฐานการตรวจสอบภายใน IIA (International Standards for the Professional Practice)','IPPF — กรอบสากลว่าด้วยจรรยาบรรณ มาตรฐาน และแนวปฏิบัติ','pl'],
+    ['🔒','มาตรฐาน','COSO Internal Control Framework','5 องค์ประกอบ: Control Environment, Risk Assessment, Control Activities, Information & Communication, Monitoring','pl'],
+    ['💻','IT','พ.ร.บ.คุ้มครองข้อมูลส่วนบุคคล พ.ศ.2562 (PDPA)','หน้าที่ในการเก็บ ใช้ และเปิดเผยข้อมูลส่วนบุคคลอย่างถูกต้อง','ph2'],
+  ];
+  document.getElementById('laws-con').innerHTML=`
+    <div class="alert aw" style="margin-bottom:16px"><strong>ประเด็นที่ สตง. มักตรวจพบ:</strong><br>
+    จัดซื้อเฉพาะเจาะจงเกินวงเงิน · ไม่มีงบประมาณรองรับ · เอกสารไม่ครบ · ตรวจรับพัสดุไม่ถูกต้อง · เบิกจ่ายไม่ตรงระเบียบ · ทะเบียนทรัพย์สินไม่เป็นปัจจุบัน · ขาดการติดตามผล</div>
+    <div class="g2">
+      <div><div class="sepl">กฎหมายและระเบียบหลัก</div>
+        ${laws.slice(0,5).map(([ic,tag,name,desc,pc])=>`<div class="lc">
+          <div class="lch">${ic} ${name} <span class="pill ${pc}" style="margin-left:auto">${tag}</span></div>
+          <div class="lcb">${desc}</div></div>`).join('')}
+      </div>
+      <div><div class="sepl">มาตรฐานและแนวปฏิบัติ</div>
+        ${laws.slice(5).map(([ic,tag,name,desc,pc])=>`<div class="lc">
+          <div class="lch">${ic} ${name} <span class="pill ${pc}" style="margin-left:auto">${tag}</span></div>
+          <div class="lcb">${desc}</div></div>`).join('')}
+        <div class="sepl" style="margin-top:20px">กรอบ COSO — 5 องค์ประกอบ</div>
+        ${[['สภาพแวดล้อมการควบคุม','ค่านิยม จริยธรรม โครงสร้างองค์กร'],
+           ['การประเมินความเสี่ยง','ระบุ วิเคราะห์ และจัดการความเสี่ยง'],
+           ['กิจกรรมการควบคุม','นโยบายและขั้นตอนลดความเสี่ยง'],
+           ['สารสนเทศและการสื่อสาร','ข้อมูลถูกต้องทันเวลาถึงผู้เกี่ยวข้อง'],
+           ['การติดตามและประเมินผล','ติดตามประสิทธิผลการควบคุมต่อเนื่อง']
+          ].map(([n,d],i)=>`<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)">
+            <span style="font-family:var(--mono);font-weight:800;color:var(--r);min-width:20px;font-size:15px">${i+1}</span>
+            <div><div style="font-weight:600;font-size:13px">${n}</div><div style="font-size:12px;color:var(--t3)">${d}</div></div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+/* ═══ UPLOAD PANELS (Google Drive) ═══ */
+const GD={
+  folders:{
+    risk:    {id:'1-uyznk8r8aQ-qRkp1Rs5wuteC0DI15DN',url:'https://drive.google.com/drive/folders/1-uyznk8r8aQ-qRkp1Rs5wuteC0DI15DN',name:'02_การประเมินความเสี่ยง'},
+    plan:    {id:'1CWpRF58jQDBQqJtPrUsYLFVV5Blm5gU8',url:'https://drive.google.com/drive/folders/1CWpRF58jQDBQqJtPrUsYLFVV5Blm5gU8',name:'03_แผนการตรวจสอบ'},
+    fw:      {id:'1Xb-m10sNhExwBfhU7rL1P6ZxwsDWsfFn',url:'https://drive.google.com/drive/folders/1Xb-m10sNhExwBfhU7rL1P6ZxwsDWsfFn',name:'04_เข้าตรวจ_Fieldwork'},
+    report:  {id:'1WDeHBiYPDIy7z4Lm2DuwZYsjgUH1vMfv',url:'https://drive.google.com/drive/folders/1WDeHBiYPDIy7z4Lm2DuwZYsjgUH1vMfv',name:'05_รายงานผลการตรวจ'},
+    fu:      {id:'12VkQr0Ew8bNIsJ34dLhX-VhtMw0SqgsA',url:'https://drive.google.com/drive/folders/12VkQr0Ew8bNIsJ34dLhX-VhtMw0SqgsA',name:'06_ติดตามผล'},
+    annual:  {id:'1kFiwdsKXOPxDBQY-1Ne6ftkYGNzbIJ2p',url:'https://drive.google.com/drive/folders/1kFiwdsKXOPxDBQY-1Ne6ftkYGNzbIJ2p',name:'07_รายงานประจำปี'},
+  }
+};
+const UPL={risk:'การประเมินความเสี่ยง',plan:'แผนการตรวจสอบ',fw:'เข้าตรวจ / Fieldwork',report:'รายงานผลการตรวจ',fu:'ติดตามผล',annual:'รายงานประจำปี'};
+
+function rUpPanel(key){
+  const el=document.getElementById('up-pg-'+key);if(!el)return;
+  const folder=GD.folders[key];if(!folder)return;
+  const files=db.get('up_'+key,[]);
+  const bid='upb-'+key;
+  el.innerHTML=`
+    <div class="upp">
+      <div class="upph" onclick="upToggle('${bid}')">
+        <div class="upphl">📁 เอกสารแนบ — ${UPL[key]}${files.length?`<span class="upct">${files.length}</span>`:''}
+        </div>
+        <div class="upphr">
+          <a href="${folder.url}" target="_blank" class="updl" onclick="event.stopPropagation()">
+            <img src="https://www.gstatic.com/images/branding/product/1x/drive_16dp.png" width="14" height="14" style="vertical-align:middle">
+            เปิดใน Drive
+          </a>
+          <span style="font-size:11px;color:rgba(255,255,255,.4)" id="upar-${bid}">▼</span>
+        </div>
+      </div>
+      <div class="uppb" id="${bid}">
+        <div class="updz" id="updz-${key}"
+          onclick="document.getElementById('upin-${key}').click()"
+          ondragover="event.preventDefault();document.getElementById('updz-${key}').classList.add('dg')"
+          ondragleave="document.getElementById('updz-${key}').classList.remove('dg')"
+          ondrop="event.preventDefault();document.getElementById('updz-${key}').classList.remove('dg');upLoad(event.dataTransfer.files,'${key}')">
+          <div style="font-size:28px;opacity:.4;margin-bottom:7px">☁️</div>
+          <div style="font-size:13px;font-weight:500;color:var(--t2);margin-bottom:3px">คลิกเลือกไฟล์ หรือลากมาวาง</div>
+          <div style="font-size:11px;color:var(--t4)">PDF, Word, Excel, รูปภาพ — สูงสุด 10MB<br>โฟลเดอร์: <strong>${folder.name}</strong></div>
+        </div>
+        <input type="file" id="upin-${key}" style="display:none" multiple
+          accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.pptx,.csv,.txt"
+          onchange="upLoad(this.files,'${key}');this.value=''">
+        <div id="upl-${key}" style="margin-top:12px">${upList(files,key)}</div>
+      </div>
+    </div>`;
+}
+function upToggle(bid){
+  const el=document.getElementById(bid);if(!el)return;
+  const open=el.classList.toggle('on');
+  const arr=document.getElementById('upar-'+bid);if(arr)arr.textContent=open?'▲':'▼';
+}
+function upList(files,key){
+  if(!files.length)return`<div style="text-align:center;padding:18px;color:var(--t4);font-size:12px">ยังไม่มีเอกสาร</div>`;
+  return files.map(f=>`
+    <div class="upfr">
+      <span style="font-size:20px;flex-shrink:0">${fic(f.name)}</span>
+      <div class="upfi">
+        <div class="upfn" title="${f.name}">${f.name}</div>
+        <div class="upfm">
+          <span>${fsz(f.size)}</span><span>${f.at}</span>
+          ${f.did?`<a href="https://drive.google.com/file/d/${f.did}/view" target="_blank" style="color:var(--r)">เปิดใน Drive ↗</a><span class="upbdg">✓ Drive</span>`
+                 :`<span class="upbdg sy">💾 Local</span>`}
+        </div>
+      </div>
+      <div style="display:flex;gap:5px;flex-shrink:0">
+        ${f.did?`<a href="https://drive.google.com/file/d/${f.did}/view" target="_blank" class="btn btn-xs btn-ok">↗ Drive</a>`
+               :`<button class="btn btn-xs btn-ok" onclick="upSync('${f.lid}','${key}')">☁ Sync</button>`}
+        <button class="btn btn-xs btn-del" onclick="upDel('${f.lid}','${key}')">ลบ</button>
+      </div>
+    </div>`).join('');
+}
+function upLoad(files,key){
+  if(!authz())return;
+  if(!files||!files.length)return;
+  const MAX=10*1024*1024;
+  Array.from(files).forEach(file=>{
+    if(file.size>MAX){toast(`⚠️ ${file.name} เกิน 10MB`);return}
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const lid='f'+Date.now()+Math.random().toString(36).slice(2);
+      const list=db.get('up_'+key,[]);
+      list.push({lid,name:file.name,size:file.size,type:file.type,data:e.target.result,at:thd(),did:null});
+      db.set('up_'+key,list);
+      upRefresh(key);toast(`📁 บันทึก "${file.name}" — กำลัง sync...`);
+      upToDrive(lid,file.name,file.type,e.target.result.split(',')[1],key);
+    };reader.readAsDataURL(file);
+  });
+}
+async function upToDrive(lid,name,mime,b64,key){
+  const folder=GD.folders[key];if(!folder)return;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-6',max_tokens:512,
+        messages:[{role:'user',content:`Upload file to Google Drive. Reply ONLY with JSON {"driveId":"<id>"}.
+Name: ${name}, MIME: ${mime}, Folder: ${folder.id}
+Base64: ${b64}
+Use create_file: title="${name}",parentId="${folder.id}",base64Content=<base64>,contentMimeType="${mime}",disableConversionToGoogleType=true`}],
+        mcp_servers:[{type:'url',url:'https://drivemcp.googleapis.com/mcp/v1',name:'gd'}]
+      })
+    });
+    const data=await res.json();let did=null;
+    if(data.content)for(const b of data.content){
+      if(b.type==='mcp_tool_result'&&b.content?.[0]?.text){try{const p=JSON.parse(b.content[0].text);if(p.id)did=p.id}catch{}}
+      if(b.type==='text'&&b.text){try{const p=JSON.parse(b.text);if(p.driveId)did=p.driveId}catch{const m=b.text.match(/"id"\s*:\s*"([^"]+)"/);if(m)did=m[1]}}
+    }
+    if(did){
+      const list=db.get('up_'+key,[]);const idx=list.findIndex(f=>f.lid===lid);
+      if(idx>=0){list[idx].did=did;list[idx].data=null;db.set('up_'+key,list);}
+      upRefresh(key);toast(`✅ "${name}" อัพโหลด Drive สำเร็จ`);
+    }else toast(`⚠️ บันทึก Local แล้ว — Drive sync ไม่สำเร็จ`);
+  }catch{toast(`⚠️ บันทึก Local แล้ว`)}
+}
+async function upSync(lid,key){
+  const rec=db.get('up_'+key,[]).find(f=>f.lid===lid);
+  if(!rec||!rec.data){toast('ไม่พบข้อมูลไฟล์');return}
+  toast(`☁️ กำลัง Sync "${rec.name}"...`);
+  await upToDrive(lid,rec.name,rec.type,rec.data.split(',')[1],key);
+}
+function upDel(lid,key){
+  if(!authz())return;
+  if(!confirm('ลบไฟล์นี้? (ไฟล์บน Drive ยังคงอยู่)'))return;
+  db.set('up_'+key,db.get('up_'+key,[]).filter(f=>f.lid!==lid));
+  upRefresh(key);toast('ลบแล้ว');
+}
+function upRefresh(key){
+  const files=db.get('up_'+key,[]);
+  const lel=document.getElementById('upl-'+key);if(lel)lel.innerHTML=upList(files,key);
+  const pel=document.getElementById('up-pg-'+key);
+  if(pel){const ct=pel.querySelector('.upct');
+    if(ct){if(files.length){ct.textContent=files.length;ct.style.display='inline-block';}else ct.style.display='none';}}
+}
+
+/* ═══ EXPORT ═══ */
+function doExport(){
+  const risks=db.get('risks',[]);if(!risks.length){toast('ไม่มีข้อมูล');return}
+  const hdr='ปีงบประมาณ,สำนัก/กอง,ประเภท,เรื่องที่ตรวจ,โอกาส,ผลกระทบ,คะแนน,ระดับ,ลำดับ,สาเหตุ,แนวทาง,ผู้ประเมิน\n';
+  const rows=risks.map(r=>[r.yr,r.dept,r.type,`"${r.topic}"`,r.prob,r.impact,r.score,r.level,r.prio,`"${r.cause||''}"`,`"${r.appr||''}"`,r.aud||''].join(',')).join('\n');
+  const blob=new Blob(['\uFEFF'+hdr+rows],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=`iam_${today()}.csv`;a.click();
+  URL.revokeObjectURL(url);toast('ส่งออก CSV แล้ว');
+}
+
+/* ═══ DOCUMENT CENTER ═══ */
+let dcViewMode = 'grid'; // 'grid' | 'list'
+
+/* ── Cat color map ── */
+const DC_CAT_CLS = {
+  'กฎบัตร':'ph2','ความเสี่ยง':'ph2','แผน':'pb','fieldwork':'pm',
+  'รายงาน':'pl','ติดตามผล':'pm','รายงานประจำปี':'pb','กฎหมาย':'pgr','อื่น ๆ':'pgr'
+};
+const DC_CAT_ICON = {
+  'กฎบัตร':'📋','ความเสี่ยง':'⬡','แผน':'📅','fieldwork':'🔍',
+  'รายงาน':'📄','ติดตามผล':'🔄','รายงานประจำปี':'📊','กฎหมาย':'⚖️','อื่น ๆ':'📁'
+};
+
+function dcUpload(files) {
+  if(!authz())return;
+  if (!files || !files.length) return;
+  const MAX = 10 * 1024 * 1024;
+  const cat   = document.getElementById('dc-cat').value;
+  const yr    = document.getElementById('dc-yr').value;
+  const dept  = document.getElementById('dc-dept').value;
+  const tags  = document.getElementById('dc-tags').value.split(',').map(t=>t.trim()).filter(Boolean);
+  const title = document.getElementById('dc-title').value.trim();
+  const note  = document.getElementById('dc-note').value.trim();
+  let count = 0;
+
+  Array.from(files).forEach(file => {
+    if (file.size > MAX) { toast(`⚠️ ${file.name} เกิน 10MB`); return; }
+    const reader = new FileReader();
+    reader.onload = e => {
+      const docs = db.get('docs', []);
+      docs.unshift({
+        id: Date.now() + Math.random(),
+        name: file.name,
+        title: title || file.name,
+        size: file.size,
+        type: file.type,
+        ext: (file.name.split('.').pop() || '').toLowerCase(),
+        data: e.target.result,
+        cat, yr, dept, tags, note,
+        uploadedAt: thd(),
+        uploadedTs: Date.now(),
+      });
+      db.set('docs', docs);
+      count++;
+      rDocs();
+      updateDcBadge();
+      toast(`📁 บันทึก "${file.name}" ในหมวด ${cat} แล้ว`);
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // Clear form
+  document.getElementById('dc-title').value = '';
+  document.getElementById('dc-note').value = '';
+  document.getElementById('dc-tags').value = '';
+  document.getElementById('dc-fi').value = '';
+}
+
+function dcDownload(id) {
+  const docs = db.get('docs', []);
+  const doc = docs.find(d => d.id == id);
+  if (!doc || !doc.data) { toast('ไม่พบข้อมูลไฟล์'); return; }
+  const a = document.createElement('a');
+  a.href = doc.data;
+  a.download = doc.name;
+  a.click();
+  toast(`↓ ดาวน์โหลด "${doc.name}"`);
+}
+
+function dcDelete(id) {
+  if(!authz())return;
+  if (!confirm('ลบเอกสารนี้ออกจากระบบ?')) return;
+  db.set('docs', db.get('docs', []).filter(d => d.id != id));
+  rDocs(); updateDcBadge();
+  dcCloseModal();
+  toast('ลบเอกสารแล้ว');
+}
+
+function dcView(mode) {
+  dcViewMode = mode;
+  document.getElementById('dc-v-grid').className = 'btn btn-xs' + (mode === 'grid' ? ' btn-p' : '');
+  document.getElementById('dc-v-list').className = 'btn btn-xs' + (mode === 'list' ? ' btn-p' : '');
+  rDocs();
+}
+
+function dcClearFilters() {
+  ['dc-search','dc-fyr'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  ['dc-fcat','dc-fdept','dc-sort'].forEach(id => { const el = document.getElementById(id); if (el) el.selectedIndex = 0; });
+  rDocs();
+}
+
+function rDocs() {
+  const q    = (document.getElementById('dc-search')?.value || '').toLowerCase().trim();
+  const cat  = document.getElementById('dc-fcat')?.value  || '';
+  const dept = document.getElementById('dc-fdept')?.value || '';
+  const yr   = document.getElementById('dc-fyr')?.value   || '';
+  const sort = document.getElementById('dc-sort')?.value  || 'date-desc';
+
+  let docs = db.get('docs', []);
+
+  // Filter
+  if (q)    docs = docs.filter(d =>
+    d.name.toLowerCase().includes(q) ||
+    (d.title||'').toLowerCase().includes(q) ||
+    (d.note||'').toLowerCase().includes(q) ||
+    (d.tags||[]).some(t => t.toLowerCase().includes(q)) ||
+    (d.cat||'').toLowerCase().includes(q) ||
+    (d.dept||'').toLowerCase().includes(q)
+  );
+  if (cat)  docs = docs.filter(d => d.cat === cat);
+  if (dept) docs = docs.filter(d => d.dept === dept);
+  if (yr)   docs = docs.filter(d => d.yr === yr);
+
+  // Sort
+  docs.sort((a, b) => {
+    switch (sort) {
+      case 'date-asc':  return a.uploadedTs - b.uploadedTs;
+      case 'date-desc': return b.uploadedTs - a.uploadedTs;
+      case 'name-asc':  return (a.title||a.name).localeCompare(b.title||b.name, 'th');
+      case 'name-desc': return (b.title||b.name).localeCompare(a.title||a.name, 'th');
+      case 'size-desc': return b.size - a.size;
+      default: return b.uploadedTs - a.uploadedTs;
+    }
+  });
+
+  // Stats bar
+  const allDocs = db.get('docs', []);
+  const catCounts = {};
+  allDocs.forEach(d => catCounts[d.cat] = (catCounts[d.cat] || 0) + 1);
+  const totalSize = allDocs.reduce((s, d) => s + (d.size || 0), 0);
+  document.getElementById('dc-stats-bar').innerHTML = `
+    <div class="sc sc-r" style="padding:10px 16px;flex:none">
+      <div class="sn" style="font-size:22px">${allDocs.length}</div>
+      <div class="sl">เอกสารทั้งหมด</div>
+    </div>
+    <div class="sc sc-b" style="padding:10px 16px;flex:none">
+      <div class="sn" style="font-size:22px">${fsz(totalSize)}</div>
+      <div class="sl">ขนาดรวม</div>
+    </div>
+    ${Object.entries(catCounts).slice(0,4).map(([c,n]) => `
+    <div class="card card-sm" style="padding:10px 14px;flex:none">
+      <div style="font-size:11px;color:var(--t4);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">${DC_CAT_ICON[c]||'📁'} ${c}</div>
+      <div style="font-size:18px;font-weight:800;font-family:var(--mono)">${n}</div>
+    </div>`).join('')}`;
+
+  // Result count
+  document.getElementById('dc-result-count').textContent =
+    docs.length === allDocs.length
+      ? `เอกสารทั้งหมด ${docs.length} รายการ`
+      : `พบ ${docs.length} จาก ${allDocs.length} รายการ`;
+
+  // Render
+  const con = document.getElementById('dc-list');
+  if (!docs.length) {
+    con.innerHTML = `<div class="empty">
+      <div class="eic">🗂️</div>
+      <h3>${q || cat || dept || yr ? 'ไม่พบเอกสารที่ตรงกัน' : 'ยังไม่มีเอกสาร'}</h3>
+      <p>${q || cat || dept || yr ? 'ลองเปลี่ยนเงื่อนไขการค้นหา' : 'อัพโหลดไฟล์ด้านบนเพื่อเริ่มต้น'}</p>
+    </div>`;
+    return;
+  }
+
+  if (dcViewMode === 'grid') {
+    con.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px">
+      ${docs.map(d => `
+        <div style="background:var(--wh);border:1px solid var(--line);border-radius:var(--rdlg);overflow:hidden;
+             cursor:pointer;transition:all .14s;box-shadow:var(--sh)"
+             onmouseover="this.style.borderColor='var(--r)';this.style.boxShadow='0 4px 16px rgba(200,16,46,.1)'"
+             onmouseout="this.style.borderColor='var(--line)';this.style.boxShadow='var(--sh)'"
+             onclick="dcOpenModal(${d.id})">
+          <!-- Thumb / icon -->
+          <div style="height:96px;display:flex;align-items:center;justify-content:center;
+               background:${d.ext==='pdf'?'#FEF2F2':d.ext==='xlsx'||d.ext==='xls'?'#F0FDF4':d.ext==='docx'||d.ext==='doc'?'#EFF6FF':'#F5F5F5'};
+               border-bottom:1px solid var(--line)">
+            ${d.type && d.type.startsWith('image/') && d.data
+              ? `<img src="${d.data}" style="max-height:96px;max-width:100%;object-fit:contain">`
+              : `<span style="font-size:40px">${fic(d.name)}</span>`}
+          </div>
+          <div style="padding:12px">
+            <div style="font-size:12px;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px"
+                 title="${d.title||d.name}">${d.title||d.name}</div>
+            <div style="display:flex;align-items:center;gap:5px;margin-bottom:6px;flex-wrap:wrap">
+              <span class="pill ${DC_CAT_CLS[d.cat]||'pgr'}" style="font-size:10px">${DC_CAT_ICON[d.cat]||'📁'} ${d.cat}</span>
+              ${d.yr?`<span class="pill pdk" style="font-size:10px">${d.yr}</span>`:''}
+            </div>
+            <div style="font-size:11px;color:var(--t4)">${fsz(d.size)} · ${d.uploadedAt}</div>
+            ${d.tags&&d.tags.length?`<div style="margin-top:5px;display:flex;gap:4px;flex-wrap:wrap">${d.tags.slice(0,3).map(t=>`<span style="font-size:10px;background:var(--bg2);color:var(--t3);padding:1px 6px;border-radius:20px">#${t}</span>`).join('')}</div>`:''}
+          </div>
+          <div style="padding:0 12px 12px;display:flex;gap:5px">
+            <button class="btn btn-xs btn-p" style="flex:1;justify-content:center" onclick="event.stopPropagation();dcDownload(${d.id})">↓ โหลด</button>
+            <button class="btn btn-xs btn-del" onclick="event.stopPropagation();dcDelete(${d.id})">🗑</button>
+          </div>
+        </div>`).join('')}
+    </div>`;
+  } else {
+    // List view
+    con.innerHTML = `<div class="tw"><table class="tb" style="table-layout:fixed">
+      <thead><tr>
+        <th style="width:36px"></th>
+        <th>ชื่อเอกสาร</th>
+        <th style="width:110px">หมวดหมู่</th>
+        <th style="width:90px">กอง</th>
+        <th style="width:60px">ปี</th>
+        <th style="width:72px">ขนาด</th>
+        <th style="width:100px">อัพโหลด</th>
+        <th style="width:120px">แท็ก</th>
+        <th style="width:130px"></th>
+      </tr></thead>
+      <tbody>
+      ${docs.map(d => `<tr style="cursor:pointer" onclick="dcOpenModal(${d.id})">
+        <td style="font-size:22px;text-align:center">${fic(d.name)}</td>
+        <td>
+          <div style="font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px" title="${d.title||d.name}">${d.title||d.name}</div>
+          ${d.note?`<div style="font-size:11px;color:var(--t4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px">${d.note}</div>`:''}
+        </td>
+        <td><span class="pill ${DC_CAT_CLS[d.cat]||'pgr'}" style="font-size:10px">${DC_CAT_ICON[d.cat]||'📁'} ${d.cat}</span></td>
+        <td style="font-size:12px;color:var(--t3)">${d.dept||'—'}</td>
+        <td style="font-family:var(--mono);font-size:12px">${d.yr||'—'}</td>
+        <td style="font-size:12px;color:var(--t3)">${fsz(d.size)}</td>
+        <td style="font-size:11px;color:var(--t4)">${d.uploadedAt}</td>
+        <td>${(d.tags||[]).slice(0,2).map(t=>`<span style="font-size:10px;background:var(--bg2);color:var(--t3);padding:1px 6px;border-radius:20px;margin-right:3px">#${t}</span>`).join('')}</td>
+        <td onclick="event.stopPropagation()">
+          <div style="display:flex;gap:5px">
+            <button class="btn btn-xs btn-p" onclick="dcDownload(${d.id})">↓ โหลด</button>
+            <button class="btn btn-xs" onclick="dcOpenModal(${d.id})">ดู</button>
+            <button class="btn btn-xs btn-del" onclick="dcDelete(${d.id})">🗑</button>
+          </div>
+        </td>
+      </tr>`).join('')}
+      </tbody>
+    </table></div>`;
+  }
+
+  updateDcBadge();
+}
+
+function dcOpenModal(id) {
+  const docs = db.get('docs', []);
+  const d = docs.find(doc => doc.id == id);
+  if (!d) return;
+
+  document.getElementById('dc-modal-title').textContent = d.title || d.name;
+  document.getElementById('dc-modal-dl').onclick = () => dcDownload(d.id);
+  document.getElementById('dc-modal-del').onclick = () => dcDelete(d.id);
+
+  let preview = '';
+  if (d.type && d.type.startsWith('image/') && d.data) {
+    preview = `<div style="text-align:center;margin-bottom:16px">
+      <img src="${d.data}" style="max-width:100%;max-height:320px;border-radius:var(--rd2);border:1px solid var(--line)">
+    </div>`;
+  } else {
+    preview = `<div style="display:flex;align-items:center;gap:16px;padding:20px;background:var(--bg);border-radius:var(--rdlg);border:1px solid var(--line);margin-bottom:16px">
+      <span style="font-size:52px">${fic(d.name)}</span>
+      <div>
+        <div style="font-size:15px;font-weight:700;margin-bottom:4px">${d.name}</div>
+        <div style="font-size:12px;color:var(--t4)">${d.ext.toUpperCase()} · ${fsz(d.size)}</div>
+        ${d.data ? '<div style="font-size:12px;color:var(--ok);margin-top:4px">✓ ข้อมูลพร้อมดาวน์โหลด</div>' : '<div style="font-size:12px;color:var(--r)">⚠️ ข้อมูลถูกลบออกจากหน่วยความจำ</div>'}
+      </div>
+    </div>`;
+  }
+
+  document.getElementById('dc-modal-body').innerHTML = `${preview}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <div><div style="font-size:10px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">หมวดหมู่</div>
+        <span class="pill ${DC_CAT_CLS[d.cat]||'pgr'}">${DC_CAT_ICON[d.cat]||'📁'} ${d.cat}</span></div>
+      <div><div style="font-size:10px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">สำนัก/กอง</div>
+        <span style="font-size:13px">${d.dept||'—'}</span></div>
+      <div><div style="font-size:10px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">ปีงบประมาณ</div>
+        <span style="font-size:13px;font-family:var(--mono)">${d.yr||'—'}</span></div>
+      <div><div style="font-size:10px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">อัพโหลดวันที่</div>
+        <span style="font-size:13px">${d.uploadedAt}</span></div>
+    </div>
+    ${d.note?`<div style="margin-bottom:12px"><div style="font-size:10px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">หมายเหตุ</div><div style="font-size:13px;color:var(--t2);background:var(--bg);padding:10px 12px;border-radius:var(--rd2);border:1px solid var(--line)">${d.note}</div></div>`:''}
+    ${d.tags&&d.tags.length?`<div><div style="font-size:10px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">แท็ก</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap">${d.tags.map(t=>`<span class="pill pb">#${t}</span>`).join('')}</div></div>`:''}`;
+
+  const modal = document.getElementById('dc-modal');
+  modal.style.display = 'flex';
+  setTimeout(() => modal.style.opacity = '1', 10);
+}
+
+function dcCloseModal() {
+  document.getElementById('dc-modal').style.display = 'none';
+}
+
+function updateDcBadge() {
+  const docs = db.get('docs', []);
+  const nb = document.getElementById('nb-docs');
+  if (nb) nb.textContent = docs.length;
+}
+
+// Export docs manifest as JSON
+function dcExportManifest() {
+  const docs = db.get('docs', []).map(d => ({
+    id: d.id, name: d.name, title: d.title, cat: d.cat,
+    yr: d.yr, dept: d.dept, tags: d.tags, note: d.note,
+    ext: d.ext, size: d.size, uploadedAt: d.uploadedAt
+  }));
+  const blob = new Blob([JSON.stringify(docs, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url;
+  a.download = `iam_docs_manifest_${today()}.json`; a.click();
+  URL.revokeObjectURL(url);
+  toast('ส่งออก Manifest JSON แล้ว');
+}
+
+/* ═══ INIT ═══ */
+syncS();
+rDash();
+updateBdg();
+updateDcBadge();
+applyRoleUI();
+setTimeout(()=>Object.keys(GD.folders).forEach(k=>rUpPanel(k)),100);
+</script></body></html>
