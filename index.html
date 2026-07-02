@@ -426,7 +426,7 @@ textarea.fi{resize:vertical;min-height:68px}
   <div class="sb-foot">
     <div class="yr-box">
       <span>ปีงบประมาณ</span>
-      <input type="number" id="gy" value="2568" min="2500" max="2600"
+      <input type="number" id="gy" placeholder="เช่น 2569" min="2500" max="2600"
         onchange="onYrChg()" oninput="if(this.value.length===4)onYrChg()"
         onkeydown="if(event.key==='Enter')onYrChg()">
     </div>
@@ -435,7 +435,7 @@ textarea.fi{resize:vertical;min-height:68px}
 </nav>
 <div id="cw">
   <div id="tb">
-    <div><div id="tb-title">ภาพรวม Dashboard</div><div id="tb-sub">ปีงบประมาณ 2568</div></div>
+    <div><div id="tb-title">ภาพรวม Dashboard</div><div id="tb-sub">ปีงบประมาณ</div></div>
     <div id="tb-acts"></div>
   </div>
   <div id="ct">
@@ -465,7 +465,7 @@ textarea.fi{resize:vertical;min-height:68px}
       <div>
         <div class="sepl">ข้อมูลองค์กร</div>
         <div class="fg"><label class="fl">ชื่อองค์กร (อปท.)</label><input type="text" id="c-org" class="fi" placeholder="เช่น เทศบาลตำบลสันทราย จ.เชียงใหม่"></div>
-        <div class="r2"><div class="fg"><label class="fl">ปีงบประมาณ</label><input type="number" id="c-yr" class="fi" value="2568" min="2500" max="2600"></div>
+        <div class="r2"><div class="fg"><label class="fl">ปีงบประมาณ</label><input type="number" id="c-yr" class="fi" placeholder="เช่น 2569" min="2500" max="2600"></div>
         <div class="fg"><label class="fl">วันที่อนุมัติ</label><input type="date" id="c-date" class="fi"></div></div>
         <div class="fg"><label class="fl">ผู้บริหารสูงสุด</label><input type="text" id="c-ceo" class="fi" placeholder="ชื่อ-นามสกุล ตำแหน่ง"></div>
         <div class="fg"><label class="fl">หัวหน้าหน่วยตรวจสอบภายใน</label><input type="text" id="c-head" class="fi"></div>
@@ -523,7 +523,7 @@ textarea.fi{resize:vertical;min-height:68px}
   <div id="rt-form" class="tp on">
     <div class="card">
       <div class="r4">
-        <div class="fg"><label class="fl">ปีงบประมาณ</label><input type="number" id="r-yr" class="fi" value="2568" min="2500" max="2600"></div>
+        <div class="fg"><label class="fl">ปีงบประมาณ</label><input type="number" id="r-yr" class="fi" placeholder="เช่น 2569" min="2500" max="2600"></div>
         <div class="fg"><label class="fl">สำนัก / กอง</label>
           <select id="r-dept" class="fi" onchange="document.getElementById('r-dg').style.display=this.value==='x'?'block':'none'">
             <option value="">-- เลือก --</option><option>สำนักปลัด</option><option>กองคลัง</option><option>กองช่าง</option>
@@ -610,7 +610,7 @@ textarea.fi{resize:vertical;min-height:68px}
     <div class="card">
       <input type="hidden" id="au-editid" value="">
       <div class="r4">
-        <div class="fg"><label class="fl">ปีงบประมาณที่ควรเริ่มตรวจ</label><input type="number" id="au-yr" class="fi" value="2570" min="2500" max="2600"></div>
+        <div class="fg"><label class="fl">ปีงบประมาณที่ควรเริ่มตรวจ</label><input type="number" id="au-yr" class="fi" placeholder="เช่น 2569" min="2500" max="2600"></div>
         <div class="fg"><label class="fl">หน่วยรับตรวจ / กอง</label>
           <select id="au-dept" class="fi" onchange="document.getElementById('au-dg').style.display=this.value==='x'?'block':'none'">
             <option value="">-- เลือก --</option><option>สำนักปลัด</option><option>กองคลัง</option><option>กองช่าง</option>
@@ -675,7 +675,7 @@ textarea.fi{resize:vertical;min-height:68px}
   <div id="plan-fw" style="display:none" class="card" style="margin-bottom:16px">
     <div class="ct2">📅 เพิ่มแผนการตรวจสอบ</div>
     <div class="r3">
-      <div class="fg"><label class="fl">ปีงบประมาณ</label><input type="number" id="p-yr" class="fi" value="2568" min="2500" max="2600"></div>
+      <div class="fg"><label class="fl">ปีงบประมาณ</label><input type="number" id="p-yr" class="fi" placeholder="เช่น 2569" min="2500" max="2600"></div>
       <div class="fg"><label class="fl">สำนัก / กอง</label><select id="p-dept" class="fi"><option value="">-- เลือก --</option><option>สำนักปลัด</option><option>กองคลัง</option><option>กองช่าง</option><option>กองการศึกษา</option><option>กองสาธารณสุข</option><option>กองสวัสดิการสังคม</option><option>กองยุทธศาสตร์และงบประมาณ</option></select></div>
       <div class="fg"><label class="fl">ประเภทการตรวจ</label><select id="p-type" class="fi"><option>การจัดซื้อจัดจ้าง</option><option>การเงินและบัญชี</option><option>งบประมาณ</option><option>บริหารงานบุคคล</option><option>การบริหารสินทรัพย์</option><option>โครงการ/งานก่อสร้าง</option></select></div>
     </div>
@@ -812,7 +812,7 @@ textarea.fi{resize:vertical;min-height:68px}
               <option value="อื่น ๆ">อื่น ๆ</option>
             </select></div>
           <div class="fg"><label class="fl">ปีงบประมาณ</label>
-            <input type="number" id="dc-yr" class="fi" value="2568" min="2500" max="2600"></div>
+            <input type="number" id="dc-yr" class="fi" placeholder="เช่น 2569" min="2500" max="2600"></div>
         </div>
         <div class="r2">
           <div class="fg"><label class="fl">สำนัก / กอง</label>
@@ -1246,7 +1246,9 @@ function G(p,btn){
   const m=META[p]||{};
   document.getElementById('tb-title').textContent=m.title||p;
   document.getElementById('tb-sub').textContent=m.sub||'';
-  document.getElementById('tb-acts').innerHTML=(m.acts||[]).map(a=>`<button class="${a.c}" onclick="${a.f}">${a.l}</button>`).join('');
+  const hasPrint=(m.acts||[]).some(a=>/print|window\.print/i.test(a.f));
+  document.getElementById('tb-acts').innerHTML=(m.acts||[]).map(a=>`<button class="${a.c}" onclick="${a.f}">${a.l}</button>`).join('')
+    + (hasPrint?'':'<button class="btn btn-sm" onclick="window.print()">🖨️ พิมพ์</button>');
   const H={dash:rDash,charter:loadC,risk:()=>{syncS();rDepts()},
     au:()=>{auSync();auRDepts();auRSummary();auRList()},
     plan:()=>{rPlan();lPlanRefs()},fw:()=>lPlanRefs(),
@@ -1257,7 +1259,7 @@ function G(p,btn){
   if(uPages.includes(p))setTimeout(()=>rUpPanel(p),60);
 }
 function onYrChg(){
-  document.getElementById('tb-sub').textContent=`ปีงบประมาณ ${gyr()}`;
+  document.getElementById('tb-sub').textContent=gyr()?`ปีงบประมาณ ${gyr()}`:'ปีงบประมาณ (ทั้งหมด)';
   if(cur==='dash')rDash();
   if(cur==='annual')rAnnual();
 }
@@ -1307,7 +1309,7 @@ function updateBdg(){
 /* ═══ DASHBOARD ═══ */
 function rDash(){
   const yr=gyr();
-  document.getElementById('tb-sub').textContent=`ปีงบประมาณ ${yr}`;
+  document.getElementById('tb-sub').textContent=yr?`ปีงบประมาณ ${yr}`:'ปีงบประมาณ (ทั้งหมด)';
   const risks=db.get('risks',[]).filter(r=>!yr||r.yr===yr);
   const plans=db.get('plans',[]).filter(p=>!yr||p.yr===yr);
   const reports=db.get('reports',[]).filter(r=>!yr||r.yr===yr);
@@ -1454,6 +1456,7 @@ function saveR(){
   if(!authz())return;
   const topic=document.getElementById('r-topic').value.trim();if(!topic){toast('กรุณาระบุเรื่องที่ตรวจ');return}
   const dept=gDept();if(!dept){toast('กรุณาเลือกสำนัก/กอง');return}
+  if(!document.getElementById('r-yr').value){toast('กรุณาระบุปีงบประมาณ');return}
   const p=+document.getElementById('r-prob').value,i=+document.getElementById('r-impact').value,s=p*i;
   const item={id:Date.now(),yr:document.getElementById('r-yr').value,dept,type:gType(),topic,
     prob:p,impact:i,score:s,level:lv(s),
@@ -1575,6 +1578,7 @@ function auSave(){
   if(!name){toast('กรุณาระบุงาน/กิจกรรม');return}
   const dept=auGDept();
   if(!dept){toast('กรุณาเลือกหน่วยรับตรวจ/กอง');return}
+  if(!document.getElementById('au-yr').value){toast('กรุณาระบุปีงบประมาณที่ควรเริ่มตรวจ');return}
   const f=+document.getElementById('au-f').value, g=+document.getElementById('au-g').value,
         h=+document.getElementById('au-h').value, i=+document.getElementById('au-i').value;
   const avg=Math.round(((f+g+h+i)/4)*100)/100;
@@ -1797,6 +1801,7 @@ function lPlanRefs(){
 function saveP(){
   if(!authz())return;
   const name=document.getElementById('p-name').value.trim();if(!name){toast('กรุณาระบุชื่องาน');return}
+  if(!document.getElementById('p-yr').value){toast('กรุณาระบุปีงบประมาณ');return}
   const item={id:Date.now(),yr:document.getElementById('p-yr').value,dept:document.getElementById('p-dept').value,
     type:document.getElementById('p-type').value,name,
     startDate:document.getElementById('p-s').value,endDate:document.getElementById('p-e').value,
@@ -2115,7 +2120,11 @@ function updFU(id,status){
 
 /* ═══ ANNUAL ═══ */
 function rAnnual(){
-  const yr=document.getElementById('ar-yr')?.value||gyr();
+  const curTY=new Date().getFullYear()+543;
+  const dataYrs=uniq([...db.get('risks',[]).map(r=>r.yr),...db.get('plans',[]).map(p=>p.yr),
+    ...db.get('reports',[]).map(r=>r.yr),...db.get('followups',[]).map(f=>f.yr)]).filter(Boolean);
+  const yrOpts=uniq([...dataYrs,String(curTY)]).sort((a,b)=>b-a);
+  const yr=document.getElementById('ar-yr')?.value||gyr()||String(curTY);
   const risks=db.get('risks',[]).filter(r=>r.yr===yr);
   const plans=db.get('plans',[]).filter(p=>p.yr===yr);
   const reports=db.get('reports',[]).filter(r=>r.yr===yr);
@@ -2132,10 +2141,8 @@ function rAnnual(){
 
   // Update topbar actions with year selector
   document.getElementById('tb-acts').innerHTML=`
-    <select id="ar-yr" class="fi" style="font-size:13px;width:90px" onchange="rAnnual()">
-      <option value="2568" ${yr==='2568'?'selected':''}>2568</option>
-      <option value="2567" ${yr==='2567'?'selected':''}>2567</option>
-      <option value="2566" ${yr==='2566'?'selected':''}>2566</option>
+    <select id="ar-yr" class="fi" style="font-size:13px;width:100px" onchange="rAnnual()">
+      ${yrOpts.map(y=>`<option value="${y}" ${y===yr?'selected':''}>${y}</option>`).join('')}
     </select>
     <button class="btn btn-sm btn-p" onclick="window.print()">🖨️ พิมพ์</button>`;
 
