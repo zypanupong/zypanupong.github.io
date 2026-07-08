@@ -104,6 +104,30 @@ textarea.fi{resize:vertical;min-height:68px}
 .r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 .r4{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
 .sepl{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t4);border-bottom:1px solid var(--line);padding-bottom:7px;margin:20px 0 14px;display:flex;align-items:center;gap:8px}
+.chh{background:linear-gradient(135deg,var(--rbg) 0%,var(--wh) 65%);border:1px solid var(--rmid);border-radius:var(--rdlg);padding:16px 18px;margin-bottom:16px;position:relative;overflow:hidden}
+.chh:before{content:'';position:absolute;top:-40px;right:-40px;width:130px;height:130px;border-radius:50%;background:var(--rglow)}
+.chh-tt{display:flex;align-items:center;gap:10px;margin-bottom:12px;position:relative}
+.chh-ic{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--r),var(--rd));display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;box-shadow:0 4px 10px var(--rglow)}
+.csealrow{display:flex;gap:14px;align-items:center;margin-bottom:14px;padding-bottom:14px;border-bottom:1px dashed var(--rmid)}
+.csealbox{width:64px;height:64px;border-radius:50%;border:2px dashed var(--rmid);background:var(--wh);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;overflow:hidden;position:relative;transition:border-color .15s}
+.csealbox:hover{border-color:var(--r)}
+.csealbox img{width:100%;height:100%;object-fit:cover;display:none}
+.csealph{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:20px;color:var(--t4)}
+.csealph span{font-size:7.5px;text-transform:uppercase;letter-spacing:.05em}
+.csealinfo{flex:1}
+.csealinfo .fl{margin-bottom:2px}
+
+.chh-tx{font-size:14.5px;font-weight:800;color:var(--t1)}
+.chh-sb{font-size:11px;color:var(--t3);margin-top:1px}
+.cacc{border:1px solid var(--line);border-radius:var(--rd2);margin-bottom:9px;overflow:hidden;background:var(--wh)}
+.cacc summary{list-style:none;cursor:pointer;padding:11px 14px;font-weight:700;font-size:13px;color:var(--t1);display:flex;align-items:center;gap:9px;border-left:4px solid var(--r);background:linear-gradient(90deg,var(--rbg),transparent 70%);user-select:none}
+.cacc summary::-webkit-details-marker,.cacc summary::marker{display:none;content:''}
+.cacc summary .cacc-n{width:22px;height:22px;border-radius:50%;background:var(--r);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--mono)}
+.cacc summary .cacc-car{margin-left:auto;color:var(--t4);font-size:11px;transition:transform .2s}
+.cacc[open] summary .cacc-car{transform:rotate(180deg)}
+.cacc-bd{padding:4px 14px 14px}
+.cacc-bd textarea.fi{width:100%;min-height:110px;line-height:1.7;font-size:12.5px}
+
 .sepl::before{content:'';display:inline-block;width:14px;height:2px;background:var(--r);flex-shrink:0}
 
 /* PILLS */
@@ -381,7 +405,28 @@ textarea.fi{resize:vertical;min-height:68px}
 .lcb{padding:10px 15px;font-size:12px;color:var(--t2);line-height:1.7}
 
 /* RESPONSIVE */
-@media(max-width:900px){#sb{display:none}.srow,.g2,.g23{grid-template-columns:1fr}.r3,.r4{grid-template-columns:1fr 1fr}#ct{padding:16px}}
+.mnu-btn{display:none;background:var(--wh);border:1px solid var(--line);border-radius:var(--rd2);width:36px;height:36px;
+  align-items:center;justify-content:center;font-size:18px;color:var(--t2);cursor:pointer;flex-shrink:0}
+#sb-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1999}
+#sb-backdrop.on{display:block}
+.tw{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+@media(max-width:900px){
+  .mnu-btn{display:flex}
+  #sb{position:fixed;left:0;top:0;bottom:0;width:min(280px,82vw);z-index:2000;
+    transform:translateX(-100%);transition:transform .25s ease;box-shadow:0 0 40px rgba(0,0,0,.35)}
+  #sb.mobile-open{transform:translateX(0)}
+  .srow,.g2,.g23{grid-template-columns:1fr}
+  .r3,.r4{grid-template-columns:1fr 1fr}
+  #ct{padding:16px}
+  #tb{height:auto;flex-wrap:wrap;padding:10px 14px;gap:8px}
+  #tb-acts{flex-wrap:wrap;width:100%;margin-left:0}
+  #tb-devtag{display:none}
+  .ic-rm-body{flex-direction:column;padding:16px 14px}
+  #ic-tabs,#rm-tabs{width:100%!important}
+}
+@media(max-width:480px){
+  .r2,.r3,.r4{grid-template-columns:1fr}
+}
 @media print{#sb,#tb,.upp,.fb,.btn{display:none!important}#ct{padding:0}body{overflow:auto}.tb th{background:#000!important;color:#fff!important;-webkit-print-color-adjust:exact}}
 
 /* ═══ LANDING PAGE ═══ */
@@ -574,8 +619,10 @@ textarea.fi{resize:vertical;min-height:68px}
     <div class="sb-auth" id="sb-auth"></div>
   </div>
 </nav>
+<div id="sb-backdrop" onclick="closeMobileNav()"></div>
 <div id="cw">
   <div id="tb">
+    <button class="mnu-btn" onclick="toggleMobileNav()" aria-label="เมนู">☰</button>
     <div><div id="tb-title">ภาพรวม Dashboard</div><div id="tb-sub">ปีงบประมาณ</div></div>
     <div id="tb-acts"></div>
     <div id="tb-devtag">Dev by Panupong Thungprong</div>
@@ -623,28 +670,81 @@ textarea.fi{resize:vertical;min-height:68px}
     <button class="tbb" onclick="ctab('docs',this)"><span>📁</span> เอกสารแนบ <span class="upct" id="cdocbdg" style="display:none">0</span></button>
   </div>
   <div id="ct-form" class="tp on">
-    <div class="g2">
-      <div>
-        <div class="sepl">ข้อมูลองค์กร</div>
-        <div class="fg"><label class="fl">ชื่อองค์กร (อปท.)</label><input type="text" id="c-org" class="fi" placeholder="เช่น เทศบาลตำบลสันทราย จ.เชียงใหม่"></div>
-        <div class="r2"><div class="fg"><label class="fl">ปีงบประมาณ</label><input type="number" id="c-yr" class="fi" placeholder="เช่น 2569" min="2500" max="2600"></div>
-        <div class="fg"><label class="fl">วันที่อนุมัติ</label><input type="date" id="c-date" class="fi"></div></div>
-        <div class="fg"><label class="fl">ผู้บริหารสูงสุด</label><input type="text" id="c-ceo" class="fi" placeholder="ชื่อ-นามสกุล ตำแหน่ง"></div>
-        <div class="fg"><label class="fl">หัวหน้าหน่วยตรวจสอบภายใน</label><input type="text" id="c-head" class="fi"></div>
-        <div class="fg"><label class="fl">วัตถุประสงค์</label><textarea id="c-obj" class="fi" rows="3" placeholder="เพื่อให้ความเชื่อมั่นและคำปรึกษาอย่างเป็นอิสระ..."></textarea></div>
-        <div class="fg"><label class="fl">ขอบเขต</label><textarea id="c-scope" class="fi" rows="3" placeholder="ครอบคลุมการตรวจสอบการเงิน พัสดุ บุคลากร โครงการ..."></textarea></div>
+    <div class="chh">
+      <div class="chh-tt"><div class="chh-ic">🛡️</div><div><div class="chh-tx">กฎบัตรการตรวจสอบภายใน</div><div class="chh-sb">ตามมาตรฐานและหลักเกณฑ์กระทรวงการคลัง — พรบ.วินัยการเงินการคลังของรัฐ พ.ศ. 2561 มาตรา 79</div></div></div>
+      <div class="csealrow">
+        <div class="csealbox" id="c-seal-box" onclick="document.getElementById('c-seal-fi').click()">
+          <img id="c-seal-img" alt="ตราเทศบาล">
+          <div class="csealph" id="c-seal-ph">🛡️<span>ตราเทศบาล</span></div>
+        </div>
+        <input type="file" id="c-seal-fi" accept="image/*" style="display:none" onchange="cSealUpload(this.files);this.value=''">
+        <div class="csealinfo">
+          <div class="fl">ตราสัญลักษณ์เทศบาล (ใช้พิมพ์หัวกฎบัตร)</div>
+          <div style="font-size:11px;color:var(--t4)">คลิกวงกลมเพื่ออัพโหลดรูป — แนะนำ PNG พื้นหลังโปร่งใส สูงสุด 3MB</div>
+          <button class="btn btn-xs btn-del" id="c-seal-rm" style="display:none;margin-top:6px" onclick="cSealRemove()">✕ ลบตรา</button>
+        </div>
       </div>
-      <div>
-        <div class="sepl">อำนาจ ความเป็นอิสระ และมาตรฐาน</div>
-        <div class="fg"><label class="fl">อำนาจหน้าที่</label><textarea id="c-auth" class="fi" rows="3" placeholder="เข้าถึงข้อมูล เอกสาร บุคลากร ทรัพย์สินทุกประเภท..."></textarea></div>
-        <div class="fg"><label class="fl">ความเป็นอิสระ</label><textarea id="c-indep" class="fi" rows="2" placeholder="ปฏิบัติงานโดยอิสระ รายงานตรงต่อผู้บริหารสูงสุด..."></textarea></div>
-        <div class="fg"><label class="fl">มาตรฐานที่ใช้</label><textarea id="c-std" class="fi" rows="2" placeholder="มาตรฐานการตรวจสอบภายในของส่วนราชการ + IIA..."></textarea></div>
-        <div class="fg"><label class="fl">การรายงาน</label><textarea id="c-rep" class="fi" rows="2" placeholder="รายงานต่อผู้บริหารและสภา อปท. อย่างน้อยปีละ 2 ครั้ง..."></textarea></div>
-        <div class="fg"><label class="fl">หมายเหตุ</label><textarea id="c-note" class="fi" rows="2"></textarea></div>
-        <div class="sepl">สถานะ</div>
-        <div class="alert as" id="c-st">ยังไม่ได้บันทึกกฎบัตร</div>
-        <button class="btn btn-p" onclick="saveC()" style="width:100%;justify-content:center">💾 บันทึกและรับรองกฎบัตร</button>
+      <div class="r3">
+        <div class="fg"><label class="fl">ชื่อองค์กร (อปท.)</label><input type="text" id="c-org" class="fi" placeholder="เช่น เทศบาลตำบลแม่ลานนา"></div>
+        <div class="fg"><label class="fl">อำเภอ / จังหวัด</label><input type="text" id="c-province" class="fi" placeholder="เช่น อำเภอลอง จังหวัดแพร่"></div>
+        <div class="fg"><label class="fl">ปีงบประมาณ</label><input type="number" id="c-yr" class="fi" placeholder="เช่น 2569" min="2500" max="2600"></div>
       </div>
+      <div class="r3">
+        <div class="fg"><label class="fl">วันที่อนุมัติ/เห็นชอบ</label><input type="date" id="c-date" class="fi"></div>
+        <div class="fg"><label class="fl">มีผลบังคับใช้ตั้งแต่</label><input type="date" id="c-effdate" class="fi"></div>
+        <div class="fg"></div>
+      </div>
+      <div class="sepl" style="margin:14px 0 10px">ผู้จัดทำ / ผู้เห็นชอบ / ผู้อนุมัติ</div>
+      <div class="r3">
+        <div class="fg"><label class="fl">ผู้จัดทำ (หัวหน้า/นักวิชาการตรวจสอบภายใน)</label><input type="text" id="c-head" class="fi" placeholder="ชื่อ-นามสกุล"></div>
+        <div class="fg"><label class="fl">ตำแหน่ง</label><input type="text" id="c-headpos" class="fi" placeholder="เช่น นักวิชาการตรวจสอบภายในปฏิบัติการ"></div>
+        <div class="fg"></div>
+      </div>
+      <div class="r3">
+        <div class="fg"><label class="fl">ผู้เห็นชอบ (ปลัดเทศบาล)</label><input type="text" id="c-clerk" class="fi" placeholder="ชื่อ-นามสกุล"></div>
+        <div class="fg"><label class="fl">ตำแหน่ง</label><input type="text" id="c-clerkpos" class="fi" placeholder="เช่น ปลัดเทศบาลตำบลแม่ลานนา"></div>
+        <div class="fg"></div>
+      </div>
+      <div class="r3">
+        <div class="fg"><label class="fl">ผู้อนุมัติ (นายกเทศมนตรี)</label><input type="text" id="c-ceo" class="fi" placeholder="ชื่อ-นามสกุล"></div>
+        <div class="fg"><label class="fl">ตำแหน่ง</label><input type="text" id="c-ceopos" class="fi" placeholder="เช่น นายกเทศมนตรีตำบลแม่ลานนา"></div>
+        <div class="fg"></div>
+      </div>
+    </div>
+
+    <div class="sepl">เนื้อหากฎบัตร <span style="text-transform:none;font-weight:400;font-size:10.5px">— แก้ไขได้ทุกส่วน คลิกหัวข้อเพื่อขยาย/ย่อ</span></div>
+
+    <details class="cacc"><summary><span class="cacc-n">น</span>คำนำ<span class="cacc-car">▾</span></summary>
+      <div class="cacc-bd"><textarea id="c-preamble" class="fi"></textarea></div></details>
+    <details class="cacc"><summary><span class="cacc-n">น</span>คำนิยาม<span class="cacc-car">▾</span></summary>
+      <div class="cacc-bd"><textarea id="c-defs" class="fi"></textarea></div></details>
+    <details class="cacc"><summary><span class="cacc-n">๑</span>วัตถุประสงค์และพันธกิจของหน่วยงานตรวจสอบภายใน<span class="cacc-car">▾</span></summary>
+      <div class="cacc-bd"><textarea id="c-s1" class="fi" style="min-height:180px"></textarea></div></details>
+    <details class="cacc"><summary><span class="cacc-n">๒</span>การปฏิบัติตามหลักเกณฑ์กระทรวงการคลัง<span class="cacc-car">▾</span></summary>
+      <div class="cacc-bd"><textarea id="c-s2" class="fi" style="min-height:60px"></textarea></div></details>
+    <details class="cacc"><summary><span class="cacc-n">๓</span>อำนาจหน้าที่ (มาตรฐานรหัส 1000)<span class="cacc-car">▾</span></summary>
+      <div class="cacc-bd"><textarea id="c-s3" class="fi" style="min-height:220px"></textarea></div></details>
+    <details class="cacc"><summary><span class="cacc-n">๔</span>ความเป็นอิสระและความเที่ยงธรรม (รหัส 1100)<span class="cacc-car">▾</span></summary>
+      <div class="cacc-bd"><textarea id="c-s4" class="fi" style="min-height:220px"></textarea></div></details>
+    <details class="cacc"><summary><span class="cacc-n">๕</span>ขอบเขตการปฏิบัติงาน<span class="cacc-car">▾</span></summary>
+      <div class="cacc-bd"><textarea id="c-s5" class="fi" style="min-height:120px"></textarea></div></details>
+    <details class="cacc"><summary><span class="cacc-n">๖</span>หน้าที่ความรับผิดชอบ<span class="cacc-car">▾</span></summary>
+      <div class="cacc-bd"><textarea id="c-s6" class="fi" style="min-height:220px"></textarea></div></details>
+    <details class="cacc"><summary><span class="cacc-n">๗</span>การประกันและการปรับปรุงคุณภาพงานตรวจสอบภายใน (รหัส 1300)<span class="cacc-car">▾</span></summary>
+      <div class="cacc-bd"><textarea id="c-s7" class="fi" style="min-height:60px"></textarea></div></details>
+    <details class="cacc"><summary><span class="cacc-n">๘</span>สิทธิของผู้ตรวจสอบภายใน<span class="cacc-car">▾</span></summary>
+      <div class="cacc-bd"><textarea id="c-s8" class="fi" style="min-height:200px"></textarea></div></details>
+    <details class="cacc"><summary><span class="cacc-n">๙</span>กฎหมาย ระเบียบ มาตรฐานในการปฏิบัติงานตรวจสอบภายใน<span class="cacc-car">▾</span></summary>
+      <div class="cacc-bd"><textarea id="c-s9" class="fi" style="min-height:90px"></textarea></div></details>
+    <details class="cacc"><summary><span class="cacc-n">ป</span>บทสรุป<span class="cacc-car">▾</span></summary>
+      <div class="cacc-bd"><textarea id="c-closing" class="fi" style="min-height:90px"></textarea></div></details>
+
+    <div class="sepl">สถานะ</div>
+    <div class="alert as" id="c-st">ยังไม่ได้บันทึกกฎบัตร</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn" onclick="fillCDefaults()">↺ โหลดข้อความต้นฉบับ</button>
+      <button class="btn btn-p" onclick="saveC()" style="flex:1;min-width:200px;justify-content:center">💾 บันทึกและรับรองกฎบัตร</button>
+      <button class="btn" onclick="printC()">🖨️ พิมพ์ / ดูตัวอย่าง</button>
     </div>
   </div>
   <div id="ct-docs" class="tp">
@@ -1091,7 +1191,7 @@ textarea.fi{resize:vertical;min-height:68px}
       </div>
     </div>
   </div>
-  <div style="padding:26px 28px;max-width:1200px;margin:0 auto;display:flex;gap:24px;align-items:flex-start">
+  <div class="ic-rm-body" style="padding:26px 28px;max-width:1200px;margin:0 auto;display:flex;gap:24px;align-items:flex-start">
     <div id="ic-tabs" style="flex-shrink:0;width:200px">
       <button class="ic-stab on" onclick="ictab('ปค.1',this)">
         <div class="ic-stab-ic">📋</div>
@@ -1177,7 +1277,7 @@ textarea.fi{resize:vertical;min-height:68px}
       </div>
     </div>
   </div>
-  <div style="padding:26px 28px;max-width:1200px;margin:0 auto;display:flex;gap:24px;align-items:flex-start">
+  <div class="ic-rm-body" style="padding:26px 28px;max-width:1200px;margin:0 auto;display:flex;gap:24px;align-items:flex-start">
     <div id="rm-tabs" style="flex-shrink:0;width:230px"></div>
     <div style="flex:1;min-width:0">
       <div class="ic-card">
@@ -1218,6 +1318,9 @@ textarea.fi{resize:vertical;min-height:68px}
     <div id="lg-err" style="display:none;color:#ff6b7d;font-size:12px;margin:-4px 0 10px">⚠ ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</div>
     <button class="btn btn-p" style="width:100%;justify-content:center;margin-top:4px" onclick="doLogin()">เข้าสู่ระบบ</button>
     <button class="btn btn-sm" style="width:100%;justify-content:center;margin-top:8px;background:transparent;color:#9A9A9A;border-color:var(--bk4)" onclick="closeLogin()">ดูข้อมูลแบบผู้เยี่ยมชม (ไม่ Login)</button>
+    <div style="text-align:center;margin-top:14px">
+      <button onclick="resetAccountsToDefault()" style="background:transparent;border:none;color:var(--r);font-size:11.5px;cursor:pointer;text-decoration:underline;padding:4px">ลืมรหัสผ่าน? รีเซ็ตบัญชีเป็นค่าเริ่มต้น</button>
+    </div>
   </div>
 </div>
 <div id="changepwd-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:3000;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeChangePwd()">
@@ -1286,6 +1389,7 @@ function backToLanding(){
   document.getElementById('pg-rm').style.display='none';
   document.getElementById('app').style.display='none';
   document.getElementById('landing').style.display='flex';
+  closeMobileNav();
 }
 /* ═══ INTERNAL CONTROL (งานควบคุมภายใน) ═══ */
 let icCurTopic='ปค.1';
@@ -1610,6 +1714,15 @@ function doLogout(){
   const activeBtn=document.querySelector('#sb .ni.on[data-p]');
   if(activeBtn)G(activeBtn.dataset.p,activeBtn);
 }
+function resetAccountsToDefault(){
+  if(!confirm('รีเซ็ตบัญชีผู้ใช้ทั้งหมดกลับเป็นค่าเริ่มต้นของระบบ?\n\nชื่อผู้ใช้/รหัสผ่านที่เคยเปลี่ยนไว้ในเบราว์เซอร์นี้จะถูกลบและกลับไปใช้ค่าเริ่มต้นของระบบ'))return;
+  localStorage.setItem(ACC_K,JSON.stringify(DEFAULT_ACCOUNTS));
+  clearSession();
+  const u=document.getElementById('lg-u'),p=document.getElementById('lg-p'),e=document.getElementById('lg-err');
+  if(u)u.value='';if(p)p.value='';if(e)e.style.display='none';
+  toast('🔄 รีเซ็ตบัญชีเป็นค่าเริ่มต้นแล้ว');
+  applyRoleUI();
+}
 function applyRoleUI(){
   const s=getSession();
   const box=document.getElementById('sb-auth');
@@ -1795,11 +1908,20 @@ const META={
 
 /* ═══ NAV ═══ */
 let cur='dash';
+function toggleMobileNav(){
+  document.getElementById('sb')?.classList.toggle('mobile-open');
+  document.getElementById('sb-backdrop')?.classList.toggle('on');
+}
+function closeMobileNav(){
+  document.getElementById('sb')?.classList.remove('mobile-open');
+  document.getElementById('sb-backdrop')?.classList.remove('on');
+}
 function G(p,btn){
   document.querySelector('.pw.on')?.classList.remove('on');
   document.querySelector('.ni.on')?.classList.remove('on');
   document.getElementById('pg-'+p).classList.add('on');
   if(btn)btn.classList.add('on');
+  closeMobileNav();
   cur=p;
   const m=META[p]||{};
   document.getElementById('tb-title').textContent=m.title||p;
@@ -1965,41 +2087,186 @@ function rDash(){
       <div style="font-size:11px;color:var(--t4)">${f.dept||'-'}</div></div></div>`).join(''));
 }
 
+const CHARTER_DEFAULTS={
+  org:"เทศบาลตำบลแม่ลานนา",
+  province:"อำเภอลอง จังหวัดแพร่",
+  headpos:"นักวิชาการตรวจสอบภายในปฏิบัติการ",
+  head:"นายภาณุพงศ์ ทุ่งโปร่ง",
+  clerk:"นางวิไลพร นาแก้ว",
+  clerkpos:"ปลัดเทศบาลตำบลแม่ลานนา",
+  ceo:"นางสาวกรรณิการ์ ผาภูมิ",
+  ceopos:"นายกเทศมนตรีตำบลแม่ลานนา",
+  preamble:"ตามที่พระราชบัญญัติวินัยการเงินการคลังของรัฐ พ.ศ. 2561 มาตรา 79 มีผลบังคับใช้เมื่อวันที่ 20 เมษายน 2561 กำหนดให้หน่วยงานของรัฐจัดให้มีการตรวจสอบภายใน การควบคุมภายใน และการบริหารจัดการความเสี่ยง โดยให้ถือปฏิบัติตามมาตรฐานและหลักเกณฑ์ที่กระทรวงการคลังกำหนด นั้น เทศบาลตำบลแม่ลานนา ได้ถือปฏิบัติตามมาตรฐานและหลักเกณฑ์ที่กระทรวงการคลังกำหนด โดยจัดให้มีการตรวจสอบภายใน ภายในหน่วยงานเรียบร้อยแล้ว\n\nดังนั้น เพื่อให้หน่วยตรวจสอบภายใน สังกัดเทศบาลตำบลแม่ลานนา ปฏิบัติหน้าที่ได้ถูกต้องครบถ้วน เป็นไปตามมาตรฐานและหลักเกณฑ์ที่กระทรวงการคลังกำหนด เพื่อประเมินระบบควบคุมภายใน และประเมินระบบการบริหารจัดการความเสี่ยง ของหน่วยรับตรวจ ให้สามารถป้องกันหรือลดความเสี่ยงที่มีอยู่ให้น้อยลงหรืออยู่ในระดับที่ยอมรับได้ โดยกำหนดวิธีการตรวจสอบ วิธีการสอบทาน วิธีการรายงานผลการตรวจสอบ วิธีการติดตามผลการตรวจสอบ และวิธีการประเมินความเสี่ยง ให้มีความเพียงพอ เหมาะสม สามารถบรรลุวัตถุประสงค์เพื่อเพิ่มประสิทธิภาพและประสิทธิผลในระบบควบคุมภายในและระบบบริหารจัดการความเสี่ยงได้อย่างแท้จริง รวมทั้ง สรุปผลการประเมินความสำเร็จ จนเกิดผลสัมฤทธิ์ในองค์ประกอบสำคัญของระบบการควบคุมภายใน ทั้ง 5 องค์ประกอบ และองค์ประกอบสำคัญของระบบการบริหารจัดการความเสี่ยง ทั้ง 8 องค์ประกอบ เพื่อเพิ่มคุณค่าและปรับปรุงการปฏิบัติงานของเทศบาลตำบลแม่ลานนาให้ดีขึ้น และจะช่วยให้เทศบาลตำบลแม่ลานนา บรรลุเป้าหมายและวัตถุประสงค์ที่กำหนดไว้ ด้วยการประเมินและปรับปรุงประสิทธิผลของกระบวนการบริหารความเสี่ยง กระบวนการควบคุมภายใน และการกำกับดูแลอย่างเป็นระบบ ต่อไป",
+  defs:"\"การตรวจสอบภายใน\" หมายความว่า กิจกรรมการให้ความเชื่อมั่นและการให้คำปรึกษาอย่างเที่ยงธรรมและเป็นอิสระ ซึ่งจัดให้มีขึ้น เพื่อเพิ่มคุณค่าและปรับปรุงการปฏิบัติงานของส่วนราชการให้ดีขึ้น การตรวจสอบภายในจะช่วยให้ส่วนราชการบรรลุถึงเป้าหมายและวัตถุประสงค์ที่กำหนดไว้ด้วยการประเมินและปรับปรุงประสิทธิผลของกระบวนการบริหารความเสี่ยง การควบคุม และการกำกับดูแลอย่างเป็นระบบ\n\n\"แผนการตรวจสอบ\" หมายความว่า แผนการปฏิบัติงานที่หัวหน้าหน่วยงานตรวจสอบภายในจัดทำขึ้นไว้ล่วงหน้าเกี่ยวกับเรื่องที่จะตรวจสอบ จำนวนหน่วยรับตรวจ ระยะเวลาที่ใช้ในการปฏิบัติงานตรวจสอบ เพื่อประโยชน์ในการสอบทานความก้าวหน้าของการปฏิบัติงานตรวจสอบเป็นระยะๆ และให้ปฏิบัติงานได้อย่างราบรื่นทันตามกำหนดเวลา\n\n\"แผนการปฏิบัติงาน\" หมายความว่า แผนการปฏิบัติงานตามที่ได้รับมอบหมาย ซึ่งผู้ตรวจสอบภายในจัดทำไว้ล่วงหน้าว่าจะตรวจสอบเรื่องใด ที่หน่วยรับตรวจใด ด้วยวัตถุประสงค์ ขอบเขต วิธีการใด และทรัพยากรที่ใช้เท่าใด จึงจะทำให้การปฏิบัติงานตรวจสอบบรรลุผลสำเร็จ",
+  s1:"วัตถุประสงค์ (มาตรฐานรหัส 1000)\nหน่วยตรวจสอบภายใน เป็นหน่วยงานที่จัดตั้งขึ้น เพื่อให้บริการต่อฝ่ายบริหารด้านการให้หลักประกันและการให้คำปรึกษาแก่หน่วยงานในสังกัด ปฏิบัติงานโดยอิสระ ปราศจากการแทรกแซงในการปฏิบัติหน้าที่ตรวจสอบและประเมินผลการดำเนินกิจกรรมต่างๆ ภายในเทศบาลตำบลแม่ลานนา ด้วยการปฏิบัติงานเกี่ยวกับการวิเคราะห์ ประเมิน ให้คำปรึกษา ให้ข้อมูลและข้อเสนอแนะ เพื่อสนับสนุนผู้ปฏิบัติงานทุกระดับของเทศบาลตำบลแม่ลานนา ให้สามารถปฏิบัติหน้าที่และดำเนินงานเป็นไปตามกฎหมาย ระเบียบ ข้อบังคับที่เกี่ยวข้องอย่างมีประสิทธิภาพยิ่งขึ้น จนเกิดความมั่นใจต่อความมีประสิทธิภาพ ประสิทธิผลของการดำเนินงาน และความคุ้มค่าของการใช้จ่ายเงิน รวมทั้งความถูกต้องเชื่อถือได้ของข้อมูลทางการเงิน และอื่นๆ ที่เกี่ยวข้อง\n\nพันธกิจ (มาตรฐานรหัส 1000)\n• ปฏิบัติหน้าที่ผู้ตรวจสอบภายในให้เป็นไปตามมาตรฐานการตรวจสอบภายในที่กระทรวงการคลังกำหนด ให้เป็นที่ยอมรับขององค์กรและหน่วยงานภายนอก\n• เตรียมความพร้อมเพื่อรองรับการประเมินการเสริมสร้างคุณภาพงานตรวจสอบภายใน จากกรมบัญชีกลาง\n• สนับสนุนและช่วยเหลือให้องค์กรมีระบบควบคุมภายในที่ดี เป็นไปตามมาตรฐานการควบคุมภายในของกระทรวงการคลัง\n• การให้คำปรึกษา (Consulting Service) ให้คำแนะนำ และความคิดเห็น เกี่ยวกับกฎหมาย ระเบียบ ข้อบังคับ ประกาศ มติ และคำสั่งของทางราชการที่เกี่ยวข้องกับการตรวจสอบภายใน ระบบการควบคุมภายใน ระบบบริหารจัดการความเสี่ยง และงานที่มีหน้าที่รับผิดชอบด้วยความเที่ยงธรรม ต่อผู้บริหารและผู้ที่เกี่ยวข้อง ทั้งเป็นทางการและไม่เป็นทางการ\n• เป็นเครื่องมือของฝ่ายบริหาร ในการตรวจสอบการปฏิบัติงานและการใช้ทรัพยากรขององค์กรให้เป็นไปอย่างมีประสิทธิภาพ และบรรลุวัตถุประสงค์ รวมทั้งการป้องกันความเสียหาย การรั่วไหล หรือการทุจริตอันเกิดจากการดำเนินงานในองค์กร",
+  s2:"หน่วยงานตรวจสอบภายใน ถือปฏิบัติตามมาตรฐานและหลักเกณฑ์ปฏิบัติการตรวจสอบภายในสำหรับหน่วยงานของรัฐ ที่กระทรวงการคลังกำหนด",
+  s3:"หลักเกณฑ์ปฏิบัติการตรวจสอบภายใน ฯ ข้อ 19 กำหนดให้ผู้ตรวจสอบภายในปฏิบัติงานตรวจสอบให้เป็นไปตามมาตรฐานการตรวจสอบภายในสำหรับหน่วยงานของรัฐ ประกอบด้วย\n1. มาตรฐานด้านคุณสมบัติ (มาตรฐานรหัส 1000 - รหัส 1300)\n2. มาตรฐานด้านการปฏิบัติงาน (มาตรฐานรหัส 2000 - รหัส 2600)\nกรณีที่ไม่ได้กำหนดไว้ให้ถือปฏิบัติตามมาตรฐานสากล\n\nหลักเกณฑ์ปฏิบัติการตรวจสอบภายใน ฯ ข้อ 20 กำหนดให้ผู้ตรวจสอบภายในปฏิบัติตนให้เป็นไปตามจรรยาบรรณการตรวจสอบภายในสำหรับหน่วยงานของรัฐ โดยมีวัตถุประสงค์เพื่อยกฐานะศักดิ์ศรีวิชาชีพตรวจสอบภายใน ให้ผู้ตรวจสอบภายในปฏิบัติหน้าที่อย่างมีประสิทธิภาพ มีแนวปฏิบัติตามหลักการพื้นฐานโดยใช้สามัญสำนึกและวิจารณญาณ เพื่อประพฤติตนตามจรรยาบรรณของผู้ตรวจสอบภายใน ยึดถือและดำรงไว้ตามหลักปฏิบัติ ที่แนบท้ายหลักเกณฑ์ปฏิบัติ ดังนี้\n\n1. ความซื่อสัตย์ (Integrity)\n   1.1 มีความซื่อสัตย์ ขยันหมั่นเพียร รับผิดชอบ\n   1.2 ปฏิบัติตามกฎระเบียบฯ และเปิดเผยข้อมูลตามหลักวิชาชีพ\n   1.3 ปฏิบัติตนและปฏิบัติงานไม่ขัดกฎหมาย ไม่เสื่อมเสียวิชาชีพ\n   1.4 เคารพ สนับสนุนกฎหมาย และจรรยาบรรณ\n2. ความเที่ยงธรรม (Objectivity)\n   2.1 ไม่มีส่วนเกี่ยวข้อง และไม่ขัดแย้งผลประโยชน์\n   2.2 ไม่รับสิ่งของใดๆ\n   2.3 เปิดเผย รายงานข้อเท็จจริง\n3. การปกปิดความลับ (Confidentiality)\n   3.1 รอบคอบในการใช้ข้อมูลจากการตรวจสอบ\n   3.2 ไม่นำข้อมูลไปแสวงหาประโยชน์\n4. ความสามารถในหน้าที่ (Competency)\n   4.1 ปฏิบัติงานด้วยความรู้ ความสามารถ ทักษะ\n   4.2 ยึดหลักมาตรฐานการตรวจสอบภายใน\n   4.3 พัฒนาตนเอง การใช้บริการอย่างสม่ำเสมอ\n\nดังนั้น หน่วยตรวจสอบภายในจึงมีอำนาจหน้าที่ตาม พรบ.วินัยการเงินการคลังของรัฐ พ.ศ. 2561 มาตรา 79 ที่กำหนด ในการตรวจสอบการปฏิบัติงานทุกหน่วยงานภายในสังกัดเทศบาลตำบลแม่ลานนา ตามแผนการตรวจสอบประจำปีงบประมาณที่ได้รับอนุมัติจากนายกเทศมนตรีตำบลแม่ลานนา เพื่อเพิ่มมูลค่าให้กับเทศบาลตำบลแม่ลานนา ตามลักษณะของงานตรวจสอบภายใน (มาตรฐานด้านการปฏิบัติงานรหัส 2100) กำหนดไว้ ดังนี้\n\nงานบริการให้ความเชื่อมั่น (Assurance Services)\n• การกำกับดูแลที่ดีที่เกี่ยวข้องกับการปฏิบัติงาน และการปฏิบัติตามกฎหมาย ระเบียบ ข้อบังคับ หนังสือสั่งการ ฯ (มาตรฐานรหัส 2110)\n• การบริหารความเสี่ยง (มาตรฐานรหัส 2120)\n• การควบคุมภายใน (มาตรฐานรหัส 2130)\n\nงานบริการให้คำปรึกษา (Consulting Services)\n• การให้คำปรึกษา\n• การให้ข้อเสนอแนะ",
+  s4:"๑. มาตรฐานรหัส 1110 : ความเป็นอิสระภายในหน่วยงาน\nหัวหน้าหน่วยงานตรวจสอบภายในต้องรายงานตรงต่อคณะกรรมการตรวจสอบและหัวหน้าหน่วยงานของรัฐ เพื่อให้การปฏิบัติงานตรวจสอบภายในสามารถดำเนินไปได้อย่างเต็มที่ตามหน้าที่ความรับผิดชอบที่ได้รับมอบหมาย ทั้งนี้ หัวหน้าหน่วยงานตรวจสอบภายในต้องยืนยันต่อคณะกรรมการตรวจสอบหรือหัวหน้าหน่วยงานของรัฐถึงความเป็นอิสระของการปฏิบัติงานตรวจสอบภายในอย่างน้อยปีละหนึ่งครั้ง\n\nการตีความ: ความเป็นอิสระภายในหน่วยงาน คือการที่หัวหน้าหน่วยงานตรวจสอบภายในสามารถรายงานในเรื่องที่เกี่ยวข้องกับการปฏิบัติงานตรวจสอบภายในต่อคณะกรรมการตรวจสอบหรือหัวหน้าหน่วยงานของรัฐ เช่น\n• การให้ความเห็นชอบกฎบัตรการตรวจสอบภายใน\n• การอนุมัติแผนการตรวจสอบภายในตามผลการประเมินความเสี่ยง\n• การอนุมัติแผนงบประมาณและการใช้ทรัพยากรของหน่วยงานตรวจสอบภายใน\n• การอนุมัติค่าตอบแทนของหัวหน้างานตรวจสอบภายใน\n• การพิจารณาสั่งการตามรายงานผลการตรวจสอบ\n• การพิจารณาอนุมัติแต่งตั้งและโยกย้ายหัวหน้าหน่วยงานตรวจสอบภายใน\n• การสอบถามเกี่ยวกับความเหมาะสมของการกำหนดขอบเขตการปฏิบัติงานและความเพียงพอของทรัพยากร\n\n1110 A1: การปฏิบัติงานตรวจสอบภายในต้องปราศจากการแทรกแซงใดๆ ในเรื่องของการกำหนดขอบเขตการปฏิบัติงานและการรายงานผลการตรวจสอบ กรณีที่มีการแทรกแซง หัวหน้าหน่วยงานตรวจสอบภายในต้องเปิดเผยถึงการถูกแทรกแซงหรือหารือถึงผลกระทบที่อาจเกิดขึ้นต่อคณะกรรมการตรวจสอบหรือหัวหน้าหน่วยงานของรัฐ\n\n๒. มาตรฐานรหัส 1111 : การมีปฏิสัมพันธ์โดยตรงกับคณะกรรมการการตรวจสอบและหัวหน้าหน่วยงานของรัฐ\nหัวหน้าหน่วยงานตรวจสอบภายในต้องมีการสื่อสารและปฏิสัมพันธ์ในการปฏิบัติงานโดยตรงกับคณะกรรมการตรวจสอบและหัวหน้าหน่วยงานของรัฐ\n\n๓. มาตรฐานรหัส 1110 ความเป็นอิสระภายในหน่วยงาน กำหนดให้ผู้ตรวจสอบภายในมีความเป็นอิสระในการปฏิบัติงานตรวจสอบ การรายงาน การเสนอความเห็นในการตรวจสอบ โดยตรงต่อคณะกรรมการตรวจสอบ และนายกเทศมนตรี โดยผ่านปลัดเทศบาล และมาตรฐานรหัสย่อย 1111 กำหนดให้มีการปฏิสัมพันธ์โดยตรงกับคณะกรรมการตรวจสอบและนายกเทศมนตรี หรือหัวหน้าหน่วยงานของรัฐ ซึ่งมาตรฐานกำหนดให้ผู้ตรวจสอบภายในดำรงไว้ซึ่งความเป็นอิสระในการปฏิบัติงาน โดยสรุปดังนี้\n• ปฏิบัติงานตรวจสอบโดยปราศจากการแทรกแซง\n• ปฏิบัติงานตรวจสอบโดยไม่มีส่วนได้เสีย\n• ไม่เป็นกรรมการในคณะกรรมการใดๆ ที่มีผลกระทบถึงความเป็นอิสระในการปฏิบัติงานตรวจสอบ\n• เข้าร่วมประชุมกับผู้บริหารเทศบาล ในเรื่องเกี่ยวกับนโยบายและการดำเนินงานของเทศบาล\n\n๔. มาตรฐานรหัส 1120 ความเที่ยงธรรมของผู้ตรวจสอบภายใน กำหนดให้ผู้ตรวจสอบภายในมีทัศนคติที่ไม่ลำเอียง และให้หลีกเลี่ยงในเรื่องของความขัดแย้งทางผลประโยชน์ใดๆ\n\n๕. มาตรฐานรหัส 1130 ข้อจำกัดของความเป็นอิสระหรือความเที่ยงธรรม กำหนดให้ผู้ตรวจสอบภายในมีสิทธิในขอบเขตการปฏิบัติงาน ในการเข้าถึงข้อมูลเอกสาร บุคคล และทรัพย์สิน ตลอดจนข้อจำกัดของทรัพยากรของเทศบาล\n\n๖. หลักเกณฑ์ปฏิบัติการตรวจสอบภายในสำหรับหน่วยงานของรัฐ ที่แนบท้ายหลักเกณฑ์กระทรวงการคลังว่าด้วยมาตรฐานและหลักเกณฑ์ปฏิบัติการตรวจสอบภายในสำหรับหน่วยงานของรัฐ (ฉบับที่ ๓) พ.ศ. ๒๕๖๔\nข้อ ๖ กำหนดว่า “หัวหน้าหน่วยงานของรัฐจะแต่งตั้งให้ผู้ตรวจสอบภายในรักษาการในตำแหน่งอื่น หรือแต่งตั้งตำแหน่งอื่นมารักษาการในตำแหน่งผู้ตรวจสอบภายในได้เฉพาะกรณีที่การปฏิบัติงานของบุคลากรดังกล่าวได้ขาดจากการปฏิบัติงานในหน้าที่เดิม ในกรณีที่หน่วยงานของรัฐอยู่ระหว่างการสรรหาบุคลากรมาดำรงตำแหน่งเป็นผู้ตรวจสอบภายในของหน่วยงานของรัฐ หน่วยงานของรัฐอาจพิจารณามอบหมายให้บุคลากรภายในหน่วยงานของรัฐมาปฏิบัติงานด้านการตรวจสอบภายในเป็นการชั่วคราวและยังคงปฏิบัติงานในตำแหน่งหน้าที่เดิมได้ ทั้งนี้ บุคลากรดังกล่าว ควรมีความรู้ ทักษะ และความสามารถที่จำเป็นต่อการปฏิบัติงานด้านการตรวจสอบภายใน และต้องไม่เป็นผู้ที่รับผิดชอบด้านการเงิน การบัญชี หรือปฏิบัติงานในภารกิจหลักของหน่วยงานของรัฐ หัวหน้าหน่วยงานของรัฐและหรือคณะกรรมการตรวจสอบจะพิจารณาสั่งการให้ผู้ตรวจสอบภายในปฏิบัติงานอื่นได้ตามควรแก่กรณี ทั้งนี้ ให้พิจารณาถึงประโยชน์ที่หน่วยงานของรัฐจะได้รับและผลกระทบต่อความเป็นอิสระและเที่ยงธรรมในการปฏิบัติงานตรวจสอบ”\nข้อ ๗ กำหนดว่า “ให้ผู้ตรวจสอบภายในดำรงไว้ซึ่งความเป็นอิสระและไม่มีความขัดแย้งทางผลประโยชน์ในกิจกรรมที่ตรวจสอบ และปราศจากการแทรกแซงในการปฏิบัติงานและการเสนอความเห็นในการตรวจสอบของฝ่ายบริหารหรือบุคคลหนึ่งบุคคลใด รวมทั้งต้องไม่ตรวจสอบงานที่ตนเคยทำหน้าที่บริหารหรือปฏิบัติงานภายในระยะเวลาหนึ่งปีก่อนการตรวจสอบ”\n\n๗. ความเที่ยงธรรม ผู้ตรวจสอบภายในจะแสดงความเที่ยงธรรมเยี่ยงผู้ประกอบวิชาชีพในการรวบรวมข้อมูล ประเมินผล และรายงานด้วยความไม่ลำเอียง ผู้ตรวจสอบภายในต้องทำหน้าที่อย่างเป็นธรรมในทุกๆ สถานการณ์ และไม่ปล่อยให้ความรู้สึกส่วนตัวหรือความรู้สึกนึกคิดของบุคคลอื่นเข้ามีอิทธิพลเหนือการปฏิบัติงาน",
+  s5:"หลักเกณฑ์ปฏิบัติการตรวจสอบภายใน ข้อ 18 กำหนดขอบเขตงานของการตรวจสอบภายในให้ครอบคลุมถึง การตรวจสอบ วิเคราะห์ รวมทั้งการประเมินความเพียงพอและประสิทธิผลของระบบควบคุมภายใน และการบริหารความเสี่ยงของเทศบาลตำบลแม่ลานนา ดังนี้\n• ประเมินความมีประสิทธิภาพและประสิทธิผลของการดำเนินงานในหน้าที่ของหน่วยรับตรวจ เสนอแนะการปรับปรุงการบริหารความเสี่ยง การควบคุมภายใน และการกำกับดูแลอย่างต่อเนื่อง\n• สอบทานระบบการปฏิบัติงานตามกฎหมาย ระเบียบ และข้อบังคับ หรือมติคณะรัฐมนตรีที่เกี่ยวข้องกับการดำเนินงาน รวมทั้งข้อกำหนดอื่นของเทศบาลตำบลแม่ลานนา\n• สอบทานความถูกต้องและเชื่อถือได้ของข้อมูลการดำเนินงานและการเงินการคลัง\n• ตรวจสอบระบบการดูแลรักษา และความปลอดภัยของทรัพย์สินของหน่วยรับตรวจให้มีความเหมาะสมกับประเภทของทรัพย์สินนั้น\n• วิเคราะห์และประเมินความมีประสิทธิภาพ ประหยัดและคุ้มค่าในการใช้ทรัพยากร และเทคโนโลยีสารสนเทศ",
+  s6:"หลักเกณฑ์ปฏิบัติการตรวจสอบภายใน ข้อ 17 กำหนดหน้าที่และความรับผิดชอบ ดังนี้\n1. กำหนดนโยบาย เป้าหมาย ภารกิจ ของงานตรวจสอบภายใน เพื่อสนับสนุนการบริหารงาน และการดำเนินงานด้านต่างๆ ของทุกส่วนราชการ ให้สอดคล้องกับนโยบายของนายกเทศมนตรีตำบลแม่ลานนาและคณะกรรมการตรวจสอบ หรือคณะกรรมการอื่นใดที่ปฏิบัติงานในลักษณะเดียวกัน โดยคำนึงถึงการกำกับดูแลที่ดี ความมีประสิทธิภาพของกิจกรรมการบริหารความเสี่ยง และความเพียงพอของระบบการควบคุมภายในของเทศบาลตำบลแม่ลานนาด้วย (มาตรฐานด้านการปฏิบัติงาน รหัส 2000 - 2100)\n2. กำหนดกฎบัตรไว้เป็นลายลักษณ์อักษร และเสนอผ่านปลัดเทศบาลตำบลแม่ลานนา เพื่อนำเสนอนายกเทศมนตรีตำบลแม่ลานนา ก่อนเสนอคณะกรรมการตรวจสอบ เพื่อพิจารณาให้ความเห็นชอบ และเผยแพร่หน่วยรับตรวจทราบ รวมทั้งมีการสอบทานความเหมาะสมของกฎบัตรอย่างน้อยปีละหนึ่งครั้ง (มาตรฐานด้านคุณสมบัติ รหัส 1000)\n3. จัดให้มีการประกันคุณภาพงานตรวจสอบภายใน ทั้งภายในและภายนอก และเสนอรายงานผลการประเมิน ปัญหาและอุปสรรค รวมทั้งแผนปรับปรุงการดำเนินงาน เสนอผ่านปลัดเทศบาลตำบลแม่ลานนา เพื่อนำเสนอต่อนายกเทศมนตรีตำบลแม่ลานนาและคณะกรรมการตรวจสอบทราบด้วย (มาตรฐานด้านคุณสมบัติ รหัส 1300)\n4. งานบริการให้ความเชื่อมั่น (Assurance Service) ในงานที่รับผิดชอบ โดยการจัดทำและเสนอแผนการตรวจสอบประจำปีต่อนายกเทศมนตรีตำบลแม่ลานนา โดยเสนอผ่านปลัดเทศบาลตำบลแม่ลานนา ก่อนเสนอคณะกรรมการตรวจสอบ เพื่อพิจารณาอนุมัติภายในเดือนสุดท้ายของปีงบประมาณ (เดือนกันยายน) หรือปีปฏิทินแล้วแต่กรณี (มาตรฐานด้านการปฏิบัติงาน รหัส 2200)\n5. ในกรณีที่หน่วยตรวจสอบภายในวางแผนการตรวจสอบที่มีระยะเวลาตั้งแต่หนึ่งปีขึ้นไป ให้นำมาใช้ประกอบการพิจารณาอนุมัติแผนการตรวจสอบประจำปีด้วย และให้ปฏิบัติงานตรวจสอบให้เป็นไปตามแผนการตรวจสอบประจำปีที่ได้รับอนุมัติ (มาตรฐานด้านการปฏิบัติงาน รหัส 2300)\n6. จัดทำและเสนอรายงานผลการตรวจสอบต่อนายกเทศมนตรีตำบลแม่ลานนา โดยเสนอผ่านปลัดเทศบาลตำบลแม่ลานนา ภายในเวลาอันสมควรและไม่เกินสองเดือน นับจากวันที่ดำเนินการตรวจสอบแล้วเสร็จ กรณีเรื่องที่ตรวจพบเป็นเรื่องที่จะมีผลเสียหายต่อทางราชการให้รายงานผลการตรวจสอบทันที (มาตรฐานด้านการปฏิบัติงาน รหัส 2400) โดยรายงานเกี่ยวกับการบริหารจัดการความเสี่ยงและการควบคุมภายใน อย่างน้อยปีละหนึ่งครั้ง ประกอบด้วย\n   6.1 ความเสี่ยงที่สำคัญเกี่ยวกับการดำเนินงานของหน่วยงานของรัฐ\n   6.2 ความเห็นเกี่ยวกับประสิทธิภาพของการบริหารจัดการความเสี่ยงและการบริหารจัดการความเสี่ยงด้านการทุจริต รวมถึงระบบการร้องเรียน (Whistle blowing) ของหน่วยงานของรัฐ\n   6.3 ความเห็นเกี่ยวกับความเพียงพอและเหมาะสมของการควบคุมภายในด้านการเงิน และกระบวนการอื่นที่พิจารณาว่ามีความเสี่ยงสูงต่อการเกิดการทุจริต\n   6.4 สรุปภาพรวมของการฟ้องร้องต่อหน่วยงานของรัฐ คดีความต่างๆ และความรับผิดทางละเมิดของเจ้าหน้าที่ในทางแพ่ง โดยวิเคราะห์สาเหตุที่แท้จริง (Root-cause analysis) และเสนอแนะแนวทางการแก้ไขปัญหาในระยะยาว\n7. ติดตามผลการตรวจสอบ เสนอแนะและให้คำปรึกษา (Consulting Service) แก่หน่วยรับตรวจ เพื่อให้การปรับปรุงแก้ไขของหน่วยรับตรวจเป็นไปตามข้อเสนอแนะในรายงานผลการตรวจสอบ (มาตรฐานด้านการปฏิบัติงาน รหัส 2500)\n8. ในกรณีมีความจำเป็นต้องอาศัยผู้เชี่ยวชาญมาร่วมปฏิบัติงานตรวจสอบ ให้เสนอขอบเขตและรายละเอียดของงาน คุณสมบัติของผู้รับจ้าง ระยะเวลาดำเนินการ และผลงานที่คาดหวังจากผู้รับจ้าง รวมทั้งข้อเสนอโครงการของผู้รับจ้าง ให้นายกเทศมนตรีตำบลแม่ลานนาพิจารณาอนุมัติให้ว่าจ้างผู้เชี่ยวชาญต่อไป\n9. ปฏิบัติงานในการให้คำปรึกษา (Consulting Service) ให้คำแนะนำ และความคิดเห็น เกี่ยวกับกฎหมาย ระเบียบ ข้อบังคับ ประกาศ มติ และคำสั่งของทางราชการที่เกี่ยวข้องกับการตรวจสอบภายใน ระบบการควบคุมภายใน ระบบบริหารจัดการความเสี่ยง และงานที่มีหน้าที่รับผิดชอบด้วยความเที่ยงธรรม ต่อผู้บริหารและผู้ที่เกี่ยวข้อง ทั้งเป็นทางการและไม่เป็นทางการ\n10. ประสานงานกับผู้สอบบัญชี คณะกรรมการตรวจสอบ หรือคณะกรรมการอื่นที่ปฏิบัติงานเช่นเดียวกัน และหน่วยงานต่างๆ ที่เกี่ยวข้อง เพื่อให้เกิดความมั่นใจว่าขอบเขตของงานตรวจสอบครอบคลุมเรื่องที่สำคัญอย่างเหมาะสมและการปฏิบัติงานที่ไม่ซ้ำซ้อนกัน\n11. ปฏิบัติงานอื่นที่เกี่ยวข้องกับการตรวจสอบภายใน ตามที่ได้รับมอบหมายจากคณะกรรมการตรวจสอบ และนายกเทศมนตรีตำบลแม่ลานนา รวมถึงงานที่ได้รับมอบหมายจากปลัดเทศบาลตำบลแม่ลานนาด้วย",
+  s7:"หลักเกณฑ์ปฏิบัติการตรวจสอบภายในสำหรับหน่วยงานของรัฐ ฉบับที่ ๑ พ.ศ. ๒๕๖๑ และที่แก้ไขเพิ่มเติมถึงฉบับที่ ๓ พ.ศ. ๒๕๖๔ ข้อ ๑๗ (๓) จัดให้มีการประกันและปรับปรุงคุณภาพงานตรวจสอบภายในทั้งภายในและภายนอก ตามรูปแบบและวิธีการที่กรมบัญชีกลางกำหนด",
+  s8:"กำหนดไว้ในความทั่วไปของหลักเกณฑ์ปฏิบัติการตรวจสอบภายใน ฯ พ.ศ. 2561 ดังนี้\n\nหลักเกณฑ์ข้อ 5 กำหนดให้หัวหน้าหน่วยงานตรวจสอบภายในต้องมีคุณสมบัติดังต่อไปนี้\n• มีความรู้ ทักษะ และความสามารถที่จำเป็นต่อการปฏิบัติหน้าที่ที่ได้รับมอบหมาย\n• มีความรู้เกี่ยวกับกฎหมาย ระเบียบ ข้อบังคับ มติคณะรัฐมนตรี ประกาศ และคำสั่งที่เกี่ยวข้องกับการดำเนินงานของเทศบาลตำบลแม่ลานนา\n• มีความรู้เกี่ยวกับการปฏิบัติงาน การกำกับดูแล การบริหารความเสี่ยง และการควบคุมภายในของเทศบาลตำบลแม่ลานนา\n(มาตรฐานด้านคุณสมบัติ รหัส 1200 ความเชี่ยวชาญและความระมัดระวังรอบคอบเยี่ยงผู้ประกอบวิชาชีพ)\n\nหลักเกณฑ์ข้อ 8 ให้ผู้ตรวจสอบภายในมีสิทธิในการเข้าถึงข้อมูล บุคคล เอกสารหลักฐาน และทรัพย์สินต่างๆ ของเทศบาลตำบลแม่ลานนา เพื่อรับทราบข้อมูลที่จะเป็นประโยชน์ต่อการปฏิบัติงานตรวจสอบภายใน (มาตรฐานด้านคุณสมบัติ รหัสย่อย 1130 ข้อจำกัดของความเป็นอิสระหรือความเที่ยงธรรม)\n\nหลักเกณฑ์ข้อ 9 กรณีหน่วยงานของรัฐ หรือเทศบาลตำบลแม่ลานนา ไม่สามารถปฏิบัติตามหลักเกณฑ์ปฏิบัติการตรวจสอบภายในสำหรับหน่วยงานของรัฐ ที่กระทรวงการคลังกำหนดได้ ให้ขอทำความตกลงกับกระทรวงการคลัง\n\nหลักเกณฑ์ข้อ 21 ให้หน่วยรับตรวจ มีหน้าที่และความรับผิดชอบ ดังนี้\n• อำนวยความสะดวกและให้ความร่วมมือแก่ผู้ตรวจสอบภายใน\n• จัดเตรียมเอกสารหลักฐานที่เกี่ยวกับการดำเนินงาน รวมถึงข้อมูลที่เกี่ยวข้องให้ครบถ้วนสมบูรณ์ พร้อมที่จะตรวจสอบได้\n• จัดทำบัญชีและจัดเก็บเอกสารประกอบรายการบัญชีพร้อมที่จะให้ผู้ตรวจสอบภายในตรวจสอบได้\n• จัดให้มีระบบการเก็บเอกสารในการปฏิบัติงานที่เหมาะสมและครบถ้วน\n• ชี้แจงและตอบข้อซักถามต่างๆ พร้อมทั้งหาข้อมูลเพิ่มเติมให้แก่ผู้ตรวจสอบภายใน\n• ปฏิบัติตามข้อทักท้วง และข้อเสนอแนะของผู้ตรวจสอบภายในในเรื่องต่างๆ ที่หัวหน้าหน่วยงานของรัฐ หรือนายกเทศมนตรีตำบลแม่ลานนาพิจารณาสั่งการให้ปฏิบัติ\nกรณีที่เจ้าหน้าที่ของหน่วยรับตรวจกระทำการโดยจงใจไม่ปฏิบัติ หรือละเลยต่อการปฏิบัติหน้าที่ตามวรรคหนึ่งของหลักเกณฑ์ข้อ 21 ให้ผู้ตรวจสอบภายในรายงานหัวหน้าหน่วยงานของรัฐ หรือนายกเทศมนตรีตำบลแม่ลานนา พิจารณาสั่งการตามสมควรแก่กรณี\n\nด้านการพัฒนาระบบตรวจสอบภายใน ให้มีการฝึกอบรมพัฒนาผู้ตรวจสอบภายใน ในด้านต่างๆ เช่น ด้านการตรวจสอบภายใน การควบคุมภายใน การบริหารความเสี่ยง และความรู้ที่เป็นประโยชน์ต่อการปฏิบัติงานตรวจสอบในทุกภารกิจของหน่วยรับตรวจ ให้มีการประสานงาน การดำเนินการตามภารกิจกับผู้เกี่ยวข้อง (มาตรฐานด้านคุณสมบัติ รหัส 1200 ความเชี่ยวชาญและความระมัดระวังรอบคอบเยี่ยงผู้ประกอบวิชาชีพ มาตรฐานย่อยรหัส 1230 การพัฒนาวิชาชีพอย่างต่อเนื่อง)",
+  s9:"ผู้ตรวจสอบภายในจะต้องปฏิบัติหน้าที่ โดยยึดกฎหมาย ระเบียบ มาตรฐานการตรวจสอบภายในของส่วนราชการ ดังต่อไปนี้\n1. รัฐธรรมนูญแห่งราชอาณาจักรไทย พุทธศักราช 2560 มาตรา 62 วรรคสาม “รัฐต้องรักษาวินัยการเงินการคลังเพื่อให้ฐานะการเงินการคลังมีเสถียรภาพมั่นคงและยั่งยืน ฯ”\n2. พระราชบัญญัติวินัยการเงินการคลังของรัฐ พ.ศ. ๒๕61\n3. หลักเกณฑ์กระทรวงการคลัง ว่าด้วยมาตรฐานและหลักเกณฑ์ปฏิบัติการตรวจสอบภายในสำหรับหน่วยงานของรัฐ ฉบับที่ ๑ ฉบับที่ ๒ และฉบับที่ ๓",
+  closing:"หน่วยตรวจสอบภายใน สังกัดเทศบาลตำบลแม่ลานนา จึงได้จัดทำกฎบัตรนี้ขึ้นตามมาตรฐานด้านคุณสมบัติ (รหัส 1000) วัตถุประสงค์ อำนาจหน้าที่ และความรับผิดชอบ และหนังสือสั่งการกรมบัญชีกลาง ที่ กค ๐๔๐๙.๔/ว ๔๗ ลงวันที่ ๒๘ มกราคม ๒๕๖๔ เรื่อง การจัดทำกฎบัตรของคณะกรรมการตรวจสอบ และกฎบัตรของหน่วยงานตรวจสอบภายใน ในการปฏิบัติงานของหน่วยตรวจสอบภายใน เพื่อให้ผู้บริหารและผู้ปฏิบัติงานทุกระดับมีความเข้าใจเกี่ยวกับ วัตถุประสงค์ สายการบังคับบัญชา ภารกิจและขอบเขต อำนาจหน้าที่ความรับผิดชอบ รวมถึงมาตรฐานและจริยธรรม การปฏิบัติงานตรวจสอบภายใน ให้สามารถปฏิบัติหน้าที่และดำเนินงานเป็นไปตามกฎหมาย ระเบียบ ข้อบังคับที่เกี่ยวข้องอย่างมีประสิทธิภาพยิ่งขึ้น",
+};
+
 /* ═══ CHARTER ═══ */
+const CHARTER_FIELDS=['org','province','yr','date','effdate','head','headpos','clerk','clerkpos','ceo','ceopos','preamble','defs','s1','s2','s3','s4','s5','s6','s7','s8','s9','closing'];
+const CHARTER_SECTIONS=[
+  ['s1','๑. วัตถุประสงค์และพันธกิจของหน่วยงานตรวจสอบภายใน'],
+  ['s2','๒. การปฏิบัติตามหลักเกณฑ์กระทรวงการคลัง'],
+  ['s3','๓. อำนาจหน้าที่ (มาตรฐานรหัส 1000)'],
+  ['s4','๔. ความเป็นอิสระและความเที่ยงธรรม (มาตรฐานด้านคุณสมบัติ รหัส 1100)'],
+  ['s5','๕. ขอบเขตการปฏิบัติงาน'],
+  ['s6','๖. หน้าที่ความรับผิดชอบ'],
+  ['s7','๗. การประกันและการปรับปรุงคุณภาพงานตรวจสอบภายใน (มาตรฐานด้านคุณสมบัติ รหัส 1300)'],
+  ['s8','๘. สิทธิของผู้ตรวจสอบภายใน'],
+  ['s9','๙. กฎหมาย ระเบียบ มาตรฐานในการปฏิบัติงานตรวจสอบภายใน'],
+];
 function loadC(){
   const c=db.get('charter',{});
-  ['org','yr','date','ceo','head','obj','scope','auth','indep','std','rep','note'].forEach(f=>{
-    const el=document.getElementById('c-'+f);if(el&&c[f])el.value=c[f];
+  CHARTER_FIELDS.forEach(f=>{
+    const el=document.getElementById('c-'+f);if(!el)return;
+    if(c[f]!=null&&c[f]!=='')el.value=c[f];
+    else if(CHARTER_DEFAULTS[f]!=null)el.value=CHARTER_DEFAULTS[f];
   });
   const st=document.getElementById('c-st');
   if(c.savedAt){st.textContent=`✓ บันทึกล่าสุด: ${c.savedAt}`;st.className='alert as';}
+  else{st.textContent='ยังไม่ได้บันทึกกฎบัตร';st.className='alert as';}
+  cSealPreview();
   rCDocBdg();
+}
+function cSealUpload(files){
+  if(!authz())return;
+  if(!files||!files.length)return;
+  const file=files[0];
+  if(!file.type||!file.type.startsWith('image/')){toast('⚠️ กรุณาเลือกไฟล์รูปภาพ');return}
+  if(file.size>3*1024*1024){toast('⚠️ ไฟล์เกิน 3MB');return}
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const c=db.get('charter',{});
+    c.seal=e.target.result;c.sealName=file.name;
+    db.set('charter',c);
+    cSealPreview();
+    toast('🛡️ อัพโหลดตราเทศบาลแล้ว');
+  };
+  reader.readAsDataURL(file);
+}
+function cSealRemove(){
+  if(!authz())return;
+  if(!confirm('ลบตราเทศบาลที่อัพโหลดไว้?'))return;
+  const c=db.get('charter',{});
+  delete c.seal;delete c.sealName;
+  db.set('charter',c);
+  cSealPreview();
+  toast('ลบตราแล้ว');
+}
+function cSealPreview(){
+  const c=db.get('charter',{});
+  const img=document.getElementById('c-seal-img');
+  const ph=document.getElementById('c-seal-ph');
+  const rm=document.getElementById('c-seal-rm');
+  if(!img)return;
+  if(c.seal){img.src=c.seal;img.style.display='block';if(ph)ph.style.display='none';if(rm)rm.style.display='inline-flex';}
+  else{img.style.display='none';if(ph)ph.style.display='flex';if(rm)rm.style.display='none';}
+}
+function fillCDefaults(){
+  if(!confirm('โหลดข้อความต้นฉบับทับข้อมูลในแบบฟอร์มปัจจุบัน?'))return;
+  CHARTER_FIELDS.forEach(f=>{
+    const el=document.getElementById('c-'+f);
+    if(el&&CHARTER_DEFAULTS[f]!=null)el.value=CHARTER_DEFAULTS[f];
+  });
+  toast('↺ โหลดข้อความต้นฉบับแล้ว');
 }
 function saveC(){
   if(!authz())return;
   const c={};
-  ['org','yr','date','ceo','head','obj','scope','auth','indep','std','rep','note'].forEach(f=>{
-    const el=document.getElementById('c-'+f);if(el)c[f]=el.value;
-  });
+  CHARTER_FIELDS.forEach(f=>{const el=document.getElementById('c-'+f);if(el)c[f]=el.value;});
   c.savedAt=thd();db.set('charter',c);
   document.getElementById('c-st').textContent=`✓ บันทึกและรับรองแล้ว — ${c.savedAt}`;
   document.getElementById('c-st').className='alert as';
   toast('💾 บันทึกกฎบัตรแล้ว');
 }
+function cEsc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function cParas(s){
+  return (s||'').split(/\n{2,}/).map(p=>`<p>${cEsc(p).replace(/\n/g,'<br>')}</p>`).join('');
+}
 function printC(){
   const c=db.get('charter',{});
+  const g=f=>(c[f]!=null&&c[f]!=='')?c[f]:(CHARTER_DEFAULTS[f]||'');
   const w=window.open('','_blank');if(!w)return;
-  const rows=[['ชื่อองค์กร',c.org],['ปีงบประมาณ',c.yr],['วันที่อนุมัติ',c.date],['ผู้บริหารสูงสุด',c.ceo],['หัวหน้าหน่วยตรวจสอบ',c.head]]
-    .map(([l,v])=>`<tr><td style="color:#666;width:160px;padding:8px;border:1px solid #eee">${l}</td><td style="padding:8px;border:1px solid #eee">${v||'-'}</td></tr>`).join('');
-  const blocks=[['วัตถุประสงค์',c.obj],['ขอบเขต',c.scope],['อำนาจหน้าที่',c.auth],['ความเป็นอิสระ',c.indep],['มาตรฐาน',c.std],['การรายงาน',c.rep],['หมายเหตุ',c.note]]
-    .filter(([,v])=>v).map(([l,v])=>`<h3 style="font-size:14px;border-bottom:1px solid #eee;padding-bottom:5px;margin:18px 0 7px">${l}</h3><p style="font-size:14px;line-height:1.8;color:#333">${(v||'').replace(/\n/g,'<br>')}</p>`).join('');
-  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>กฎบัตร</title>
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600&display=swap" rel="stylesheet">
-    <style>body{font-family:'Sarabun',sans-serif;max-width:700px;margin:40px auto;padding:0 24px;font-size:14px;line-height:1.7}h1{text-align:center;font-size:20px;color:#C8102E;margin-bottom:4px}table{width:100%;border-collapse:collapse}h2{border-bottom:2px solid #C8102E;padding-bottom:4px;margin:22px 0 10px}</style>
-    </head><body><h1>กฎบัตรการตรวจสอบภายใน</h1>
-    <p style="text-align:center;color:#888;font-size:12px">${c.org||''} — ปีงบประมาณ ${c.yr||''}</p>
-    <h2>ข้อมูลองค์กร</h2><table>${rows}</table>${blocks}
-    <p style="margin-top:48px;font-size:11px;color:#aaa;text-align:center">บันทึก ${c.savedAt||'-'}</p></body></html>`);
+  const sectionsHtml=CHARTER_SECTIONS.map(([f,title],i)=>`
+    <div class="csec">
+      <div class="csec-hd"><span class="csec-badge">${title.split('.')[0]}</span><h2>${cEsc(title.split('.').slice(1).join('.').trim())}</h2></div>
+      <div class="csec-bd">${cParas(g(f))}</div>
+    </div>`).join('');
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>กฎบัตรการตรวจสอบภายใน — ${cEsc(g('org'))}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    @page{size:A4;margin:2.2cm 2cm 2cm 3cm}
+    *{box-sizing:border-box}
+    html{-webkit-text-size-adjust:100%}
+    body{font-family:'TH SarabunPSK','TH Sarabun New','Sarabun',sans-serif;max-width:800px;margin:0 auto;padding:34px 40px 50px;font-size:17.5px;line-height:1.7;color:#181818;background:#fff}
+    .cp-band{height:8px;background:linear-gradient(90deg,#9B0C22,#C8102E 45%,#FF8A9A);margin:0 -40px 22px}
+    .cp-title{text-align:center;margin-bottom:22px}
+    .cp-seal{width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,#C8102E,#9B0C22);margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:25px;color:#fff;box-shadow:0 4px 12px rgba(200,16,46,.3)}
+    .cp-seal-img{background:#fff;border:1px solid #eee;padding:4px}
+    .cp-seal-img img{width:100%;height:100%;object-fit:contain}
+    .cp-title h1{font-size:26px;color:#9B0C22;margin:0 0 3px;font-weight:800;letter-spacing:.01em}
+    .cp-title .org{font-size:19px;font-weight:700;color:#222;margin:1px 0}
+    .cp-title .prov{font-size:15px;color:#777}
+    .cp-meta{display:flex;justify-content:center;gap:16px;margin-top:9px;font-size:14px;color:#9B0C22;font-weight:600}
+    .cp-meta span{background:#FFF0F1;border:1px solid #FFCED3;border-radius:20px;padding:2px 14px}
+    h2{font-size:18px;margin:0;font-weight:700;color:#111}
+    p{margin:0 0 2px;text-indent:1.6em;text-align:justify;white-space:pre-wrap;orphans:3;widows:3}
+    .cnote{border-left:4px solid #C8102E;background:#FFF7F7;padding:12px 18px;margin-bottom:20px;font-size:16.5px;color:#333}
+    .cnote p:first-child{text-indent:1.6em}
+    .cdefs{border-top:1px solid #E5E5E5;border-bottom:1px solid #E5E5E5;padding:14px 2px;margin-bottom:22px}
+    .cdefs h2{border-bottom:2px solid #C8102E;padding-bottom:5px;margin-bottom:10px;display:inline-block}
+    .csec{margin-bottom:16px}
+    .csec-hd{display:flex;align-items:center;gap:9px;border-bottom:1.5px solid #C8102E;padding-bottom:5px;margin-bottom:9px;page-break-after:avoid}
+    .csec-badge{width:24px;height:24px;border-radius:50%;background:#C8102E;color:#fff;font-size:12.5px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .csec-bd{padding-left:2px}
+    .cclose{margin-top:26px;padding-top:14px;border-top:1px dashed #ccc}
+    .ceff{text-align:center;font-weight:700;color:#9B0C22;margin:18px 0 34px;font-size:17.5px;text-indent:0}
+    .csigns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:16px;page-break-inside:avoid}
+    .csign{text-align:center;font-size:15.5px}
+    .csign .role{color:#888;font-size:13px;margin-bottom:34px;text-transform:uppercase;letter-spacing:.05em}
+    .csign .line{border-bottom:1px dotted #999;margin-bottom:7px}
+    .csign .nm{font-weight:700;color:#222}
+    .csign .ps{color:#666;margin-top:1px}
+    .cfoot{margin-top:40px;text-align:center;font-size:12px;color:#bbb;text-indent:0}
+    @media print{
+      body{padding:0;max-width:100%}
+      .cp-band{margin:0 0 22px}
+      .cp-band,.csec-badge,.cp-seal{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+      .csigns{break-inside:avoid}
+    }
+  </style></head><body>
+  <div class="cp-band"></div>
+  <div class="cp-title">
+    ${g('seal')?`<div class=\"cp-seal cp-seal-img\"><img src=\"${g('seal')}\" alt=\"ตราเทศบาล\"></div>`:`<div class=\"cp-seal\">🛡️</div>`}
+    <h1>กฎบัตรการตรวจสอบภายใน</h1>
+    <div class="org">${cEsc(g('org'))}</div>
+    <div class="prov">${cEsc(g('province'))}</div>
+    <div class="cp-meta">${g('yr')?`<span>ปีงบประมาณ ${cEsc(g('yr'))}</span>`:''}${g('date')?`<span>วันที่จัดทำ ${cEsc(g('date'))}</span>`:''}</div>
+  </div>
+  <div class="cnote">${cParas(g('preamble'))}</div>
+  <div class="cdefs"><h2>คำนิยาม</h2>${cParas(g('defs'))}</div>
+  ${sectionsHtml}
+  <div class="cclose">
+    ${cParas(g('closing'))}
+    ${g('effdate')?`<div class="ceff">กฎบัตรฉบับนี้ให้ใช้บังคับตั้งแต่วันที่ ${cEsc(g('effdate'))} เป็นต้นไป</div>`:''}
+    <div class="csigns">
+      <div class="csign"><div class="role">ผู้จัดทำ</div><div class="line">&nbsp;</div><div class="nm">(${cEsc(g('head')||'-')})</div><div class="ps">${cEsc(g('headpos')||'-')}</div></div>
+      <div class="csign"><div class="role">ผู้เห็นชอบ</div><div class="line">&nbsp;</div><div class="nm">(${cEsc(g('clerk')||'-')})</div><div class="ps">${cEsc(g('clerkpos')||'-')}</div></div>
+      <div class="csign"><div class="role">ผู้อนุมัติ</div><div class="line">&nbsp;</div><div class="nm">(${cEsc(g('ceo')||'-')})</div><div class="ps">${cEsc(g('ceopos')||'-')}</div></div>
+    </div>
+  </div>
+  <div class="cfoot">บันทึกล่าสุด ${cEsc(c.savedAt||'-')} · จัดทำผ่านระบบ IAM Audit</div>
+  </body></html>`;
+  w.document.write(html);
+  w.document.close();
   w.print();
 }
 
