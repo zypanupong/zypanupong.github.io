@@ -116,6 +116,12 @@ textarea.fi{resize:vertical;min-height:68px}
 .csealph span{font-size:7.5px;text-transform:uppercase;letter-spacing:.05em}
 .csealinfo{flex:1}
 .csealinfo .fl{margin-bottom:2px}
+.sigbox{width:100%;max-width:150px;height:52px;border:2px dashed var(--rmid);border-radius:8px;background:var(--wh);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;position:relative;transition:border-color .15s}
+.sigbox:hover{border-color:var(--r)}
+.sigbox img{max-width:100%;max-height:100%;object-fit:contain;display:none}
+.sigph{display:flex;flex-direction:column;align-items:center;gap:1px;font-size:9px;color:var(--t4);text-align:center;line-height:1.2}
+.sigwrap .fl{margin-bottom:4px}
+.sigwrap .btn-xs{margin-top:4px}
 
 .chh-tx{font-size:14.5px;font-weight:800;color:var(--t1)}
 .chh-sb{font-size:11px;color:var(--t3);margin-top:1px}
@@ -602,7 +608,7 @@ textarea.fi{resize:vertical;min-height:68px}
   <button class="ni" data-p="risk" onclick="G('risk',this)"><span class="ic">⬡</span> 3. ประเมินความเสี่ยง <span class="nbdg r" id="nb-r">0</span></button>
   <button class="ni" data-p="plan" onclick="G('plan',this)"><span class="ic">📅</span> 4. แผนการตรวจสอบ</button>
   <button class="ni" data-p="fw" onclick="G('fw',this)"><span class="ic">🔍</span> 5. เข้าตรวจ / Checklist</button>
-  <button class="ni" data-p="report" onclick="G('report',this)"><span class="ic">📄</span> 6. รายงานผลการตรวจ <span class="nbdg g" id="nb-rp">0</span></button>
+  <button class="ni" data-p="report" id="ni-report" onclick="G('report',this)"><span class="ic">📄</span> 6. รายงานผลการตรวจ <span class="nbdg g" id="nb-rp">0</span></button>
   <button class="ni" data-p="fu" onclick="G('fu',this)"><span class="ic">🔄</span> 6.2 ติดตามผล <span class="nbdg r" id="nb-fu">0</span></button>
   <button class="ni" data-p="annual" onclick="G('annual',this)"><span class="ic">📊</span> 7. รายงานประจำปี</button>
   <div class="nav-sec">เครื่องมือ</div>
@@ -617,6 +623,7 @@ textarea.fi{resize:vertical;min-height:68px}
         onkeydown="if(event.key==='Enter')onYrChg()">
     </div>
     <div class="sb-auth" id="sb-auth"></div>
+    <div id="sb-fs" style="margin-top:9px;padding:9px 10px;border:1px solid var(--bk4);border-radius:var(--rd2)"></div>
   </div>
 </nav>
 <div id="sb-backdrop" onclick="closeMobileNav()"></div>
@@ -698,17 +705,38 @@ textarea.fi{resize:vertical;min-height:68px}
       <div class="r3">
         <div class="fg"><label class="fl">ผู้จัดทำ (หัวหน้า/นักวิชาการตรวจสอบภายใน)</label><input type="text" id="c-head" class="fi" placeholder="ชื่อ-นามสกุล"></div>
         <div class="fg"><label class="fl">ตำแหน่ง</label><input type="text" id="c-headpos" class="fi" placeholder="เช่น นักวิชาการตรวจสอบภายในปฏิบัติการ"></div>
-        <div class="fg"></div>
+        <div class="fg sigwrap"><label class="fl">ลายเซ็น</label>
+          <div class="sigbox" id="sig-c-head-box" onclick="document.getElementById('sig-c-head-fi').click()">
+            <img id="sig-c-head-img" alt="ลายเซ็น">
+            <div class="sigph" id="sig-c-head-ph">✍️<span>อัพโหลดลายเซ็น</span></div>
+          </div>
+          <input type="file" id="sig-c-head-fi" accept="image/*" style="display:none" onchange="sigUpload('head',this.files);this.value=''">
+          <button class="btn btn-xs btn-del" id="sig-c-head-rm" style="display:none" onclick="sigRemove('head')">✕ ลบลายเซ็น</button>
+        </div>
       </div>
       <div class="r3">
         <div class="fg"><label class="fl">ผู้เห็นชอบ (ปลัดเทศบาล)</label><input type="text" id="c-clerk" class="fi" placeholder="ชื่อ-นามสกุล"></div>
         <div class="fg"><label class="fl">ตำแหน่ง</label><input type="text" id="c-clerkpos" class="fi" placeholder="เช่น ปลัดเทศบาลตำบลแม่ลานนา"></div>
-        <div class="fg"></div>
+        <div class="fg sigwrap"><label class="fl">ลายเซ็น</label>
+          <div class="sigbox" id="sig-c-clerk-box" onclick="document.getElementById('sig-c-clerk-fi').click()">
+            <img id="sig-c-clerk-img" alt="ลายเซ็น">
+            <div class="sigph" id="sig-c-clerk-ph">✍️<span>อัพโหลดลายเซ็น</span></div>
+          </div>
+          <input type="file" id="sig-c-clerk-fi" accept="image/*" style="display:none" onchange="sigUpload('clerk',this.files);this.value=''">
+          <button class="btn btn-xs btn-del" id="sig-c-clerk-rm" style="display:none" onclick="sigRemove('clerk')">✕ ลบลายเซ็น</button>
+        </div>
       </div>
       <div class="r3">
         <div class="fg"><label class="fl">ผู้อนุมัติ (นายกเทศมนตรี)</label><input type="text" id="c-ceo" class="fi" placeholder="ชื่อ-นามสกุล"></div>
         <div class="fg"><label class="fl">ตำแหน่ง</label><input type="text" id="c-ceopos" class="fi" placeholder="เช่น นายกเทศมนตรีตำบลแม่ลานนา"></div>
-        <div class="fg"></div>
+        <div class="fg sigwrap"><label class="fl">ลายเซ็น</label>
+          <div class="sigbox" id="sig-c-ceo-box" onclick="document.getElementById('sig-c-ceo-fi').click()">
+            <img id="sig-c-ceo-img" alt="ลายเซ็น">
+            <div class="sigph" id="sig-c-ceo-ph">✍️<span>อัพโหลดลายเซ็น</span></div>
+          </div>
+          <input type="file" id="sig-c-ceo-fi" accept="image/*" style="display:none" onchange="sigUpload('ceo',this.files);this.value=''">
+          <button class="btn btn-xs btn-del" id="sig-c-ceo-rm" style="display:none" onclick="sigRemove('ceo')">✕ ลบลายเซ็น</button>
+        </div>
       </div>
     </div>
 
@@ -935,7 +963,7 @@ textarea.fi{resize:vertical;min-height:68px}
 <!-- PLAN -->
 <div id="pg-plan" class="pw">
   <div id="plan-fw" style="display:none" class="card" style="margin-bottom:16px">
-    <div class="ct2">📅 เพิ่มแผนการตรวจสอบ</div>
+    <div class="ct2" id="plan-fw-title">📅 เพิ่มแผนการตรวจสอบ</div>
     <div class="r3">
       <div class="fg"><label class="fl">ปีงบประมาณ</label><input type="number" id="p-yr" class="fi" placeholder="เช่น 2569" min="2500" max="2600"></div>
       <div class="fg"><label class="fl">สำนัก / กอง</label><select id="p-dept" class="fi"><option value="">-- เลือก --</option><option>สำนักปลัด</option><option>กองคลัง</option><option>กองช่าง</option><option>กองการศึกษา</option><option>กองสาธารณสุข</option><option>กองสวัสดิการสังคม</option><option>กองยุทธศาสตร์และงบประมาณ</option></select></div>
@@ -951,7 +979,7 @@ textarea.fi{resize:vertical;min-height:68px}
     <div class="fg"><label class="fl">วัตถุประสงค์</label><textarea id="p-obj" class="fi" rows="2"></textarea></div>
     <div style="display:flex;gap:8px">
       <button class="btn btn-p" onclick="saveP()" style="flex:1;justify-content:center">💾 บันทึกแผน</button>
-      <button class="btn" onclick="document.getElementById('plan-fw').style.display='none'">ยกเลิก</button>
+      <button class="btn" onclick="closePF()">ยกเลิก</button>
     </div>
   </div>
   <div class="fb">
@@ -996,26 +1024,81 @@ textarea.fi{resize:vertical;min-height:68px}
 <!-- REPORT -->
 <div id="pg-report" class="pw">
   <div id="rpt-fw" style="display:none" class="card" style="margin-bottom:16px">
-    <div class="ct2">📄 จัดทำรายงานผลการตรวจสอบ</div>
+    <div class="ct2" id="rpt-fw-title">📄 จัดทำรายงานผลการตรวจสอบ</div>
     <div class="r3">
       <div class="fg"><label class="fl">อ้างอิงแผนงาน</label><select id="rp-ref" class="fi" onchange="rpRefFill()"><option value="">-- เลือกแผน --</option></select></div>
-      <div class="fg"><label class="fl">วันที่รายงาน</label><input type="date" id="rp-date" class="fi"></div>
-      <div class="fg"><label class="fl">ผู้จัดทำ</label><input type="text" id="rp-auth" class="fi"></div>
-    </div>
-    <div class="r2">
       <div class="fg"><label class="fl">ปีงบประมาณ *</label><input type="number" id="rp-form-yr" class="fi" placeholder="เช่น 2569" min="2500" max="2600"></div>
       <div class="fg"><label class="fl">สำนัก/กอง *</label><input type="text" id="rp-form-dept" class="fi" placeholder="พิมพ์ชื่อสำนัก/กอง"></div>
     </div>
+    <div class="r2">
+      <div class="fg"><label class="fl">เรื่องที่ตรวจสอบ</label><input type="text" id="rp-subject" class="fi" placeholder="เช่น การจัดเก็บรายได้ ประจำปีงบประมาณ 2569"></div>
+      <div class="fg"><label class="fl">งวด/รอบการตรวจ</label><input type="text" id="rp-period" class="fi" placeholder="เช่น งวดเดือน พ.ค.-มิ.ย. 2569 (ครั้งที่ 6)"></div>
+    </div>
+    <div class="r3">
+      <div class="fg"><label class="fl">วันที่รายงาน</label><input type="date" id="rp-date" class="fi"></div>
+      <div class="fg"><label class="fl">ข้อมูล ณ วันที่</label><input type="date" id="rp-asof" class="fi"></div>
+      <div class="fg"><label class="fl">ผู้จัดทำ (ตรวจสอบโดย)</label><input type="text" id="rp-auth" class="fi"></div>
+    </div>
+    <div class="sepl">หัวเรื่องรายงาน (สำหรับพิมพ์)</div>
+    <div class="r2">
+      <div class="fg"><label class="fl">เรียน</label><input type="text" id="rp-to" class="fi"></div>
+      <div class="fg"><label class="fl">สำเนาเรียน (บรรทัดละราย)</label><textarea id="rp-cc" class="fi" rows="2"></textarea></div>
+    </div>
+    <div class="sepl">รายละเอียดการตรวจสอบ</div>
+    <div class="fg"><label class="fl">วัตถุประสงค์ของการตรวจสอบ (บรรทัดละข้อ)</label><textarea id="rp-obj" class="fi" rows="3"></textarea></div>
+    <div class="r2">
+      <div class="fg"><label class="fl">ระยะเวลาที่เข้าตรวจสอบ</label><input type="text" id="rp-itime" class="fi" placeholder="เช่น ระหว่างวันที่ 1 พ.ค. - 15 มิ.ย. 69"></div>
+      <div class="fg"><label class="fl">วิธีการตรวจสอบ</label><input type="text" id="rp-method" class="fi" placeholder="เช่น การสอบทาน, การสุ่มตัวอย่าง"></div>
+    </div>
+    <div class="fg"><label class="fl">ขอบเขตการตรวจสอบ (บรรทัดละข้อ)</label><textarea id="rp-scope" class="fi" rows="3"></textarea></div>
     <div class="sepl">บทสรุปผู้บริหาร</div>
-    <div class="fg"><label class="fl">สรุปผลการตรวจสอบโดยรวม *</label><textarea id="rp-sum" class="fi" rows="3"></textarea></div>
+    <div class="fg"><label class="fl">สรุปข้อตรวจพบโดยรวม *</label><textarea id="rp-sum" class="fi" rows="4"></textarea></div>
+    <div class="fg"><label class="fl">ด้านดี (ถ้ามี)</label><textarea id="rp-good" class="fi" rows="2"></textarea></div>
     <div class="sepl">ข้อสังเกต</div>
     <div id="find-con"></div>
     <button class="btn btn-sm" onclick="addF()" style="margin-bottom:13px">+ เพิ่มข้อสังเกต</button>
     <div class="sepl">ข้อเสนอแนะเชิงระบบ</div>
-    <div class="fg"><label class="fl">ข้อเสนอแนะภาพรวม</label><textarea id="rp-rec" class="fi" rows="3"></textarea></div>
+    <div class="fg"><label class="fl">ข้อเสนอแนะ/ความเห็น</label><textarea id="rp-rec" class="fi" rows="3"></textarea></div>
+    <div class="sepl">ผู้จัดทำ / ผู้เห็นชอบ / ผู้อนุมัติ</div>
+    <div class="r3">
+      <div class="fg"><label class="fl">ตำแหน่งผู้จัดทำ (ตรวจสอบโดย)</label><input type="text" id="rp-authpos" class="fi"></div>
+      <div class="fg"></div>
+      <div class="fg sigwrap"><label class="fl">ลายเซ็น</label>
+          <div class="sigbox" id="sig-rp-head-box" onclick="document.getElementById('sig-rp-head-fi').click()">
+            <img id="sig-rp-head-img" alt="ลายเซ็น">
+            <div class="sigph" id="sig-rp-head-ph">✍️<span>อัพโหลดลายเซ็น</span></div>
+          </div>
+          <input type="file" id="sig-rp-head-fi" accept="image/*" style="display:none" onchange="sigUpload('head',this.files);this.value=''">
+          <button class="btn btn-xs btn-del" id="sig-rp-head-rm" style="display:none" onclick="sigRemove('head')">✕ ลบลายเซ็น</button>
+        </div>
+    </div>
+    <div class="r3">
+      <div class="fg"><label class="fl">ผู้เห็นชอบ (ปลัด)</label><input type="text" id="rp-clerk" class="fi"></div>
+      <div class="fg"><label class="fl">ตำแหน่งผู้เห็นชอบ</label><input type="text" id="rp-clerkpos" class="fi"></div>
+      <div class="fg sigwrap"><label class="fl">ลายเซ็น</label>
+          <div class="sigbox" id="sig-rp-clerk-box" onclick="document.getElementById('sig-rp-clerk-fi').click()">
+            <img id="sig-rp-clerk-img" alt="ลายเซ็น">
+            <div class="sigph" id="sig-rp-clerk-ph">✍️<span>อัพโหลดลายเซ็น</span></div>
+          </div>
+          <input type="file" id="sig-rp-clerk-fi" accept="image/*" style="display:none" onchange="sigUpload('clerk',this.files);this.value=''">
+          <button class="btn btn-xs btn-del" id="sig-rp-clerk-rm" style="display:none" onclick="sigRemove('clerk')">✕ ลบลายเซ็น</button>
+        </div>
+    </div>
+    <div class="r3">
+      <div class="fg"><label class="fl">ผู้อนุมัติ (นายก)</label><input type="text" id="rp-ceo" class="fi"></div>
+      <div class="fg"><label class="fl">ตำแหน่งผู้อนุมัติ</label><input type="text" id="rp-ceopos" class="fi"></div>
+      <div class="fg sigwrap"><label class="fl">ลายเซ็น</label>
+          <div class="sigbox" id="sig-rp-ceo-box" onclick="document.getElementById('sig-rp-ceo-fi').click()">
+            <img id="sig-rp-ceo-img" alt="ลายเซ็น">
+            <div class="sigph" id="sig-rp-ceo-ph">✍️<span>อัพโหลดลายเซ็น</span></div>
+          </div>
+          <input type="file" id="sig-rp-ceo-fi" accept="image/*" style="display:none" onchange="sigUpload('ceo',this.files);this.value=''">
+          <button class="btn btn-xs btn-del" id="sig-rp-ceo-rm" style="display:none" onclick="sigRemove('ceo')">✕ ลบลายเซ็น</button>
+        </div>
+    </div>
     <div style="display:flex;gap:8px">
       <button class="btn btn-p" onclick="saveRpt()" style="flex:1;justify-content:center">💾 บันทึกรายงาน</button>
-      <button class="btn" onclick="document.getElementById('rpt-fw').style.display='none'">ยกเลิก</button>
+      <button class="btn" onclick="closeRF()">ยกเลิก</button>
     </div>
   </div>
   <div class="fb">
@@ -1031,6 +1114,25 @@ textarea.fi{resize:vertical;min-height:68px}
   <div class="fb">
     <input type="number" id="fu-yr" class="fi" placeholder="ทุกปี" min="2500" max="2600" oninput="if(this.value===''||this.value.length===4)rFU()">
     <select id="fu-st" class="fi" onchange="rFU()"><option value="">ทุกสถานะ</option><option value="open">ยังไม่ดำเนินการ</option><option value="partial">บางส่วน</option><option value="done">เสร็จสิ้น</option></select>
+    <input type="text" id="fu-round" class="fi" placeholder="ครั้งที่ (สำหรับพิมพ์)" style="max-width:170px">
+  </div>
+  <div id="fu-fw" style="display:none;margin-bottom:16px" class="card">
+    <div class="ct2" id="fu-fw-title">✎ แก้ไขรายการติดตามผล</div>
+    <div class="r3">
+      <div class="fg"><label class="fl">ปีงบประมาณ</label><input type="number" id="fu-f-yr" class="fi" min="2500" max="2600"></div>
+      <div class="fg"><label class="fl">สำนัก/กอง</label><input type="text" id="fu-f-dept" class="fi"></div>
+      <div class="fg"><label class="fl">สถานะ</label><select id="fu-f-st" class="fi"><option value="open">ยังไม่ดำเนินการ</option><option value="partial">บางส่วน</option><option value="done">เสร็จสิ้น</option></select></div>
+    </div>
+    <div class="fg"><label class="fl">เรื่องที่ตรวจ</label><input type="text" id="fu-f-subject" class="fi"></div>
+    <div class="fg"><label class="fl">ประเด็น / ข้อสังเกต</label><textarea id="fu-f-finding" class="fi" rows="3"></textarea></div>
+    <div class="r2">
+      <div class="fg"><label class="fl">กฎหมาย / ระเบียบ</label><textarea id="fu-f-law" class="fi" rows="2"></textarea></div>
+      <div class="fg"><label class="fl">ข้อเสนอแนะ</label><textarea id="fu-f-rec" class="fi" rows="2"></textarea></div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-p" onclick="saveFU()" style="flex:1;justify-content:center">💾 บันทึก</button>
+      <button class="btn" onclick="closeFUF()">ยกเลิก</button>
+    </div>
   </div>
   <div id="fu-list"></div>
   <div id="up-pg-fu"></div>
@@ -1434,6 +1536,7 @@ function icUpload(files){
       icRender();
       icUpdateBadges();
       toast(`📁 บันทึก "${file.name}" ในหมวด ${icCurTopic}${needsDept?' · '+dept:''} ปี ${yr} แล้ว`);
+      fsSyncFile(['งานควบคุมภายใน',icCurTopic,needsDept?dept:'',yr],file.name,e.target.result);
     };
     reader.readAsDataURL(file);
   });
@@ -1593,6 +1696,7 @@ function rmUpload(files){
       rmRender();
       rmUpdateBadges();
       toast(`📁 บันทึก "${file.name}" ในหมวด ${group} · ${topic}${dept?' · '+dept:''} ปี ${yr} แล้ว`);
+      fsSyncFile(['งานบริหารความเสี่ยง',group,topic,dept,yr],file.name,e.target.result);
     };
     reader.readAsDataURL(file);
   });
@@ -1781,6 +1885,7 @@ function toast(msg,t=2300){
 function gyr(){return(document.getElementById('gy').value||'').trim()}
 function today(){return new Date().toISOString().slice(0,10)}
 function thd(){return new Date().toLocaleDateString('th-TH')}
+function rpDate(iso){if(!iso)return'-';try{return new Date(iso+'T00:00:00').toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'})}catch(e){return iso||'-'}}
 function uniq(a){return[...new Set(a)].filter(Boolean).sort()}
 function fsz(b){if(b<1024)return b+'B';if(b<1048576)return(b/1024).toFixed(1)+'KB';return(b/1048576).toFixed(1)+'MB'}
 function fic(n){const e=(n.split('.').pop()||'').toLowerCase();return{pdf:'📄',doc:'📝',docx:'📝',xls:'📊',xlsx:'📊',jpg:'🖼',jpeg:'🖼',png:'🖼',pptx:'📊',csv:'📋',txt:'📃'}[e]||'📎'}
@@ -1894,13 +1999,14 @@ const META={
             acts:[{l:'💾 บันทึก',c:'btn btn-sm',f:"saveC()"},{l:'🖨️ พิมพ์',c:'btn btn-sm btn-p',f:"printC()"}]},
   risk:    {title:'การประเมินความเสี่ยง',    sub:'Risk Assessment', acts:[{l:'📥 นำเข้าจาก Audit Universe',c:'btn btn-sm btn-p',f:'importAuditUniverse()'}]},
   au:      {title:'Audit Universe',          sub:'บัญชีหน่วยรับตรวจและการประเมินความเสี่ยงระยะยาว',
-            acts:[{l:'📥 นำเข้าข้อมูลตัวอย่าง 47 รายการ',c:'btn btn-sm btn-p',f:'auSeed()'}]},
+            acts:[{l:'📥 นำเข้าข้อมูลตัวอย่าง 48 รายการ',c:'btn btn-sm btn-p',f:'auSeed()'}]},
   plan:    {title:'แผนการตรวจสอบภายใน',    sub:'Audit Plan',
-            acts:[{l:'+ เพิ่มแผนงาน',c:'btn btn-sm btn-p',f:"document.getElementById('plan-fw').style.display='block'"}]},
+            acts:[{l:'+ เพิ่มแผนงาน',c:'btn btn-sm btn-p',f:"openPF()"}]},
   fw:      {title:'เข้าตรวจ / Checklist',    sub:'Fieldwork', acts:[]},
   report:  {title:'รายงานผลการตรวจสอบ',     sub:'Audit Report',
             acts:[{l:'+ สร้างรายงาน',c:'btn btn-sm btn-p',f:"showRF()"}]},
-  fu:      {title:'ติดตามผลการตรวจสอบ',     sub:'Follow-up', acts:[]},
+  fu:      {title:'ติดตามผลการตรวจสอบ',     sub:'Follow-up',
+            acts:[{l:'🖨️ พิมพ์',c:'btn btn-sm btn-p',f:"printFU()"}]},
   annual:  {title:'รายงานประจำปี',           sub:'Annual Report',
             acts:[{l:'🖨️ พิมพ์',c:'btn btn-sm btn-p',f:"window.print()"}]},
   laws:    {title:'ฐานกฎหมายและระเบียบ',    sub:'กฎหมาย ระเบียบ มาตรฐาน', acts:[]},
@@ -2134,6 +2240,7 @@ function loadC(){
   if(c.savedAt){st.textContent=`✓ บันทึกล่าสุด: ${c.savedAt}`;st.className='alert as';}
   else{st.textContent='ยังไม่ได้บันทึกกฎบัตร';st.className='alert as';}
   cSealPreview();
+  sigPreviewAll();
   rCDocBdg();
 }
 function cSealUpload(files){
@@ -2170,6 +2277,47 @@ function cSealPreview(){
   if(c.seal){img.src=c.seal;img.style.display='block';if(ph)ph.style.display='none';if(rm)rm.style.display='inline-flex';}
   else{img.style.display='none';if(ph)ph.style.display='flex';if(rm)rm.style.display='none';}
 }
+const SIG_K='signatures';
+const SIG_ROLES=['head','clerk','ceo'];
+function sigUpload(role,files){
+  if(!authz())return;
+  if(!files||!files.length)return;
+  const file=files[0];
+  if(!file.type||!file.type.startsWith('image/')){toast('⚠️ กรุณาเลือกไฟล์รูปภาพ');return}
+  if(file.size>1.5*1024*1024){toast('⚠️ ไฟล์เกิน 1.5MB');return}
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const sigs=db.get(SIG_K,{});
+    sigs[role]={img:e.target.result,name:file.name};
+    db.set(SIG_K,sigs);
+    sigPreviewAll();
+    toast('✍️ อัพโหลดลายเซ็นแล้ว');
+  };
+  reader.readAsDataURL(file);
+}
+function sigRemove(role){
+  if(!authz())return;
+  if(!confirm('ลบลายเซ็นนี้?'))return;
+  const sigs=db.get(SIG_K,{});
+  delete sigs[role];
+  db.set(SIG_K,sigs);
+  sigPreviewAll();
+  toast('ลบลายเซ็นแล้ว');
+}
+function sigPreviewAll(){
+  const sigs=db.get(SIG_K,{});
+  SIG_ROLES.forEach(role=>{
+    ['c','rp'].forEach(prefix=>{
+      const img=document.getElementById(`sig-${prefix}-${role}-img`);
+      if(!img)return;
+      const ph=document.getElementById(`sig-${prefix}-${role}-ph`);
+      const rm=document.getElementById(`sig-${prefix}-${role}-rm`);
+      const sd=sigs[role];
+      if(sd&&sd.img){img.src=sd.img;img.style.display='block';if(ph)ph.style.display='none';if(rm)rm.style.display='inline-flex';}
+      else{img.style.display='none';if(ph)ph.style.display='flex';if(rm)rm.style.display='none';}
+    });
+  });
+}
 function fillCDefaults(){
   if(!confirm('โหลดข้อความต้นฉบับทับข้อมูลในแบบฟอร์มปัจจุบัน?'))return;
   CHARTER_FIELDS.forEach(f=>{
@@ -2194,6 +2342,8 @@ function cParas(s){
 function printC(){
   const c=db.get('charter',{});
   const g=f=>(c[f]!=null&&c[f]!=='')?c[f]:(CHARTER_DEFAULTS[f]||'');
+  const sigs=db.get('signatures',{});
+  const sigImg=role=>(sigs[role]&&sigs[role].img)?`<img src="${sigs[role].img}" style="max-height:38px;max-width:120px;object-fit:contain">`:'&nbsp;';
   const w=window.open('','_blank');if(!w)return;
   const sectionsHtml=CHARTER_SECTIONS.map(([f,title],i)=>`
     <div class="csec">
@@ -2232,7 +2382,7 @@ function printC(){
     .csigns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:16px;page-break-inside:avoid}
     .csign{text-align:center;font-size:15.5px}
     .csign .role{color:#888;font-size:13px;margin-bottom:34px;text-transform:uppercase;letter-spacing:.05em}
-    .csign .line{border-bottom:1px dotted #999;margin-bottom:7px}
+    .csign .line{border-bottom:1px dotted #999;margin-bottom:7px;min-height:30px;display:flex;align-items:flex-end;justify-content:center}
     .csign .nm{font-weight:700;color:#222}
     .csign .ps{color:#666;margin-top:1px}
     .cfoot{margin-top:40px;text-align:center;font-size:12px;color:#bbb;text-indent:0}
@@ -2258,9 +2408,9 @@ function printC(){
     ${cParas(g('closing'))}
     ${g('effdate')?`<div class="ceff">กฎบัตรฉบับนี้ให้ใช้บังคับตั้งแต่วันที่ ${cEsc(g('effdate'))} เป็นต้นไป</div>`:''}
     <div class="csigns">
-      <div class="csign"><div class="role">ผู้จัดทำ</div><div class="line">&nbsp;</div><div class="nm">(${cEsc(g('head')||'-')})</div><div class="ps">${cEsc(g('headpos')||'-')}</div></div>
-      <div class="csign"><div class="role">ผู้เห็นชอบ</div><div class="line">&nbsp;</div><div class="nm">(${cEsc(g('clerk')||'-')})</div><div class="ps">${cEsc(g('clerkpos')||'-')}</div></div>
-      <div class="csign"><div class="role">ผู้อนุมัติ</div><div class="line">&nbsp;</div><div class="nm">(${cEsc(g('ceo')||'-')})</div><div class="ps">${cEsc(g('ceopos')||'-')}</div></div>
+      <div class="csign"><div class="role">ผู้จัดทำ</div><div class="line">${sigImg('head')}</div><div class="nm">(${cEsc(g('head')||'-')})</div><div class="ps">${cEsc(g('headpos')||'-')}</div></div>
+      <div class="csign"><div class="role">ผู้เห็นชอบ</div><div class="line">${sigImg('clerk')}</div><div class="nm">(${cEsc(g('clerk')||'-')})</div><div class="ps">${cEsc(g('clerkpos')||'-')}</div></div>
+      <div class="csign"><div class="role">ผู้อนุมัติ</div><div class="line">${sigImg('ceo')}</div><div class="nm">(${cEsc(g('ceo')||'-')})</div><div class="ps">${cEsc(g('ceopos')||'-')}</div></div>
     </div>
   </div>
   <div class="cfoot">บันทึกล่าสุด ${cEsc(c.savedAt||'-')} · จัดทำผ่านระบบ IAM Audit</div>
@@ -2282,6 +2432,7 @@ function cDocUp(files){
       const docs=db.get('charter_docs',[]);
       docs.push({id:Date.now()+Math.random(),name:file.name,size:file.size,data:e.target.result,at:thd()});
       db.set('charter_docs',docs);rCDocs();rCDocBdg();toast(`📁 บันทึก "${file.name}"`);
+      fsSyncFile(['กฎบัตรตรวจสอบ','เอกสารแนบ'],file.name,e.target.result);
     };reader.readAsDataURL(file);
   });
   document.getElementById('c-fi').value='';
@@ -2553,7 +2704,7 @@ function auRSummary(){
   const bdEl=document.getElementById('au-bd');
   if(!bdEl)return;
   const dpts=uniq(list.map(x=>x.dept));
-  if(!dpts.length){bdEl.innerHTML='<div style="font-size:12px;color:var(--t4)">ยังไม่มีข้อมูล — กด "นำเข้าข้อมูลตัวอย่าง 47 รายการ" ด้านบนเพื่อเริ่มต้น</div>';return}
+  if(!dpts.length){bdEl.innerHTML='<div style="font-size:12px;color:var(--t4)">ยังไม่มีข้อมูล — กด "นำเข้าข้อมูลตัวอย่าง 48 รายการ" ด้านบนเพื่อเริ่มต้น</div>';return}
   bdEl.innerHTML=`<div class="tw"><table class="tb"><thead><tr><th>หน่วยรับตรวจ / กอง</th><th>รวม</th><th>สูง</th><th>ปานกลาง</th><th>ต่ำ</th></tr></thead><tbody>`+
     dpts.map(d=>{
       const dr=list.filter(x=>x.dept===d);
@@ -2635,7 +2786,8 @@ const AUDIT_UNIVERSE_SEED = [
   ['กองการศึกษา','งานบัญชีและรายงานการเงินของศูนย์พัฒนาเด็กเล็ก','การจัดทำบัญชีรับ-จ่ายและรายงานการเงินของศูนย์พัฒนาเด็กเล็ก รวมถึงเงินอุดหนุนอาหารกลางวัน/อาหารเสริม(นม)','การเงิน',4,4,3,3,2570],
   ['กองการศึกษา','งานค่าใช้จ่ายเดินทางไปราชการ ค่าตอบแทนนอกเวลา และพัฒนาบุคลากร/ฝึกอบรมกองการศึกษา','การเบิกจ่ายค่าใช้จ่ายเดินทางไปราชการ ค่าตอบแทนการปฏิบัติงานนอกเวลาราชการ และการพัฒนาบุคลากร/ฝึกอบรมสัมมนาของกองการศึกษา','การเงิน/การดำเนินงาน',3,3,3,2,2571],
   ['กองการศึกษา','งานระบบควบคุมภายในของหน่วยงาน (กองการศึกษา)','การจัดทำและติดตามรายงานการประเมินระบบการควบคุมภายในตามหลักเกณฑ์กระทรวงการคลัง','การดำเนินงาน/ควบคุมภายใน',2,4,4,3,2571],
-  ['กองการศึกษา','งานบริหารความเสี่ยงของหน่วยงาน (กองการศึกษา)','การจัดทำแผนบริหารความเสี่ยงและติดตามรายงานผลการบริหารความเสี่ยงประจำปีของหน่วยงาน','การดำเนินงาน/ควบคุมภายใน',2,3,4,3,2572]
+  ['กองการศึกษา','งานบริหารความเสี่ยงของหน่วยงาน (กองการศึกษา)','การจัดทำแผนบริหารความเสี่ยงและติดตามรายงานผลการบริหารความเสี่ยงประจำปีของหน่วยงาน','การดำเนินงาน/ควบคุมภายใน',2,3,4,3,2572],
+  ['กองคลัง','งานตรวจสอบระบบชำระเงินอิเล็กทรอนิกส์ผ่านระบบ KTB Corporate Online','การควบคุมการใช้งานระบบ KTB Corporate Online สำหรับการรับ-จ่ายเงินทางอิเล็กทรอนิกส์ของเทศบาล การกำหนดสิทธิผู้ใช้งานและการแบ่งแยกหน้าที่ผู้บันทึกรายการ/ผู้อนุมัติรายการ (Maker-Checker) การอนุมัติรายการโอนเงิน/เบิกจ่ายผ่านระบบ และการดูแลรักษาความปลอดภัยของรหัสผ่านและอุปกรณ์ยืนยันตัวตน (Token)','การเงิน/สารสนเทศ',5,4,5,4,2570]
 ];
 
 function auSeed(){
@@ -2669,18 +2821,68 @@ function lPlanRefs(){
     el.innerHTML='<option value="">-- เลือกจากแผน --</option>'+plans.map(p=>`<option value="${p.id}">${p.name} (${p.yr})</option>`).join('');
   });
 }
+let editingPlanId=null;
+function openPF(){
+  editingPlanId=null;
+  document.getElementById('plan-fw-title').textContent='📅 เพิ่มแผนการตรวจสอบ';
+  document.getElementById('p-yr').value='';
+  document.getElementById('p-dept').selectedIndex=0;
+  document.getElementById('p-type').selectedIndex=0;
+  document.getElementById('p-name').value='';
+  document.getElementById('p-s').value='';
+  document.getElementById('p-e').value='';
+  document.getElementById('p-aud').value='';
+  document.getElementById('p-st').value='planned';
+  document.getElementById('p-obj').value='';
+  document.getElementById('plan-fw').style.display='block';
+}
+function closePF(){
+  editingPlanId=null;
+  document.getElementById('plan-fw').style.display='none';
+  document.getElementById('plan-fw-title').textContent='📅 เพิ่มแผนการตรวจสอบ';
+}
+function editP(id){
+  if(!authz())return;
+  const plans=db.get('plans',[]);const p=plans.find(x=>x.id===id);if(!p)return;
+  editingPlanId=id;
+  document.getElementById('p-yr').value=p.yr||'';
+  document.getElementById('p-dept').value=p.dept||'';
+  document.getElementById('p-type').value=p.type||'';
+  document.getElementById('p-name').value=p.name||'';
+  document.getElementById('p-s').value=p.startDate||'';
+  document.getElementById('p-e').value=p.endDate||'';
+  document.getElementById('p-aud').value=p.aud||'';
+  document.getElementById('p-st').value=p.status||'planned';
+  document.getElementById('p-obj').value=p.obj||'';
+  document.getElementById('plan-fw-title').textContent='✎ แก้ไขแผนการตรวจสอบ';
+  document.getElementById('plan-fw').style.display='block';
+  document.getElementById('plan-fw').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function delP(id){
+  if(!authz())return;
+  if(!confirm('ยืนยันการลบแผนการตรวจสอบนี้?'))return;
+  let plans=db.get('plans',[]);plans=plans.filter(p=>p.id!==id);db.set('plans',plans);
+  toast('🗑 ลบแผนแล้ว');rPlan();lPlanRefs();
+}
 function saveP(){
   if(!authz())return;
   const name=document.getElementById('p-name').value.trim();if(!name){toast('กรุณาระบุชื่องาน');return}
   if(!document.getElementById('p-yr').value){toast('กรุณาระบุปีงบประมาณ');return}
-  const item={id:Date.now(),yr:document.getElementById('p-yr').value,dept:document.getElementById('p-dept').value,
+  const data={yr:document.getElementById('p-yr').value,dept:document.getElementById('p-dept').value,
     type:document.getElementById('p-type').value,name,
     startDate:document.getElementById('p-s').value,endDate:document.getElementById('p-e').value,
     aud:document.getElementById('p-aud').value,status:document.getElementById('p-st').value,
     obj:document.getElementById('p-obj').value};
-  const plans=db.get('plans',[]);plans.push(item);db.set('plans',plans);
-  toast('💾 บันทึกแผนแล้ว');
+  const plans=db.get('plans',[]);
+  if(editingPlanId!=null){
+    const idx=plans.findIndex(p=>p.id===editingPlanId);
+    if(idx>=0){plans[idx]={...plans[idx],...data};db.set('plans',plans);toast('💾 แก้ไขแผนแล้ว')}
+    editingPlanId=null;
+  }else{
+    const item={id:Date.now(),...data};plans.push(item);db.set('plans',plans);toast('💾 บันทึกแผนแล้ว');
+  }
   document.getElementById('plan-fw').style.display='none';
+  document.getElementById('plan-fw-title').textContent='📅 เพิ่มแผนการตรวจสอบ';
   ['p-name','p-s','p-e','p-aud','p-obj'].forEach(id=>document.getElementById(id).value='');
   rPlan();lPlanRefs();
 }
@@ -2708,6 +2910,8 @@ function rPlan(){
         <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
           <span class="pill ${stl[p.status]}">${stx[p.status]}</span>
           <button class="btn btn-xs" onclick="cycleP(${p.id})">${p.status==='done'?'↩ เปิด':'✓ เสร็จ'}</button>
+          <button class="btn btn-xs" onclick="editP(${p.id})">✎ แก้ไข</button>
+          <button class="btn btn-xs btn-del" onclick="delP(${p.id})">🗑 ลบ</button>
           <span class="pill pdk" style="font-size:10px">${p.yr}</span>
         </div>
       </div>
@@ -2869,22 +3073,101 @@ function saveFW(){
 
 /* ═══ REPORT ═══ */
 let fIdx=0;
+let editingReportId=null;
 function showRF(){
+  editingReportId=null;
+  document.getElementById('rpt-fw-title').textContent='📄 จัดทำรายงานผลการตรวจสอบ';
   fIdx=0;document.getElementById('find-con').innerHTML='';
   const plans=db.get('plans',[]);
   document.getElementById('rp-ref').innerHTML='<option value="">-- เลือกแผน --</option>'+plans.map(p=>`<option value="${p.id}">${p.name} (${p.yr})</option>`).join('');
   document.getElementById('rp-date').value=today();
+  document.getElementById('rp-asof').value=today();
   document.getElementById('rp-form-yr').value=gyr()||'';
   document.getElementById('rp-form-dept').value='';
+  document.getElementById('rp-subject').value='';
+  document.getElementById('rp-period').value='';
+  document.getElementById('rp-auth').value=CHARTER_DEFAULTS.head;
+  document.getElementById('rp-authpos').value=CHARTER_DEFAULTS.headpos;
+  document.getElementById('rp-to').value=CHARTER_DEFAULTS.ceopos;
+  document.getElementById('rp-cc').value=CHARTER_DEFAULTS.clerkpos+'\nหัวหน้าหน่วยรับตรวจ';
+  document.getElementById('rp-obj').value='';
+  document.getElementById('rp-itime').value='';
+  document.getElementById('rp-method').value='การสอบทาน, การสุ่มตัวอย่าง, การตรวจเอกสารและการนับจำนวน';
+  document.getElementById('rp-scope').value='';
+  document.getElementById('rp-good').value='';
+  document.getElementById('rp-clerk').value=CHARTER_DEFAULTS.clerk;
+  document.getElementById('rp-clerkpos').value=CHARTER_DEFAULTS.clerkpos;
+  document.getElementById('rp-ceo').value=CHARTER_DEFAULTS.ceo;
+  document.getElementById('rp-ceopos').value=CHARTER_DEFAULTS.ceopos;
+  sigPreviewAll();
   document.getElementById('rpt-fw').style.display='block';
+}
+function closeRF(){
+  editingReportId=null;
+  document.getElementById('rpt-fw').style.display='none';
+  document.getElementById('rpt-fw-title').textContent='📄 จัดทำรายงานผลการตรวจสอบ';
+}
+function editRpt(id){
+  if(!authz())return;
+  const reports=db.get('reports',[]);
+  const r=reports.find(x=>String(x.id)===String(id));if(!r)return;
+  G('report',document.getElementById('ni-report'));
+  editingReportId=id;
+  fIdx=0;document.getElementById('find-con').innerHTML='';
+  const plans=db.get('plans',[]);
+  document.getElementById('rp-ref').innerHTML='<option value="">-- เลือกแผน --</option>'+plans.map(p=>`<option value="${p.id}">${p.name} (${p.yr})</option>`).join('');
+  document.getElementById('rp-ref').value=r.planId||'';
+  document.getElementById('rp-date').value=r.date||'';
+  document.getElementById('rp-asof').value=r.asof||'';
+  document.getElementById('rp-form-yr').value=r.yr||'';
+  document.getElementById('rp-form-dept').value=r.dept||'';
+  document.getElementById('rp-subject').value=r.subject||'';
+  document.getElementById('rp-period').value=r.period||'';
+  document.getElementById('rp-auth').value=r.auth||'';
+  document.getElementById('rp-authpos').value=r.authpos||'';
+  document.getElementById('rp-to').value=r.to||'';
+  document.getElementById('rp-cc').value=r.cc||'';
+  document.getElementById('rp-obj').value=r.obj||'';
+  document.getElementById('rp-itime').value=r.itime||'';
+  document.getElementById('rp-method').value=r.method||'';
+  document.getElementById('rp-scope').value=r.scope||'';
+  document.getElementById('rp-sum').value=r.sum||'';
+  document.getElementById('rp-good').value=r.good||'';
+  document.getElementById('rp-rec').value=r.rec||'';
+  document.getElementById('rp-clerk').value=r.clerk||'';
+  document.getElementById('rp-clerkpos').value=r.clerkpos||'';
+  document.getElementById('rp-ceo').value=r.ceo||'';
+  document.getElementById('rp-ceopos').value=r.ceopos||'';
+  (r.findings||[]).forEach(f=>{
+    addF();
+    const i=fIdx-1;
+    document.getElementById('ft-'+i).value=f.text||'';
+    document.getElementById('fl-'+i).value=f.law||'';
+    document.getElementById('fr-'+i).value=f.rec||'';
+    document.getElementById('fs-'+i).value=f.sev||'med';
+    document.getElementById('fu-'+i).checked=f.needsFU!==false;
+  });
+  sigPreviewAll();
+  document.getElementById('rpt-fw-title').textContent='✎ แก้ไขรายงานผลการตรวจสอบ';
+  document.getElementById('rpt-fw').style.display='block';
+  document.getElementById('rpt-fw').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function delRpt(id){
+  if(!authz())return;
+  if(!confirm('ยืนยันการลบรายงานผลการตรวจสอบนี้? (รายการติดตามที่เกี่ยวข้องจะยังคงอยู่)'))return;
+  let reports=db.get('reports',[]);reports=reports.filter(r=>String(r.id)!==String(id));db.set('reports',reports);
+  toast('🗑 ลบรายงานแล้ว');
+  rRpts();updateBdg();rDepts();
+  if(cur==='annual')rAnnual();
 }
 function rpRefFill(){
   const pid=document.getElementById('rp-ref').value;
   const plan=db.get('plans',[]).find(p=>p.id==pid);
   if(!plan)return;
-  const yEl=document.getElementById('rp-form-yr'),dEl=document.getElementById('rp-form-dept');
+  const yEl=document.getElementById('rp-form-yr'),dEl=document.getElementById('rp-form-dept'),sEl=document.getElementById('rp-subject');
   if(yEl&&!yEl.value)yEl.value=plan.yr||'';
   if(dEl&&!dEl.value)dEl.value=plan.dept||'';
+  if(sEl&&!sEl.value)sEl.value=plan.name||'';
 }
 function addF(){
   const i=fIdx++;const div=document.createElement('div');
@@ -2903,6 +3186,10 @@ function addF(){
         <option value="med" selected>ปานกลาง — ต้องแก้ไข</option>
         <option value="high">สูง — เร่งด่วน</option>
       </select></div></div>
+    <div class="fg" style="display:flex;align-items:center;gap:7px;margin-bottom:0">
+      <input type="checkbox" id="fu-${i}" checked style="width:16px;height:16px;flex-shrink:0">
+      <label for="fu-${i}" style="font-size:12.5px;color:var(--t2);cursor:pointer">🔄 ต้องติดตามผลการแก้ไข (จะแสดงในแท็บ "ติดตามผล")</label>
+    </div>
   </div>`;
   document.getElementById('find-con').appendChild(div);
 }
@@ -2917,26 +3204,52 @@ function saveRpt(){
   document.querySelectorAll('[id^="fd-"]').forEach(el=>{
     const i=el.id.replace('fd-','');
     findings.push({text:document.getElementById('ft-'+i)?.value||'',law:document.getElementById('fl-'+i)?.value||'',
-      rec:document.getElementById('fr-'+i)?.value||'',sev:document.getElementById('fs-'+i)?.value||'med'});
+      rec:document.getElementById('fr-'+i)?.value||'',sev:document.getElementById('fs-'+i)?.value||'med',
+      needsFU:document.getElementById('fu-'+i)?.checked!==false});
   });
   const pid=document.getElementById('rp-ref').value;
   const plan=db.get('plans',[]).find(p=>p.id==pid);
-  const rep={id:Date.now(),planId:pid,planName:plan?.name||'-',dept,
+  const data={planId:pid,planName:plan?.name||'-',dept,
     yr,date:document.getElementById('rp-date').value,
-    auth:document.getElementById('rp-auth').value,sum,findings,
-    rec:document.getElementById('rp-rec').value,at:thd()};
-  const reports=db.get('reports',[]);reports.push(rep);db.set('reports',reports);
-  const fus=db.get('followups',[]);
-  findings.forEach(f=>{
-    if(f.sev==='high'||f.sev==='med'){
-      fus.push({id:Date.now()+Math.random(),finding:f.text.slice(0,100),
-        dept:rep.dept,yr:rep.yr,law:f.law,rec:f.rec,status:'open',at:rep.date});
-    }
-  });
-  db.set('followups',fus);
-  toast('💾 บันทึกรายงานแล้ว');
+    asof:document.getElementById('rp-asof').value,
+    subject:document.getElementById('rp-subject').value.trim()||plan?.name||'-',
+    period:document.getElementById('rp-period').value.trim(),
+    to:document.getElementById('rp-to').value.trim(),
+    cc:document.getElementById('rp-cc').value,
+    auth:document.getElementById('rp-auth').value,
+    authpos:document.getElementById('rp-authpos').value,
+    obj:document.getElementById('rp-obj').value,
+    itime:document.getElementById('rp-itime').value.trim(),
+    method:document.getElementById('rp-method').value.trim(),
+    scope:document.getElementById('rp-scope').value,
+    sum,good:document.getElementById('rp-good').value.trim(),findings,
+    rec:document.getElementById('rp-rec').value,
+    clerk:document.getElementById('rp-clerk').value,
+    clerkpos:document.getElementById('rp-clerkpos').value,
+    ceo:document.getElementById('rp-ceo').value,
+    ceopos:document.getElementById('rp-ceopos').value};
+  const reports=db.get('reports',[]);
+  if(editingReportId!=null){
+    const idx=reports.findIndex(x=>String(x.id)===String(editingReportId));
+    if(idx>=0){reports[idx]={...reports[idx],...data};db.set('reports',reports);toast('💾 แก้ไขรายงานแล้ว')}
+    editingReportId=null;
+  }else{
+    const rep={id:Date.now(),...data,at:thd()};
+    reports.push(rep);db.set('reports',reports);
+    const fus=db.get('followups',[]);
+    findings.forEach(f=>{
+      if(f.needsFU){
+        fus.push({id:Date.now()+Math.random(),finding:f.text.slice(0,100),
+          dept:rep.dept,yr:rep.yr,subject:rep.subject,reportId:rep.id,law:f.law,rec:f.rec,status:'open',at:rep.date});
+      }
+    });
+    db.set('followups',fus);
+    toast('💾 บันทึกรายงานแล้ว');
+  }
   document.getElementById('rpt-fw').style.display='none';
+  document.getElementById('rpt-fw-title').textContent='📄 จัดทำรายงานผลการตรวจสอบ';
   rRpts();updateBdg();rDepts();
+  if(cur==='annual')rAnnual();
 }
 function rRpts(){
   const yr=document.getElementById('rp-yr')?.value||'';
@@ -2952,9 +3265,14 @@ function rRpts(){
   con.innerHTML=[...reports].reverse().map(r=>`
     <div class="card card-sm" style="margin-bottom:11px">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;flex-wrap:wrap;gap:7px">
-        <div><div style="font-size:14px;font-weight:700">${r.planName}</div>
+        <div><div style="font-size:14px;font-weight:700">${r.subject||r.planName}</div>
         <div style="font-size:12px;color:var(--t3);margin-top:2px">${r.dept} · ${r.date||'-'} · ผู้จัดทำ: ${r.auth||'-'}</div></div>
-        <span class="pill pdk">${r.yr}</span>
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+          <span class="pill pdk">${r.yr}</span>
+          <button class="btn btn-xs" onclick="editRpt('${r.id}')">✎ แก้ไข</button>
+          <button class="btn btn-xs" onclick="printRpt('${r.id}')">🖨️ พิมพ์</button>
+          <button class="btn btn-xs btn-del" onclick="delRpt('${r.id}')">🗑 ลบ</button>
+        </div>
       </div>
       <div style="font-size:13px;color:var(--t2);border-left:3px solid var(--r);padding-left:10px;margin-bottom:10px">${r.sum}</div>
       ${r.findings.length?`<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t4);margin-bottom:6px">ข้อสังเกต ${r.findings.length} รายการ</div>`+
@@ -2964,6 +3282,122 @@ function rRpts(){
           <span class="pill ${spl[f.sev]}" style="margin-top:4px">${slb[f.sev]}</span>
         </div>`).join(''):''}
     </div>`).join('');
+}
+function printRpt(id){
+  const reports=db.get('reports',[]);
+  const r=reports.find(x=>String(x.id)===String(id));
+  if(!r)return;
+  const w=window.open('','_blank');if(!w)return;
+  const objList=(r.obj||'').split('\n').map(s=>s.trim()).filter(Boolean);
+  const scopeList=(r.scope||'').split('\n').map(s=>s.trim()).filter(Boolean);
+  const ccList=(r.cc||'').split('\n').map(s=>s.trim()).filter(Boolean);
+  const subj=r.subject||r.planName||'-';
+  const sigs=db.get('signatures',{});
+  const sigImg=role=>(sigs[role]&&sigs[role].img)?`<img src="${sigs[role].img}" style="max-height:38px;max-width:120px;object-fit:contain">`:'&nbsp;';
+  const findingHtml=(r.findings&&r.findings.length)?r.findings.map((f,i)=>`
+    <div class="rfnd">
+      <div class="rfnd-hd">ข้อตรวจพบที่ ${i+1}${f.sev==='high'?' (ระดับสูง)':f.sev==='med'?' (ระดับปานกลาง)':' (ระดับต่ำ)'}</div>
+      <p>${cEsc(f.text)}</p>
+      ${f.law?`<p style="font-family:'Courier New',monospace;color:#666;font-size:14.5px">อ้างอิง: ${cEsc(f.law)}</p>`:''}
+      ${f.rec?`<p><b>ข้อเสนอแนะ:</b> ${cEsc(f.rec)}</p>`:''}
+    </div>`).join(''):`<p>จากการตรวจสอบ เรื่อง ${cEsc(subj)} ไม่พบข้อผิดพลาดในการดำเนินงาน</p>`;
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>รายงานผลการตรวจสอบ — ${cEsc(subj)}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    @page{size:A4;margin:2.2cm 2cm 2cm 3cm}
+    *{box-sizing:border-box}
+    body{font-family:'TH SarabunPSK','TH Sarabun New','Sarabun',sans-serif;max-width:800px;margin:0 auto;padding:34px 40px 50px;font-size:17.5px;line-height:1.7;color:#181818;background:#fff}
+    p{margin:0 0 2px;text-indent:1.6em;text-align:justify;white-space:pre-wrap;orphans:3;widows:3}
+    .rp-cover{text-align:center;margin-bottom:6px;padding-top:26px}
+    .rp-cover h1{font-size:25px;margin:0 0 2px;font-weight:800}
+    .rp-cover .sub{font-size:17.5px;font-weight:700;margin:0}
+    .rp-subj{text-align:center;font-weight:700;font-size:19px;margin:22px 0 2px;text-indent:0}
+    .rp-asof{text-align:center;font-size:15px;color:#555;margin-bottom:30px;text-indent:0}
+    .rp-to{font-weight:700;margin:0 0 4px;text-indent:0}
+    .rp-cc{margin:0 0 2px;text-indent:0;padding-left:2.4em}
+    .rp-signed{margin-top:34px;text-align:right;text-indent:0}
+    .rp-signed p{text-indent:0;margin:0 0 2px}
+    .rp-signed .nm{font-weight:700}
+    .page-break{page-break-before:always}
+    .rp-body-title{text-align:center;font-weight:800;font-size:18px;margin:0 0 2px;text-indent:0}
+    .rp-body-sub{text-align:center;font-weight:700;font-size:16px;margin:0 0 20px;text-indent:0}
+    .rp-fld{margin-bottom:11px;text-indent:0}
+    .rp-fld > .lbl{font-weight:700}
+    .rp-fld ol,.rp-fld ul{margin:4px 0 4px 2.2em;padding:0}
+    .rp-fld li{margin-bottom:2px}
+    .rfnd{border-left:3px solid #C8102E;background:#FFF7F7;padding:8px 14px;margin:8px 0;border-radius:0 8px 8px 0}
+    .rfnd-hd{font-weight:700;color:#9B0C22;font-size:14.5px;margin-bottom:3px;text-indent:0}
+    .rfnd p{text-indent:0;margin:0 0 3px}
+    .rp-sec-hd{font-weight:700;border-bottom:1.5px solid #C8102E;padding-bottom:4px;margin:18px 0 8px;text-indent:0;page-break-after:avoid}
+    .csigns{display:grid;grid-template-columns:1fr;gap:16px;margin-top:26px;max-width:260px}
+    .csign{text-align:center;font-size:15.5px;text-indent:0}
+    .csign .role{color:#888;font-size:13px;margin-bottom:28px;text-transform:uppercase;letter-spacing:.05em}
+    .csign .line{border-bottom:1px dotted #999;margin-bottom:7px;min-height:30px;display:flex;align-items:flex-end;justify-content:center}
+    .csign .nm{font-weight:700;color:#222}
+    .csign .ps{color:#666;margin-top:1px}
+    .rp-appr{margin-top:30px;page-break-inside:avoid}
+    .rp-appr-lbl{text-indent:0;margin-bottom:14px;font-weight:700}
+    @media print{
+      body{padding:0;max-width:100%}
+      .rfnd{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+      .csigns,.rfnd,.rp-appr{break-inside:avoid}
+    }
+  </style></head><body>
+  <div class="rp-cover">
+    <h1>รายงานผลการตรวจสอบ</h1>
+    <div class="sub">(ตามมาตรฐานด้านการปฏิบัติงาน รหัส ๒๔๐๐)</div>
+  </div>
+  <div class="rp-subj">เรื่อง ${cEsc(subj)}</div>
+  <div class="rp-asof">สำหรับข้อมูลสิ้นสุด ณ วันที่ ${cEsc(rpDate(r.asof||r.date))}</div>
+  <p class="rp-to">เรียน : ${cEsc(r.to||CHARTER_DEFAULTS.ceopos)}</p>
+  ${ccList.length?`<p style="text-indent:0;font-weight:700">สำเนาเรียน : ${cEsc(ccList[0])}</p>${ccList.slice(1).map(c=>`<p class="rp-cc">: ${cEsc(c)}</p>`).join('')}`:''}
+  <div class="rp-signed">
+    <p>ตรวจสอบโดย : <span class="nm">${cEsc(r.auth||CHARTER_DEFAULTS.head)}</span></p>
+    <p>ตำแหน่ง ${cEsc(r.authpos||CHARTER_DEFAULTS.headpos)}</p>
+  </div>
+
+  <div class="page-break"></div>
+  <div class="rp-body-title">รายงานผลการตรวจสอบภายใน (ตามมาตรฐานการปฏิบัติงาน รหัส ๒๔๐๐)</div>
+  <div class="rp-body-sub">${r.period?cEsc(r.period)+' ':''}ประจำปีงบประมาณ พ.ศ. ${cEsc(r.yr||'-')}</div>
+  <div class="rp-fld"><span class="lbl">หน่วยรับตรวจ</span>&nbsp; ${cEsc(r.dept||'-')}</div>
+  <div class="rp-fld"><span class="lbl">เรื่องที่ตรวจสอบ</span>&nbsp; ${cEsc(subj)}</div>
+  ${objList.length?`<div class="rp-fld"><span class="lbl">วัตถุประสงค์ของการตรวจสอบ</span><ul>${objList.map(o=>`<li>${cEsc(o)}</li>`).join('')}</ul></div>`:''}
+  ${r.itime?`<div class="rp-fld"><span class="lbl">ระยะเวลาที่เข้าตรวจสอบ</span>&nbsp; ${cEsc(r.itime)}</div>`:''}
+  ${r.method?`<div class="rp-fld"><span class="lbl">วิธีการตรวจสอบ</span>&nbsp; ${cEsc(r.method)}</div>`:''}
+  ${scopeList.length?`<div class="rp-fld"><span class="lbl">ขอบเขตการตรวจสอบ</span><ol>${scopeList.map(o=>`<li>${cEsc(o)}</li>`).join('')}</ol></div>`:''}
+
+  <div class="rp-sec-hd">สรุปข้อตรวจพบ เรื่อง ${cEsc(subj)}</div>
+  ${cParas(r.sum||'')}
+
+  ${r.good?`<div class="rp-sec-hd">ด้านดี</div><p>${cEsc(r.good)}</p>`:''}
+
+  <div class="rp-sec-hd">ข้อตรวจพบ</div>
+  ${findingHtml}
+
+  ${r.rec?`<div class="rp-sec-hd">ข้อเสนอแนะ/ความเห็น</div>${cParas(r.rec)}`:''}
+
+  <div class="csigns" style="margin-left:auto;margin-right:0">
+    <div class="csign"><div class="role">(ลงชื่อ) ผู้ตรวจสอบภายใน</div><div class="line">${sigImg('head')}</div><div class="nm">(${cEsc(r.auth||CHARTER_DEFAULTS.head)})</div><div class="ps">${cEsc(r.authpos||CHARTER_DEFAULTS.headpos)}</div></div>
+  </div>
+
+  <div class="rp-appr">
+    <p class="rp-appr-lbl">ความเห็นปลัดฯ ....................................................................................................................................................</p>
+    <div class="csigns" style="margin-left:auto;margin-right:0">
+      <div class="csign"><div class="role">(ลงชื่อ)</div><div class="line">${sigImg('clerk')}</div><div class="nm">(${cEsc(r.clerk||CHARTER_DEFAULTS.clerk)})</div><div class="ps">${cEsc(r.clerkpos||CHARTER_DEFAULTS.clerkpos)}</div></div>
+    </div>
+  </div>
+
+  <div class="rp-appr">
+    <p class="rp-appr-lbl">ความเห็นนายกฯ ....................................................................................................................................................</p>
+    <div class="csigns" style="margin-left:auto;margin-right:0">
+      <div class="csign"><div class="role">(ลงชื่อ)</div><div class="line">${sigImg('ceo')}</div><div class="nm">(${cEsc(r.ceo||CHARTER_DEFAULTS.ceo)})</div><div class="ps">${cEsc(r.ceopos||CHARTER_DEFAULTS.ceopos)}</div></div>
+    </div>
+  </div>
+
+  </body></html>`;
+  w.document.write(html);
+  w.document.close();
+  w.print();
 }
 
 /* ═══ FOLLOW-UP ═══ */
@@ -2982,6 +3416,7 @@ function rFU(){
     <div class="fur">
       <div class="fud ${dc[f.status]}"></div>
       <div style="flex:1">
+        ${f.subject?`<div style="font-size:11px;color:var(--r);font-weight:700;margin-bottom:2px">📄 ${f.subject}</div>`:''}
         <div style="font-size:13px;font-weight:600">${f.finding}</div>
         <div style="font-size:11px;color:var(--t4);margin-top:2px">${f.dept||'-'} · ปี ${f.yr||'-'} · ${f.at||'-'}</div>
         ${f.law?`<div style="font-size:11px;color:var(--t3);font-family:var(--mono);margin-top:2px">📋 ${f.law}</div>`:''}
@@ -2994,6 +3429,10 @@ function rFU(){
           <option value="partial" ${f.status==='partial'?'selected':''}>บางส่วน</option>
           <option value="done" ${f.status==='done'?'selected':''}>เสร็จสิ้น</option>
         </select>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-xs" onclick="editFU('${f.id}')">✎ แก้ไข</button>
+          <button class="btn btn-xs btn-del" onclick="delFU('${f.id}')">🗑 ลบ</button>
+        </div>
       </div>
     </div>`).join('');
 }
@@ -3001,6 +3440,127 @@ function updFU(id,status){
   if(!authz())return;
   const fus=db.get('followups',[]);const idx=fus.findIndex(f=>f.id==id);if(idx<0)return;
   fus[idx].status=status;db.set('followups',fus);toast('อัปเดตสถานะแล้ว');rFU();updateBdg();
+}
+let editingFUId=null;
+function editFU(id){
+  if(!authz())return;
+  const fus=db.get('followups',[]);const f=fus.find(x=>String(x.id)===String(id));if(!f)return;
+  editingFUId=id;
+  document.getElementById('fu-f-yr').value=f.yr||'';
+  document.getElementById('fu-f-dept').value=f.dept||'';
+  document.getElementById('fu-f-st').value=f.status||'open';
+  document.getElementById('fu-f-subject').value=f.subject||'';
+  document.getElementById('fu-f-finding').value=f.finding||'';
+  document.getElementById('fu-f-law').value=f.law||'';
+  document.getElementById('fu-f-rec').value=f.rec||'';
+  document.getElementById('fu-fw-title').textContent='✎ แก้ไขรายการติดตามผล';
+  document.getElementById('fu-fw').style.display='block';
+  document.getElementById('fu-fw').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function closeFUF(){
+  editingFUId=null;
+  document.getElementById('fu-fw').style.display='none';
+}
+function saveFU(){
+  if(!authz())return;
+  if(editingFUId==null)return;
+  const finding=document.getElementById('fu-f-finding').value.trim();
+  if(!finding){toast('กรุณากรอกประเด็น/ข้อสังเกต');return}
+  const fus=db.get('followups',[]);
+  const idx=fus.findIndex(x=>String(x.id)===String(editingFUId));
+  if(idx>=0){
+    fus[idx]={...fus[idx],
+      yr:document.getElementById('fu-f-yr').value,
+      dept:document.getElementById('fu-f-dept').value.trim(),
+      status:document.getElementById('fu-f-st').value,
+      subject:document.getElementById('fu-f-subject').value.trim(),
+      finding,
+      law:document.getElementById('fu-f-law').value,
+      rec:document.getElementById('fu-f-rec').value};
+    db.set('followups',fus);
+    toast('💾 แก้ไขรายการติดตามแล้ว');
+  }
+  editingFUId=null;
+  document.getElementById('fu-fw').style.display='none';
+  rFU();updateBdg();
+}
+function delFU(id){
+  if(!authz())return;
+  if(!confirm('ยืนยันการลบรายการติดตามผลนี้?'))return;
+  let fus=db.get('followups',[]);fus=fus.filter(f=>String(f.id)!==String(id));db.set('followups',fus);
+  toast('🗑 ลบรายการติดตามแล้ว');
+  rFU();updateBdg();
+}
+function printFU(){
+  const yr=document.getElementById('fu-yr')?.value||'';
+  const st=document.getElementById('fu-st')?.value||'';
+  const round=(document.getElementById('fu-round')?.value||'').trim();
+  let fus=db.get('followups',[]);
+  if(yr)fus=fus.filter(f=>f.yr===yr);
+  if(st)fus=fus.filter(f=>f.status===st);
+  const curTY=new Date().getFullYear()+543;
+  const dispYr=yr||String(curTY);
+  const groups={};
+  const order=[];
+  fus.forEach(f=>{
+    const key=f.reportId!=null?('r:'+f.reportId):('x:'+(f.dept||'')+'|'+(f.subject||f.finding||''));
+    if(!groups[key]){groups[key]={dept:f.dept||'-',subject:f.subject||f.finding||'-',items:[]};order.push(key);}
+    groups[key].items.push(f);
+  });
+  const groupList=order.map(k=>groups[k]);
+  const stStat=items=>{
+    const done=items.filter(i=>i.status==='done').length;
+    const total=items.length;
+    if(total===0)return '-';
+    if(done===total)return total>1?`ดำเนินการแล้วทั้ง ${total} ข้อ`:'ดำเนินการแล้ว';
+    if(done===0)return 'ยังไม่ดำเนินการ';
+    return `ดำเนินการแล้ว ${done} จาก ${total} ข้อ`;
+  };
+  const w=window.open('','_blank');if(!w)return;
+  const sigs=db.get('signatures',{});
+  const sigImg=role=>(sigs[role]&&sigs[role].img)?`<img src="${sigs[role].img}" style="max-height:36px;max-width:110px;object-fit:contain;vertical-align:middle">`:'';
+  const rowsHtml=groupList.length?groupList.map(g=>`
+    <tr>
+      <td style="text-align:center">${cEsc(g.dept)}</td>
+      <td>${cEsc(g.subject)}</td>
+      <td>${g.items.map((it,i)=>`${i+1}. ${cEsc(it.rec||it.finding||'-')}`).join('<br>')}</td>
+      <td style="text-align:center">${cEsc(stStat(g.items))}</td>
+      <td></td>
+    </tr>`).join(''):`<tr><td colspan="5" style="text-align:center;padding:24px;color:#888">ไม่มีรายการติดตามผลในเงื่อนไขที่เลือก</td></tr>`;
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>รายงานการติดตามผลการปฏิบัติตามข้อเสนอแนะของหน่วยตรวจสอบภายใน</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    @page{size:A4 landscape;margin:2cm}
+    *{box-sizing:border-box}
+    body{font-family:'TH SarabunPSK','TH Sarabun New','Sarabun',sans-serif;margin:0;padding:18px 30px;font-size:16px;line-height:1.6;color:#181818;background:#fff}
+    h1{font-size:20px;text-align:center;margin:0 0 2px;font-weight:800}
+    .fu-sub{font-size:20px;text-align:center;margin:0 0 20px;font-weight:800}
+    table{width:100%;border-collapse:collapse;margin-bottom:26px}
+    th,td{border:1px solid #333;padding:8px 10px;font-size:15px;vertical-align:top;text-align:left}
+    th{background:#eee;font-weight:700;text-align:center}
+    th:nth-child(1),td:nth-child(1){width:13%}
+    th:nth-child(2),td:nth-child(2){width:18%}
+    th:nth-child(3),td:nth-child(3){width:36%}
+    th:nth-child(4),td:nth-child(4){width:18%}
+    th:nth-child(5),td:nth-child(5){width:15%}
+    .fu-sign{margin-top:14px;text-align:right;padding-right:70px}
+    .fu-sign p{margin:0 0 2px}
+    .fu-sign .nm{margin-top:6px;font-weight:600}
+    @media print{ th{-webkit-print-color-adjust:exact;print-color-adjust:exact} }
+  </style></head><body>
+    <h1>รายงานการติดตามผลการปฏิบัติตามข้อเสนอแนะของหน่วยตรวจสอบภายใน</h1>
+    <div class="fu-sub">ครั้งที่ ${cEsc(round||'-')}/${cEsc(dispYr)}</div>
+    <table><thead><tr><th>ส่วนราชการ</th><th>เรื่องที่ตรวจ</th><th>ข้อเสนอแนะ</th><th>ผลการติดตาม</th><th>หมายเหตุ</th></tr></thead>
+    <tbody>${rowsHtml}</tbody></table>
+    <div class="fu-sign">
+      <p>ลงชื่อ ${sigImg('head')}</p>
+      <p class="nm">(${cEsc(CHARTER_DEFAULTS.head)})</p>
+      <p>${cEsc(CHARTER_DEFAULTS.headpos)}</p>
+    </div>
+  </body></html>`;
+  w.document.write(html);
+  w.document.close();
+  w.print();
 }
 
 /* ═══ ANNUAL ═══ */
@@ -3023,13 +3583,52 @@ function rAnnual(){
   const byDept={};
   risks.forEach(r=>{if(!byDept[r.dept])byDept[r.dept]={n:0,high:0};byDept[r.dept].n++;if(r.level==='วิกฤต'||r.level==='สูง')byDept[r.dept].high++});
   const savedNote=db.get('ar-note-'+yr,'');
+  // รายงานประจำปี: รวมข้อมูลจากรายงานผลการตรวจ (reports) ของปีงบประมาณนี้ทั้งหมด
+  const spl={low:'pl',med:'pm',high:'ph2'},slb={low:'ต่ำ',med:'ปานกลาง',high:'สูง'},sbd={high:'var(--r)',med:'var(--wa)',low:'var(--ok)'};
+  const allFindings=[];
+  reports.forEach(rp=>(rp.findings||[]).forEach(f=>allFindings.push({...f,dept:rp.dept,subject:rp.subject||rp.planName})));
+  const sevOrd={high:0,med:1,low:2};
+  allFindings.sort((a,b)=>(sevOrd[a.sev]??3)-(sevOrd[b.sev]??3));
+  const allRecs=reports.filter(rp=>rp.rec&&rp.rec.trim()).map(rp=>({dept:rp.dept,subject:rp.subject||rp.planName,rec:rp.rec}));
+  // ข้อมูลกราฟ: ระดับความเสี่ยง / ผลการติดตาม / ข้อตรวจพบแยกระดับ / ความเสี่ยงแยกตามกอง
+  const lvDef=[{l:'วิกฤต',c:'var(--r)'},{l:'สูง',c:'#F4784B'},{l:'ปานกลาง',c:'var(--wa)'},{l:'ต่ำ',c:'var(--ok)'}];
+  const riskGrad=donutGrad(lvDef.map(d=>({v:byLv[d.l]||0,c:d.c})));
+  const riskLegend=lvDef.map(d=>{
+    const n=byLv[d.l]||0;const p=risks.length?Math.round(n/risks.length*100):0;
+    return`<div class="dleg-item"><span class="dleg-dot" style="background:${d.c}"></span>${d.l}<span class="pct">${p}%</span><b>${n}</b></div>`;
+  }).join('');
+  const fuGrad=donutGrad([{v:fuDone,c:'var(--ok)'},{v:fus.length-fuDone,c:'var(--bg2)'}]);
+  const findLvDef=[{l:'high',c:'var(--r)',label:'สูง'},{l:'med',c:'var(--wa)',label:'ปานกลาง'},{l:'low',c:'var(--ok)',label:'ต่ำ'}];
+  const findBySev={high:0,med:0,low:0};
+  allFindings.forEach(f=>findBySev[f.sev]=(findBySev[f.sev]||0)+1);
+  const findGrad=donutGrad(findLvDef.map(d=>({v:findBySev[d.l]||0,c:d.c})));
+  const findLegend=findLvDef.map(d=>{
+    const n=findBySev[d.l]||0;const p=allFindings.length?Math.round(n/allFindings.length*100):0;
+    return`<div class="dleg-item"><span class="dleg-dot" style="background:${d.c}"></span>${d.label}<span class="pct">${p}%</span><b>${n}</b></div>`;
+  }).join('');
+  const deptSorted=Object.entries(byDept).sort((a,b)=>b[1].n-a[1].n).slice(0,8);
+  const deptMax=Math.max(1,...deptSorted.map(([,v])=>v.n));
+  const deptBars=deptSorted.map(([d,v])=>{
+    const p=Math.round(v.n/deptMax*100);const c=v.high>0?'var(--r)':'var(--ok)';
+    return`<div class="dbar-row"><div class="dbar-top"><span class="dbar-label">${cEsc(d)}</span><span class="dbar-val" style="color:${c}">${v.n}</span></div>
+      <div class="dbar-track"><div class="dbar-fill" style="width:${p}%;background:${c}"></div></div></div>`;
+  }).join('');
+  const arStCounts={planned:0,inprogress:0,done:0};
+  plans.forEach(p=>{arStCounts[p.status]=(arStCounts[p.status]||0)+1});
+  const arStColor={planned:'var(--bl)',inprogress:'var(--wa)',done:'var(--ok)'};
+  const arStx={planned:'วางแผน',inprogress:'กำลังตรวจ',done:'เสร็จสิ้น'};
+  const arPlanStack=['planned','inprogress','done'].map(k=>{
+    const w=plans.length?Math.round(arStCounts[k]/plans.length*100):0;
+    return w>0?`<div class="dstack-seg" style="width:${w}%;background:${arStColor[k]}"></div>`:'';
+  }).join('');
+  const arPlanLegend=['planned','inprogress','done'].map(k=>`<div class="dstack-leg-item"><span class="dstack-leg-dot" style="background:${arStColor[k]}"></span>${arStx[k]} ${arStCounts[k]}</div>`).join('');
 
   // Update topbar actions with year selector
   document.getElementById('tb-acts').innerHTML=`
     <select id="ar-yr" class="fi" style="font-size:13px;width:100px" onchange="rAnnual()">
       ${yrOpts.map(y=>`<option value="${y}" ${y===yr?'selected':''}>${y}</option>`).join('')}
     </select>
-    <button class="btn btn-sm btn-p" onclick="window.print()">🖨️ พิมพ์</button>`;
+    <button class="btn btn-sm btn-p" onclick="printAnnual('${yr}')">🖨️ พิมพ์</button>`;
 
   document.getElementById('annual-con').innerHTML=`
     <div class="abl">
@@ -3043,25 +3642,35 @@ function rAnnual(){
         </div>
       </div>
     </div>
+    <div class="abl" style="margin-bottom:13px"><div class="ablh">📅 สถานะแผนตรวจสอบ</div><div class="ablb">
+      ${plans.length?`<div class="dstack">${arPlanStack}</div><div class="dstack-legend">${arPlanLegend}</div>`:'<div style="font-size:12px;color:var(--t4);padding:8px 0">ยังไม่มีแผนตรวจสอบปีนี้</div>'}
+    </div></div>
     <div class="g2" style="margin-bottom:13px">
       <div class="abl" style="margin:0"><div class="ablh">⬡ ระดับความเสี่ยง</div><div class="ablb">
-        ${['วิกฤต','สูง','ปานกลาง','ต่ำ'].map(l=>{
-          const n=byLv[l]||0;const p=risks.length?Math.round(n/risks.length*100):0;
-          const pc={วิกฤต:'pr',สูง:'pr',ปานกลาง:'pa',ต่ำ:'pg'}[l];
-          return`<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--t3);margin-bottom:3px"><span>${l}</span><span>${n} (${p}%)</span></div>
-          <div class="prog"><div class="pf ${pc}" style="width:${p}%"></div></div></div>`;
-        }).join('')}
+        ${risks.length?`<div class="dchart-row" style="border-bottom:none;margin-bottom:0;padding-bottom:0">
+          <div class="dchart-donut" style="background:${riskGrad}"><div class="dchart-hole"><div class="n">${risks.length}</div><div class="l">ทั้งหมด</div></div></div>
+          <div class="dchart-legend">${riskLegend}</div>
+        </div>`:'<div style="font-size:12px;color:var(--t4);padding:8px 0">ยังไม่มีข้อมูลความเสี่ยงปีนี้</div>'}
       </div></div>
-      <div class="abl" style="margin:0"><div class="ablh">🔄 ผลการติดตาม</div>
-        <div class="ablb" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:140px">
-          <div style="font-size:56px;font-weight:800;color:${fuPct>=70?'var(--ok)':'var(--r)'};font-family:var(--mono);line-height:1">${fuPct}%</div>
-          <div style="font-size:13px;color:var(--t3);margin-top:6px">อัตราการดำเนินการแก้ไข</div>
-          <div style="font-size:12px;color:var(--t4);margin-top:3px">${fuDone} จาก ${fus.length} รายการ</div>
-          <div class="prog" style="width:100%;margin-top:12px"><div class="pf ${fuPct>=70?'pg':'pr'}" style="width:${fuPct}%"></div></div>
-        </div>
-      </div>
+      <div class="abl" style="margin:0"><div class="ablh">🔄 ผลการติดตาม</div><div class="ablb">
+        ${fus.length?`<div class="dring-row" style="border-bottom:none;margin-bottom:0;padding-bottom:0">
+          <div class="dring" style="background:${fuGrad}"><div class="dring-hole">${fuPct}%</div></div>
+          <div style="font-size:12px;color:var(--t3)">ติดตามแล้ว <b style="color:var(--t1);font-family:var(--mono)">${fuDone}</b> จาก <b style="color:var(--t1);font-family:var(--mono)">${fus.length}</b> รายการ<br><span style="color:var(--t4)">คงเหลือรอติดตาม ${fus.length-fuDone} รายการ</span></div>
+        </div>`:'<div style="font-size:12px;color:var(--t4);padding:8px 0">ยังไม่มีรายการติดตามปีนี้</div>'}
+      </div></div>
     </div>
-    <div class="abl" style="margin-bottom:13px"><div class="ablh">🏢 แยกตามสำนัก/กอง</div><div class="ablb">
+    <div class="g2" style="margin-bottom:13px">
+      <div class="abl" style="margin:0"><div class="ablh">🔎 ข้อตรวจพบแยกตามระดับ (รวมทั้งปี)</div><div class="ablb">
+        ${allFindings.length?`<div class="dchart-row" style="border-bottom:none;margin-bottom:0;padding-bottom:0">
+          <div class="dchart-donut" style="background:${findGrad}"><div class="dchart-hole"><div class="n">${allFindings.length}</div><div class="l">ข้อตรวจพบ</div></div></div>
+          <div class="dchart-legend">${findLegend}</div>
+        </div>`:'<div style="font-size:12px;color:var(--t4);padding:8px 0">ไม่มีข้อตรวจพบในปีนี้</div>'}
+      </div></div>
+      <div class="abl" style="margin:0"><div class="ablh">🏢 ความเสี่ยงแยกตามสำนัก/กอง</div><div class="ablb">
+        ${deptSorted.length?deptBars:'<div style="font-size:12px;color:var(--t4);padding:8px 0">ยังไม่มีข้อมูล</div>'}
+      </div></div>
+    </div>
+    <div class="abl" style="margin-bottom:13px"><div class="ablh">📋 รายละเอียดความเสี่ยงตามสำนัก/กอง</div><div class="ablb">
       <div class="tw"><table class="tb"><thead><tr><th>สำนัก/กอง</th><th>รายการทั้งหมด</th><th>วิกฤต+สูง</th><th>สัดส่วน</th></tr></thead><tbody>
         ${Object.entries(byDept).map(([d,v])=>{const p=Math.round(v.high/v.n*100);return`<tr>
           <td style="font-weight:600">${d}</td><td style="font-family:var(--mono)">${v.n}</td>
@@ -3070,32 +3679,344 @@ function rAnnual(){
         </tr>`}).join('')||'<tr><td colspan="4" style="text-align:center;color:var(--t4);padding:24px">ไม่มีข้อมูล</td></tr>'}
       </tbody></table></div>
     </div></div>
+    <div class="abl" style="margin-bottom:13px"><div class="ablh">📄 รายงานผลการตรวจสอบที่จัดทำในปีงบประมาณนี้ (${reports.length} ฉบับ)</div><div class="ablb">
+      ${reports.length?reports.map(rp=>{
+        const hi=(rp.findings||[]).filter(f=>f.sev==='high').length;
+        const me=(rp.findings||[]).filter(f=>f.sev==='med').length;
+        const lo=(rp.findings||[]).filter(f=>f.sev==='low').length;
+        return`<div style="padding:10px 12px;border-left:3px solid var(--r);margin-bottom:8px;background:var(--bg);border-radius:0 var(--rd2) var(--rd2) 0">
+          <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px">
+            <div><div style="font-size:13px;font-weight:700">${rp.subject||rp.planName||'-'}</div>
+            <div style="font-size:11px;color:var(--t4)">${rp.dept||'-'} · ${rp.date||'-'}</div></div>
+            <div style="display:flex;gap:4px;flex-wrap:wrap">
+              ${hi?`<span class="pill ph2">สูง ${hi}</span>`:''}${me?`<span class="pill pm">ปานกลาง ${me}</span>`:''}${lo?`<span class="pill pl">ต่ำ ${lo}</span>`:''}
+              ${!hi&&!me&&!lo?`<span class="pill pl">ไม่พบข้อผิดพลาด</span>`:''}
+            </div>
+          </div>
+          ${rp.sum?`<div style="font-size:12px;color:var(--t2);margin-top:6px">${rp.sum.slice(0,180)}${rp.sum.length>180?'…':''}</div>`:''}
+          <div style="display:flex;gap:4px;margin-top:6px">
+            <button class="btn btn-xs" onclick="editRpt('${rp.id}')">✎ แก้ไข</button>
+            <button class="btn btn-xs btn-del" onclick="delRpt('${rp.id}')">🗑 ลบ</button>
+          </div>
+        </div>`;
+      }).join(''):'<div style="text-align:center;color:var(--t4);padding:20px">ยังไม่มีรายงานผลการตรวจในปีงบประมาณนี้</div>'}
+    </div></div>
+    <div class="abl" style="margin-bottom:13px"><div class="ablh">🔎 ข้อตรวจพบรวมทั้งปี — จากรายงานผลการตรวจทุกฉบับ (${allFindings.length} รายการ)</div><div class="ablb">
+      ${allFindings.length?allFindings.map(f=>`<div style="padding:8px 12px;border-left:3px solid ${sbd[f.sev]};margin-bottom:4px;background:var(--bg);border-radius:0 var(--rd2) var(--rd2) 0">
+        <div style="font-size:12px;font-weight:600">${f.text}</div>
+        <div style="font-size:10px;color:var(--t4);margin-top:2px">${f.dept||'-'} · ${f.subject||'-'}</div>
+        <span class="pill ${spl[f.sev]}" style="margin-top:4px">${slb[f.sev]}</span>
+      </div>`).join(''):'<div style="text-align:center;color:var(--t4);padding:20px">ไม่มีข้อตรวจพบในปีงบประมาณนี้</div>'}
+    </div></div>
+    <div class="abl" style="margin-bottom:13px"><div class="ablh">💡 ข้อเสนอแนะจากรายงานผลการตรวจ ประจำปีนี้</div><div class="ablb">
+      ${allRecs.length?allRecs.map(x=>`<div style="padding:8px 12px;margin-bottom:6px;border-left:3px solid var(--ok);background:var(--bg);border-radius:0 var(--rd2) var(--rd2) 0">
+        <div style="font-size:11px;color:var(--t4);font-weight:700">${x.dept||'-'} · ${x.subject||'-'}</div>
+        <div style="font-size:12px;color:var(--t2);margin-top:2px">${x.rec}</div>
+      </div>`).join(''):'<div style="text-align:center;color:var(--t4);padding:20px">ไม่มีข้อเสนอแนะจากรายงานในปีงบประมาณนี้</div>'}
+    </div></div>
     <div class="abl"><div class="ablh">📝 ข้อเสนอแนะสำหรับปีถัดไป</div><div class="ablb">
       <textarea id="ar-note" class="fi" rows="5" placeholder="บันทึกข้อเสนอแนะเชิงนโยบาย ประเด็นปรับปรุงเชิงระบบ...">${savedNote}</textarea>
       <button class="btn btn-sm btn-p" onclick="saveArNote('${yr}')" style="margin-top:8px">💾 บันทึก</button>
     </div></div>`;
 }
 function saveArNote(yr){if(!authz())return;db.set('ar-note-'+yr,document.getElementById('ar-note').value);toast('💾 บันทึกแล้ว')}
+function printAnnual(yr){
+  const charter=db.get('charter',{});
+  const risks=db.get('risks',[]).filter(r=>r.yr===yr);
+  const plans=db.get('plans',[]).filter(p=>p.yr===yr);
+  const reports=db.get('reports',[]).filter(r=>r.yr===yr);
+  const fus=db.get('followups',[]).filter(f=>f.yr===yr);
+  const byLv={วิกฤต:0,สูง:0,ปานกลาง:0,ต่ำ:0};
+  risks.forEach(r=>byLv[r.level]=(byLv[r.level]||0)+1);
+  const pDone=plans.filter(p=>p.status==='done').length;
+  const fuDone=fus.filter(f=>f.status==='done').length;
+  const fuPct=fus.length?Math.round(fuDone/fus.length*100):0;
+  const byDept={};
+  risks.forEach(r=>{if(!byDept[r.dept])byDept[r.dept]={n:0,high:0};byDept[r.dept].n++;if(r.level==='วิกฤต'||r.level==='สูง')byDept[r.dept].high++});
+  const allFindings=[];
+  reports.forEach(rp=>(rp.findings||[]).forEach(f=>allFindings.push({...f,dept:rp.dept,subject:rp.subject||rp.planName})));
+  const sevOrd={high:0,med:1,low:2};
+  allFindings.sort((a,b)=>(sevOrd[a.sev]??3)-(sevOrd[b.sev]??3));
+  const allRecs=reports.filter(rp=>rp.rec&&rp.rec.trim()).map(rp=>({dept:rp.dept,subject:rp.subject||rp.planName,rec:rp.rec}));
+  const savedNote=db.get('ar-note-'+yr,'');
+  const sigs=db.get('signatures',{});
+  const sigImg=role=>(sigs[role]&&sigs[role].img)?`<img src="${sigs[role].img}" style="max-height:38px;max-width:120px;object-fit:contain">`:'&nbsp;';
+  const sealImg=(charter||{}).seal||'';
+  const spl={low:'pl',med:'pm',high:'ph2'},slb={low:'ต่ำ',med:'ปานกลาง',high:'สูง'};
+  const sevColor={high:'#C8102E',med:'#C98A00',low:'#0E8A5F'};
+  const secHd=(icon,title,color)=>`<div class="pa-sec-hd"><span class="sec-badge" style="background:${color||'#C8102E'}">${icon}</span>${cEsc(title)}</div>`;
+  const subHd=(title,color)=>`<div class="pa-sub-hd" style="color:${color||'#9B0C22'}">${cEsc(title)}</div>`;
+
+  const lvDef=[{l:'วิกฤต',c:'#C8102E'},{l:'สูง',c:'#F4784B'},{l:'ปานกลาง',c:'#C98A00'},{l:'ต่ำ',c:'#0E8A5F'}];
+  const riskGrad=donutGrad(lvDef.map(d=>({v:byLv[d.l]||0,c:d.c})));
+  const riskLegend=lvDef.map(d=>{const n=byLv[d.l]||0;const p=risks.length?Math.round(n/risks.length*100):0;
+    return`<div class="pleg-item"><span class="pleg-dot" style="background:${d.c}"></span>${d.l}<span class="pct">${p}%</span><b>${n}</b></div>`;}).join('');
+  const fuGrad=donutGrad([{v:fuDone,c:'#0E8A5F'},{v:fus.length-fuDone,c:'#E5E5E5'}]);
+  const findLvDef=[{l:'high',c:'#C8102E',label:'สูง'},{l:'med',c:'#C98A00',label:'ปานกลาง'},{l:'low',c:'#0E8A5F',label:'ต่ำ'}];
+  const findBySev={high:0,med:0,low:0};
+  allFindings.forEach(f=>findBySev[f.sev]=(findBySev[f.sev]||0)+1);
+  const findGrad=donutGrad(findLvDef.map(d=>({v:findBySev[d.l]||0,c:d.c})));
+  const findLegend=findLvDef.map(d=>{const n=findBySev[d.l]||0;const p=allFindings.length?Math.round(n/allFindings.length*100):0;
+    return`<div class="pleg-item"><span class="pleg-dot" style="background:${d.c}"></span>${d.label}<span class="pct">${p}%</span><b>${n}</b></div>`;}).join('');
+  const deptSorted=Object.entries(byDept).sort((a,b)=>b[1].n-a[1].n);
+  const deptMax=Math.max(1,...deptSorted.map(([,v])=>v.n));
+  const deptBars=deptSorted.map(([d,v])=>{const p=Math.round(v.n/deptMax*100);const c=v.high>0?'#C8102E':'#0E8A5F';
+    return`<div class="pbar-row"><div class="pbar-top"><span class="pbar-label">${cEsc(d)}</span><span class="pbar-val" style="color:${c}">${v.n}</span></div>
+      <div class="pbar-track"><div class="pbar-fill" style="width:${p}%;background:${c}"></div></div></div>`;}).join('');
+  const stCounts={planned:0,inprogress:0,done:0};
+  plans.forEach(p=>{stCounts[p.status]=(stCounts[p.status]||0)+1});
+  const stColor={planned:'#3B7DC4',inprogress:'#C98A00',done:'#0E8A5F'};
+  const stx={planned:'วางแผน',inprogress:'กำลังตรวจ',done:'เสร็จสิ้น'};
+  const planStackSegs=['planned','inprogress','done'].map(k=>{
+    const w2=plans.length?Math.round(stCounts[k]/plans.length*100):0;
+    return w2>0?`<div class="pstack-seg" style="width:${w2}%;background:${stColor[k]}"></div>`:'';
+  }).join('');
+  const planStackLegend=['planned','inprogress','done'].map(k=>`<span class="pstack-leg-item"><span class="dot" style="background:${stColor[k]}"></span>${stx[k]} ${stCounts[k]}</span>`).join('');
+
+  // เรียงข้อมูลรายงานผลการตรวจสอบ (แต่ละเรื่องแยกคนละหน้า)
+  const reportPagesHtml = reports.length ? reports.map((rp,ri)=>{
+    const findHtml=(rp.findings&&rp.findings.length)?rp.findings.map((f,fi)=>`
+      <div class="pa-item" style="border-left-color:${sevColor[f.sev]||'#999'}">
+        <div class="t">ข้อตรวจพบที่ ${fi+1}: ${cEsc(f.text)}</div>
+        ${f.law?`<div class="m">อ้างอิง: ${cEsc(f.law)}</div>`:''}
+        ${f.rec?`<div class="m">ข้อเสนอแนะ: ${cEsc(f.rec)}</div>`:''}
+        <div class="m">ระดับ: ${slb[f.sev]||'-'}</div>
+      </div>`).join('') : '<div style="font-size:12px;color:#999">ไม่พบข้อผิดพลาดในการดำเนินงาน</div>';
+    return`<div class="page-break"></div>
+    <div class="pa-sec">
+      <div class="rpt-page-hd"><span class="rpt-badge">${ri+1}</span><div><div class="rpt-title">เรื่องที่ ${ri+1}: ${cEsc(rp.subject||rp.planName||'-')}</div>
+      <div class="rpt-page-sub">${cEsc(rp.dept||'-')} · ${cEsc(rp.date||'-')}${rp.period?' · '+cEsc(rp.period):''}</div></div></div>
+      ${rp.sum?`${subHd('สรุปข้อตรวจพบ')}<div class="pa-body-txt" style="margin-bottom:16px">${cEsc(rp.sum)}</div>`:''}
+      ${subHd('ข้อตรวจพบ ('+(rp.findings||[]).length+' รายการ)')}
+      ${findHtml}
+      ${rp.rec?`${subHd('ข้อเสนอแนะ/ความเห็น','#0E8A5F')}<div class="pa-body-txt">${cEsc(rp.rec)}</div>`:''}
+    </div>`;
+  }).join('') : `<div class="page-break"></div><div class="pa-sec">${secHd('📄','รายงานผลการตรวจสอบ')}<div style="font-size:12px;color:#999">ยังไม่มีรายงานผลการตรวจในปีงบประมาณนี้</div></div>`;
+
+  const w=window.open('','_blank');if(!w)return;
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>รายงานสรุปผลการตรวจสอบภายในประจำปี ${cEsc(yr)}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{--pr:#C8102E;--prd:#8E0A1E;--prl:#FF8A9A;--pbl:#2F6FB2;--ppu:#7C3AED;--pgr:#0E8A5F;--por:#C98A00}
+    @page{size:A4;margin:1.8cm 1.8cm 2cm}
+    *{box-sizing:border-box}
+    body{font-family:'TH SarabunPSK','TH Sarabun New','Sarabun',sans-serif;max-width:840px;margin:0 auto;padding:0 0 40px;font-size:16.5px;line-height:1.65;color:#22201f;background:#fff}
+    .pa-hd{position:relative;text-align:center;padding:30px 20px 26px;margin:0 0 24px;border-radius:16px;background:linear-gradient(135deg,var(--prd) 0%,var(--pr) 55%,#E8365A 100%);color:#fff;overflow:hidden}
+    .pa-hd:before{content:'';position:absolute;top:-60px;right:-60px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.08)}
+    .pa-hd:after{content:'';position:absolute;bottom:-50px;left:-30px;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.06)}
+    .pa-hd-seal{width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,.16);margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:26px;position:relative;box-shadow:0 4px 14px rgba(0,0,0,.15)}
+    .pa-hd-seal.img{background:#fff;padding:4px}
+    .pa-hd-seal.img img{width:100%;height:100%;object-fit:contain;border-radius:50%}
+    .pa-hd h1{font-size:23px;margin:0 0 6px;font-weight:800;position:relative;letter-spacing:.01em}
+    .pa-hd .org{font-size:16.5px;font-weight:700;margin:2px 0;position:relative;opacity:.97}
+    .pa-hd .prov{font-size:13px;position:relative;opacity:.8}
+    .pa-hd .yrbadge{display:inline-block;margin-top:12px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);border-radius:20px;padding:4px 18px;font-size:13px;font-weight:700;position:relative;backdrop-filter:blur(2px)}
+    .pa-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:24px}
+    .pa-kpi{border-radius:12px;padding:14px 8px 12px;text-align:center;background:#FAFAFA;border-top:3px solid var(--c,var(--pr));box-shadow:0 1px 3px rgba(0,0,0,.05)}
+    .pa-kpi .ic{font-size:15px;margin-bottom:2px}
+    .pa-kpi .n{font-size:21px;font-weight:800;font-family:'Courier New',monospace;color:var(--c,var(--pr));line-height:1.1}
+    .pa-kpi .l{font-size:10px;color:#888;margin-top:5px;line-height:1.3}
+    .pa-sec{margin-bottom:22px}
+    .pa-sec-hd{display:flex;align-items:center;gap:9px;font-weight:700;font-size:15.5px;color:#222;padding-bottom:8px;margin-bottom:13px;border-bottom:1.5px solid #f2dade;page-break-after:avoid}
+    .sec-badge{width:25px;height:25px;border-radius:8px;background:var(--pr);color:#fff;font-size:12.5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 5px rgba(200,16,46,.28)}
+    .pa-sub-hd{font-weight:700;font-size:13.5px;color:#9B0C22;margin:0 0 7px;letter-spacing:.01em}
+    .pa-body-txt{font-size:13.5px;color:#333;white-space:pre-wrap;line-height:1.65}
+    .pa-g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px}
+    .pa-panel{background:#FCFCFC;border:1px solid #f0f0f0;border-radius:12px;padding:14px 16px}
+    .pchart-row{display:flex;align-items:center;gap:16px}
+    .pchart-donut{width:88px;height:88px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+    .pchart-hole{width:62px;height:62px;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 1px #eee;display:flex;flex-direction:column;align-items:center;justify-content:center}
+    .pchart-hole .n{font-size:15.5px;font-weight:800;font-family:'Courier New',monospace;color:#181818;line-height:1}
+    .pchart-hole .l{font-size:7.5px;color:#999;margin-top:2px}
+    .pleg-item{display:flex;align-items:center;gap:6px;font-size:12px;color:#333;margin-bottom:7px}
+    .pleg-dot{width:9px;height:9px;border-radius:3px;flex-shrink:0}
+    .pleg-item .pct{font-size:10px;color:#999}
+    .pleg-item b{margin-left:auto;font-family:'Courier New',monospace;font-weight:700;padding-left:10px}
+    .pring{width:54px;height:54px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+    .pring-hole{width:39px;height:39px;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 1px #eee;display:flex;align-items:center;justify-content:center;font-family:'Courier New',monospace;font-size:10.5px;font-weight:800}
+    .pbar-row{margin-bottom:10px}
+    .pbar-row:last-child{margin-bottom:0}
+    .pbar-top{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px}
+    .pbar-label{font-weight:600}
+    .pbar-val{font-family:'Courier New',monospace;font-weight:800}
+    .pbar-track{background:#ececec;border-radius:5px;height:8px;overflow:hidden}
+    .pbar-fill{height:100%;border-radius:5px}
+    table.pa-tb{width:100%;border-collapse:collapse;font-size:12.5px;border-radius:10px;overflow:hidden}
+    table.pa-tb th{text-align:left;background:var(--pr);color:#fff;font-weight:700;padding:8px 10px}
+    table.pa-tb td{padding:7px 10px;border-bottom:1px solid #f0f0f0}
+    table.pa-tb tr:nth-child(even) td{background:#FAFAFA}
+    .pa-item{border-left:3px solid var(--pr);background:#FFF8F8;padding:9px 13px;margin-bottom:8px;border-radius:0 10px 10px 0;font-size:12.5px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+    .pa-item .t{font-weight:700;color:#222}
+    .pa-item .m{color:#888;font-size:11px;margin-top:3px}
+    .pa-note{white-space:pre-wrap;font-size:13px;color:#333;border-left:3px solid #999;padding:10px 14px;background:#FAFAFA;border-radius:0 10px 10px 0}
+    .csigns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:20px;page-break-inside:avoid}
+    .csign{text-align:center;font-size:14px}
+    .csign .role{color:#888;font-size:11.5px;margin-bottom:26px;text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+    .csign .line{border-bottom:1.5px dotted #bbb;margin-bottom:7px;min-height:28px;display:flex;align-items:flex-end;justify-content:center}
+    .csign .nm{font-weight:700;color:#222}
+    .csign .ps{color:#666;margin-top:1px;font-size:12px}
+    .pa-foot{margin-top:34px;padding-top:12px;border-top:1px solid #f0f0f0;text-align:center;font-size:11px;color:#bbb}
+    .page-break{page-break-before:always}
+    .pstack{display:flex;height:11px;border-radius:6px;overflow:hidden;margin-bottom:9px;background:#ececec}
+    .pstack-seg{height:100%}
+    .pstack-leg-item{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:#333;margin-right:18px}
+    .pstack-leg-item .dot{width:8px;height:8px;border-radius:2px;display:inline-block}
+    .rpt-page-hd{display:flex;align-items:flex-start;gap:13px;margin:6px 0 18px;padding-bottom:14px;border-bottom:2px solid var(--pr)}
+    .rpt-badge{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--prd),var(--pr));color:#fff;font-size:17px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 3px 8px rgba(200,16,46,.3)}
+    .rpt-title{font-size:18px;font-weight:800;color:#181818}
+    .rpt-page-sub{font-size:12.5px;color:#888;margin-top:3px}
+    @media print{
+      body{padding:0 0 20px}
+      .pa-hd{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+      .sec-badge,.pchart-donut,.pring,.pbar-fill,.pstack-seg,table.pa-tb th,table.pa-tb tr:nth-child(even) td,.pa-item,.rpt-badge,.pa-kpi{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+      .pa-sec,.pa-item,.csigns{break-inside:avoid}
+    }
+  </style></head><body>
+  <div class="pa-hd">
+    ${sealImg?`<div class=\"pa-hd-seal img\"><img src=\"${sealImg}\" alt=\"ตราเทศบาล\"></div>`:`<div class=\"pa-hd-seal\">🛡️</div>`}
+    <h1>รายงานสรุปผลการตรวจสอบภายในประจำปี</h1>
+    <div class="org">${cEsc(charter.org||CHARTER_DEFAULTS.org)}</div>
+    <div class="prov">${cEsc(charter.province||CHARTER_DEFAULTS.province)}</div>
+    <div class="yrbadge">ปีงบประมาณ ${cEsc(yr)}</div>
+  </div>
+
+  <div class="pa-kpis">
+    <div class="pa-kpi" style="--c:var(--pr)"><div class="ic">⬡</div><div class="n">${risks.length}</div><div class="l">ประเด็นความเสี่ยง</div></div>
+    <div class="pa-kpi" style="--c:var(--pbl)"><div class="ic">📅</div><div class="n">${pDone}/${plans.length}</div><div class="l">แผนตรวจสอบเสร็จ</div></div>
+    <div class="pa-kpi" style="--c:var(--ppu)"><div class="ic">📄</div><div class="n">${reports.length}</div><div class="l">รายงานที่จัดทำ</div></div>
+    <div class="pa-kpi" style="--c:${fuPct>=70?'var(--pgr)':'var(--pr)'}"><div class="ic">🔄</div><div class="n">${fuPct}%</div><div class="l">อัตราแก้ไข (${fuDone}/${fus.length})</div></div>
+  </div>
+
+  <div class="pa-sec pa-panel">${secHd('📅','สถานะแผนตรวจสอบ','var(--pbl)')}
+    ${plans.length?`<div class="pstack">${planStackSegs}</div><div>${planStackLegend}</div>`:'<div style="font-size:12px;color:#999">ยังไม่มีแผนตรวจสอบ</div>'}
+  </div>
+
+  <div class="pa-g2">
+    <div class="pa-panel" style="margin-bottom:0">${secHd('⬡','ระดับความเสี่ยง')}
+      ${risks.length?`<div class="pchart-row"><div class="pchart-donut" style="background:${riskGrad}"><div class="pchart-hole"><div class="n">${risks.length}</div><div class="l">ทั้งหมด</div></div></div><div>${riskLegend}</div></div>`:'<div style="font-size:12px;color:#999">ยังไม่มีข้อมูล</div>'}
+    </div>
+    <div class="pa-panel" style="margin-bottom:0">${secHd('🔄','ผลการติดตาม','var(--pgr)')}
+      ${fus.length?`<div class="pchart-row"><div class="pring" style="background:${fuGrad}"><div class="pring-hole">${fuPct}%</div></div><div style="font-size:12px;color:#333">ติดตามแล้ว <b>${fuDone}</b> จาก <b>${fus.length}</b> รายการ<br><span style="color:#999">คงเหลือ ${fus.length-fuDone} รายการ</span></div></div>`:'<div style="font-size:12px;color:#999">ยังไม่มีข้อมูล</div>'}
+    </div>
+  </div>
+
+  <div class="pa-g2">
+    <div class="pa-panel" style="margin-bottom:0">${secHd('🔎','ข้อตรวจพบแยกตามระดับ','var(--por)')}
+      ${allFindings.length?`<div class="pchart-row"><div class="pchart-donut" style="background:${findGrad}"><div class="pchart-hole"><div class="n">${allFindings.length}</div><div class="l">ข้อตรวจพบ</div></div></div><div>${findLegend}</div></div>`:'<div style="font-size:12px;color:#999">ไม่มีข้อตรวจพบ</div>'}
+    </div>
+    <div class="pa-panel" style="margin-bottom:0">${secHd('🏢','ความเสี่ยงแยกตามสำนัก/กอง','var(--ppu)')}
+      ${deptSorted.length?deptBars:'<div style="font-size:12px;color:#999">ยังไม่มีข้อมูล</div>'}
+    </div>
+  </div>
+
+  <div class="pa-sec">${secHd('📋','รายละเอียดความเสี่ยงตามสำนัก/กอง')}
+    <table class="pa-tb"><thead><tr><th>สำนัก/กอง</th><th>รายการทั้งหมด</th><th>วิกฤต+สูง</th></tr></thead><tbody>
+      ${deptSorted.length?deptSorted.map(([d,v])=>`<tr><td>${cEsc(d)}</td><td>${v.n}</td><td>${v.high}</td></tr>`).join(''):'<tr><td colspan="3" style="text-align:center;color:#999;padding:14px">ไม่มีข้อมูล</td></tr>'}
+    </tbody></table>
+  </div>
+
+  ${reportPagesHtml}
+
+  <div class="page-break"></div>
+  ${savedNote?`<div class="pa-sec">${secHd('📝','ข้อเสนอแนะสำหรับปีถัดไป','#666')}<div class="pa-note">${cEsc(savedNote)}</div></div>`:''}
+
+  <div class="csigns">
+    <div class="csign"><div class="role">ผู้จัดทำ</div><div class="line">${sigImg('head')}</div><div class="nm">(${cEsc(CHARTER_DEFAULTS.head)})</div><div class="ps">${cEsc(CHARTER_DEFAULTS.headpos)}</div></div>
+    <div class="csign"><div class="role">ผู้เห็นชอบ</div><div class="line">${sigImg('clerk')}</div><div class="nm">(${cEsc(CHARTER_DEFAULTS.clerk)})</div><div class="ps">${cEsc(CHARTER_DEFAULTS.clerkpos)}</div></div>
+    <div class="csign"><div class="role">ผู้อนุมัติ</div><div class="line">${sigImg('ceo')}</div><div class="nm">(${cEsc(CHARTER_DEFAULTS.ceo)})</div><div class="ps">${cEsc(CHARTER_DEFAULTS.ceopos)}</div></div>
+  </div>
+
+  <div class="pa-foot">จัดทำผ่านระบบ IAM Audit · พิมพ์เมื่อ ${cEsc(new Date().toLocaleDateString('th-TH'))}</div>
+  </body></html>`;
+  w.document.write(html);
+  w.document.close();
+  w.print();
+}
 
 /* ═══ LAWS ═══ */
+const LAW_GROUPS=[
+  {cat:'วินัยการเงินการคลังและงบประมาณ',icon:'💰',items:[
+    ['📜','พ.ร.บ.วินัยการเงินการคลังของรัฐ พ.ศ.2561','กำหนดวินัยการเงินการคลัง หลักเกณฑ์การใช้จ่าย และการรายงานทางการเงินของหน่วยงานของรัฐ','pc'],
+    ['📜','พ.ร.บ.วิธีการงบประมาณ พ.ศ.2561','หลักเกณฑ์การจัดทำและบริหารงบประมาณรายจ่ายประจำปี','pc'],
+    ['📋','ระเบียบกระทรวงมหาดไทยว่าด้วยวิธีการงบประมาณขององค์กรปกครองส่วนท้องถิ่น พ.ศ.2563','ขั้นตอนการจัดทำ อนุมัติ โอน และแก้ไขเปลี่ยนแปลงงบประมาณของ อปท.','pb'],
+    ['📋','ระเบียบกระทรวงมหาดไทยว่าด้วยการจัดทำแผนพัฒนาขององค์กรปกครองส่วนท้องถิ่น พ.ศ.2548 (แก้ไขเพิ่มเติมถึงฉบับที่ 3 พ.ศ.2561)','หลักเกณฑ์การจัดทำแผนยุทธศาสตร์ แผนพัฒนาท้องถิ่น และแผนการดำเนินงาน','pb'],
+  ]},
+  {cat:'การเงิน บัญชี และการเบิกจ่าย',icon:'💵',items:[
+    ['💵','ระเบียบกระทรวงมหาดไทยว่าด้วยการรับเงิน การเบิกจ่ายเงิน การฝากเงิน การเก็บรักษาเงิน และการตรวจเงินของ อปท. พ.ศ.2566','ระเบียบหลักด้านการรับ-จ่ายเงินของ อปท. ใช้แทนฉบับ พ.ศ.2547','pm'],
+    ['📊','ประกาศกระทรวงการคลัง เรื่อง มาตรฐานการบัญชีภาครัฐและนโยบายการบัญชีภาครัฐ พ.ศ.2561','มาตรฐานการบันทึกบัญชีและการแสดงรายการทางการเงินของหน่วยงานภาครัฐ','pm'],
+    ['🎁','ระเบียบกระทรวงมหาดไทยว่าด้วยเงินอุดหนุนของ อปท. พ.ศ.2559 (แก้ไขเพิ่มเติมถึงฉบับที่ 2 พ.ศ.2563)','หลักเกณฑ์การตั้งงบประมาณและเบิกจ่ายเงินอุดหนุนหน่วยงานอื่น','pm'],
+    ['✈️','ระเบียบกระทรวงมหาดไทยว่าด้วยค่าใช้จ่ายในการเดินทางไปราชการของเจ้าหน้าที่ท้องถิ่น พ.ศ.2555 และที่แก้ไขเพิ่มเติม','หลักเกณฑ์การเบิกค่าเบี้ยเลี้ยง ค่าที่พัก และค่าพาหนะในการเดินทางไปราชการ','pm'],
+    ['🎓','ระเบียบกระทรวงมหาดไทยว่าด้วยค่าใช้จ่ายในการฝึกอบรมและการเข้ารับการฝึกอบรมของเจ้าหน้าที่ท้องถิ่น พ.ศ.2557','หลักเกณฑ์การเบิกจ่ายค่าใช้จ่ายในการจัดและเข้ารับการฝึกอบรม','pm'],
+    ['🚗','ระเบียบกระทรวงมหาดไทยว่าด้วยการใช้และรักษารถยนต์ของ อปท. พ.ศ.2548 (แก้ไขเพิ่มเติมถึงฉบับที่ 2 พ.ศ.2563)','หลักเกณฑ์การใช้ การเก็บรักษา และการควบคุมยานพาหนะของ อปท.','pm'],
+  ]},
+  {cat:'การพัสดุและการจัดซื้อจัดจ้าง',icon:'📦',items:[
+    ['📦','พ.ร.บ.การจัดซื้อจัดจ้างและการบริหารพัสดุภาครัฐ พ.ศ.2560','กฎหมายหลักกำหนดวิธีจัดซื้อจัดจ้าง ราคากลาง การบริหารสัญญา และการตรวจรับพัสดุ','ph2'],
+    ['📦','ระเบียบกระทรวงการคลังว่าด้วยการจัดซื้อจัดจ้างและการบริหารพัสดุภาครัฐ พ.ศ.2560','ระเบียบปฏิบัติรายละเอียดวิธีการจัดซื้อจัดจ้างแต่ละประเภท','ph2'],
+    ['📦','กฎกระทรวงกำหนดวงเงินการจัดซื้อจัดจ้างพัสดุโดยวิธีเฉพาะเจาะจงฯ พ.ศ.2560','กำหนดวงเงินสำหรับวิธีเฉพาะเจาะจงและวงเงินที่ไม่ต้องทำข้อตกลงเป็นหนังสือ','ph2'],
+    ['📦','กฎกระทรวงกำหนดพัสดุและวิธีการจัดซื้อจัดจ้างพัสดุที่รัฐต้องการส่งเสริมหรือสนับสนุน (ฉบับที่ 2) พ.ศ.2563','หลักเกณฑ์ส่งเสริมผู้ประกอบการ SME และพัสดุที่ผลิตในประเทศ','ph2'],
+    ['📦','ระเบียบกระทรวงมหาดไทยว่าด้วยการพัสดุของหน่วยการบริหารราชการส่วนท้องถิ่น พ.ศ.2535 และที่แก้ไขเพิ่มเติม','ใช้เฉพาะส่วนที่ไม่ขัดหรือแย้งกับ พ.ร.บ.จัดซื้อจัดจ้างฯ 2560 เช่น การจำหน่ายพัสดุ','ph2'],
+  ]},
+  {cat:'บุคลากรท้องถิ่น',icon:'👤',items:[
+    ['👤','พ.ร.บ.ระเบียบบริหารงานบุคคลส่วนท้องถิ่น พ.ศ.2542','หลักเกณฑ์การบรรจุแต่งตั้ง เลื่อนขั้น วินัย การออกจากราชการ และสวัสดิการ','pl'],
+    ['👤','พ.ร.บ.บำเหน็จบำนาญข้าราชการส่วนท้องถิ่น พ.ศ.2500 และที่แก้ไขเพิ่มเติม','สิทธิและหลักเกณฑ์การรับบำเหน็จบำนาญของข้าราชการส่วนท้องถิ่น','pl'],
+    ['👤','ประกาศคณะกรรมการกลางพนักงานส่วนท้องถิ่น (ก.จ./ก.ท./ก.อบต.) เรื่อง มาตรฐานทั่วไปเกี่ยวกับพนักงานจ้าง','หลักเกณฑ์การจ้าง อัตราค่าตอบแทน และการประเมินผลพนักงานจ้าง','pl'],
+  ]},
+  {cat:'โครงสร้างการบริหารราชการส่วนท้องถิ่น',icon:'🏛️',items:[
+    ['🏛️','พ.ร.บ.เทศบาล พ.ศ.2496 และที่แก้ไขเพิ่มเติมถึง (ฉบับที่ 14) พ.ศ.2562','อำนาจหน้าที่ โครงสร้าง และการบริหารราชการของเทศบาล','pdk'],
+    ['🏛️','พ.ร.บ.สภาตำบลและองค์การบริหารส่วนตำบล พ.ศ.2537 และที่แก้ไขเพิ่มเติม','อำนาจหน้าที่และโครงสร้างการบริหารขององค์การบริหารส่วนตำบล','pdk'],
+    ['🏛️','พ.ร.บ.องค์การบริหารส่วนจังหวัด พ.ศ.2540 และที่แก้ไขเพิ่มเติม','อำนาจหน้าที่และโครงสร้างการบริหารขององค์การบริหารส่วนจังหวัด','pdk'],
+    ['🏛️','พ.ร.บ.กำหนดแผนและขั้นตอนการกระจายอำนาจให้แก่องค์กรปกครองส่วนท้องถิ่น พ.ศ.2542','กำหนดภารกิจและรายได้ที่ถ่ายโอนให้แก่ อปท.','pdk'],
+  ]},
+  {cat:'รายได้ท้องถิ่นและภาษี',icon:'🏷️',items:[
+    ['🏷️','พ.ร.บ.ภาษีที่ดินและสิ่งปลูกสร้าง พ.ศ.2562','ภาษีทรัพย์สินที่ใช้แทนภาษีโรงเรือนและที่ดิน/ภาษีบำรุงท้องที่ เป็นรายได้หลักของ อปท.','pc'],
+    ['🏷️','พ.ร.บ.ภาษีป้าย พ.ศ.2510 และที่แก้ไขเพิ่มเติม','หลักเกณฑ์การจัดเก็บภาษีป้ายซึ่งเป็นรายได้ของ อปท.','pc'],
+    ['🏷️','พ.ร.บ.จัดสรรรายได้ประเภทภาษีมูลค่าเพิ่มและภาษีธุรกิจเฉพาะให้แก่ราชการส่วนท้องถิ่น พ.ศ.2534','หลักเกณฑ์การจัดสรรภาษีมูลค่าเพิ่มให้แก่ อปท.','pc'],
+  ]},
+  {cat:'การตรวจสอบภายใน ควบคุมภายใน และบริหารความเสี่ยง',icon:'🔍',items:[
+    ['🔍','หลักเกณฑ์กระทรวงการคลังว่าด้วยมาตรฐานและหลักเกณฑ์ปฏิบัติการตรวจสอบภายในสำหรับหน่วยงานของรัฐ พ.ศ.2561 (แก้ไขเพิ่มเติมถึงฉบับที่ 4 พ.ศ.2566)','มาตรฐาน จรรยาบรรณ และหลักเกณฑ์ปฏิบัติงานของผู้ตรวจสอบภายในภาครัฐ','pcus'],
+    ['🔒','หลักเกณฑ์กระทรวงการคลังว่าด้วยมาตรฐานและหลักเกณฑ์ปฏิบัติการควบคุมภายในสำหรับหน่วยงานของรัฐ พ.ศ.2561','กรอบและวิธีการประเมินระบบการควบคุมภายในของหน่วยงานของรัฐ','pcus'],
+    ['⚠️','หลักเกณฑ์กระทรวงการคลังว่าด้วยมาตรฐานและหลักเกณฑ์ปฏิบัติการบริหารจัดการความเสี่ยงสำหรับหน่วยงานของรัฐ พ.ศ.2562','กรอบการบริหารจัดการความเสี่ยงระดับองค์กรของหน่วยงานของรัฐ','pcus'],
+    ['📋','ระเบียบคณะกรรมการตรวจเงินแผ่นดินว่าด้วยการปฏิบัติหน้าที่ของผู้ตรวจสอบภายใน พ.ศ.2546','หลักเกณฑ์การปฏิบัติหน้าที่ของผู้ตรวจสอบภายในตามกฎหมาย สตง.','pcus'],
+    ['📋','ระเบียบคณะกรรมการตรวจเงินแผ่นดินว่าด้วยการกำหนดมาตรฐานการควบคุมภายใน พ.ศ.2544','มาตรฐานการควบคุมภายในตามแนวทาง COSO ที่ สตง. กำหนด','pcus'],
+    ['⚖️','พ.ร.บ.ประกอบรัฐธรรมนูญว่าด้วยการตรวจเงินแผ่นดิน พ.ศ.2561','อำนาจหน้าที่ของ สตง. และแนวทางการตรวจสอบหน่วยงานของรัฐ','pcus'],
+  ]},
+  {cat:'ความรับผิดและวิธีปฏิบัติราชการทางปกครอง',icon:'⚖️',items:[
+    ['⚖️','พ.ร.บ.ความรับผิดทางละเมิดของเจ้าหน้าที่ พ.ศ.2539','หลักเกณฑ์ความรับผิดทางละเมิดของเจ้าหน้าที่ต่อหน่วยงานของรัฐ','pgr'],
+    ['⚖️','ระเบียบสำนักนายกรัฐมนตรีว่าด้วยหลักเกณฑ์การปฏิบัติเกี่ยวกับความรับผิดทางละเมิดของเจ้าหน้าที่ พ.ศ.2539','ขั้นตอนการสอบข้อเท็จจริงความรับผิดทางละเมิด','pgr'],
+    ['⚖️','พ.ร.บ.วิธีปฏิบัติราชการทางปกครอง พ.ศ.2539 และที่แก้ไขเพิ่มเติม','หลักเกณฑ์การออกคำสั่งทางปกครองและการอุทธรณ์','pgr'],
+    ['📄','พ.ร.บ.ข้อมูลข่าวสารของราชการ พ.ศ.2540','สิทธิของประชาชนในการเข้าถึงข้อมูลข่าวสารของราชการ','pgr'],
+  ]},
+  {cat:'จริยธรรมและการป้องกันการทุจริต',icon:'🛡️',items:[
+    ['🛡️','พ.ร.บ.ประกอบรัฐธรรมนูญว่าด้วยการป้องกันและปราบปรามการทุจริต พ.ศ.2561','อำนาจหน้าที่ ป.ป.ช. และหลักเกณฑ์การยื่นบัญชีทรัพย์สิน','pb'],
+    ['🛡️','พ.ร.บ.มาตรฐานทางจริยธรรม พ.ศ.2562','มาตรฐานทางจริยธรรมของเจ้าหน้าที่รัฐทุกประเภท','pb'],
+  ]},
+  {cat:'เทคโนโลยีสารสนเทศและข้อมูลข่าวสาร',icon:'💻',items:[
+    ['💻','พ.ร.บ.คุ้มครองข้อมูลส่วนบุคคล พ.ศ.2562 (PDPA)','หน้าที่ในการเก็บ ใช้ และเปิดเผยข้อมูลส่วนบุคคลอย่างถูกต้อง','pb'],
+    ['💻','พ.ร.บ.การปฏิบัติราชการทางอิเล็กทรอนิกส์ พ.ศ.2565','หลักเกณฑ์การให้บริการและติดต่อราชการทางอิเล็กทรอนิกส์','pb'],
+    ['💻','พ.ร.บ.ว่าด้วยการกระทำความผิดเกี่ยวกับคอมพิวเตอร์ พ.ศ.2550 (แก้ไขเพิ่มเติมฉบับที่ 2 พ.ศ.2560)','ความผิดเกี่ยวกับการใช้ระบบคอมพิวเตอร์และข้อมูลอิเล็กทรอนิกส์','pb'],
+  ]},
+  {cat:'งานสาธารณะ ผังเมือง สิ่งแวดล้อม และสาธารณสุข',icon:'🏗️',items:[
+    ['🏗️','พ.ร.บ.ควบคุมอาคาร พ.ศ.2522 และที่แก้ไขเพิ่มเติม','หลักเกณฑ์การขออนุญาตก่อสร้าง ดัดแปลง และควบคุมอาคาร','pl'],
+    ['🏗️','พ.ร.บ.การขุดดินและถมดิน พ.ศ.2543','หลักเกณฑ์การขออนุญาตขุดดินและถมดิน','pl'],
+    ['🗺️','พ.ร.บ.การผังเมือง พ.ศ.2562','การวางและจัดทำผังเมืองรวม/ผังเมืองเฉพาะขององค์กรปกครองส่วนท้องถิ่น','pl'],
+    ['🏥','พ.ร.บ.การสาธารณสุข พ.ศ.2535 และที่แก้ไขเพิ่มเติม','อำนาจหน้าที่ อปท. ด้านการสาธารณสุขและอนามัยสิ่งแวดล้อม','pl'],
+    ['🧹','พ.ร.บ.รักษาความสะอาดและความเป็นระเบียบเรียบร้อยของบ้านเมือง พ.ศ.2535 และที่แก้ไขเพิ่มเติม','หน้าที่ อปท. ในการรักษาความสะอาดและการจัดการมูลฝอย','pl'],
+    ['🌳','พ.ร.บ.ส่งเสริมและรักษาคุณภาพสิ่งแวดล้อมแห่งชาติ พ.ศ.2535','กรอบการดูแลรักษาคุณภาพสิ่งแวดล้อมในพื้นที่ อปท.','pl'],
+  ]},
+  {cat:'มาตรฐานและแนวปฏิบัติสากล',icon:'🌐',items:[
+    ['🌐','มาตรฐานการตรวจสอบภายใน IIA (International Standards for the Professional Practice of Internal Auditing)','IPPF — กรอบสากลว่าด้วยจรรยาบรรณ มาตรฐาน และแนวปฏิบัติวิชาชีพตรวจสอบภายใน','pc'],
+    ['🔒','กรอบการควบคุมภายใน COSO (Internal Control – Integrated Framework)','5 องค์ประกอบ: Control Environment, Risk Assessment, Control Activities, Information & Communication, Monitoring','pc'],
+  ]},
+];
 function rLaws(){
-  const laws=[
-    ['⚖️','หลัก','พ.ร.บ.วินัยการเงินการคลังของรัฐ พ.ศ.2561','กำหนดวินัยการเงินการคลัง หลักเกณฑ์การใช้จ่าย และการรายงานทางการเงิน','pdk'],
-    ['⚖️','หลัก','พ.ร.บ.การจัดซื้อจัดจ้างและบริหารพัสดุภาครัฐ พ.ศ.2560','กำหนดวิธีจัดซื้อจัดจ้าง ราคากลาง การบริหารสัญญา และตรวจรับพัสดุ','pdk'],
-    ['📋','หลัก','ระเบียบกระทรวงการคลัง ว่าด้วยการตรวจสอบภายใน พ.ศ.2551','มาตรฐาน กรอบการตรวจสอบ รูปแบบรายงาน และความสัมพันธ์กับผู้บริหาร','pdk'],
-    ['💰','การเงิน','ระเบียบกระทรวงการคลัง ว่าด้วยการเบิกเงินจากคลัง การรับเงิน การจ่ายเงิน','วิธีปฏิบัติเกี่ยวกับการรับเงิน เบิกจ่ายเงิน และนำส่งเงินต่อคลัง','pm'],
-    ['👤','บุคลากร','พ.ร.บ.ระเบียบบริหารงานบุคคลส่วนท้องถิ่น พ.ศ.2542','หลักเกณฑ์การบรรจุแต่งตั้ง เลื่อนขั้น วินัย และสวัสดิการ','pb'],
-    ['💰','การเงิน','ระเบียบกระทรวงมหาดไทย ว่าด้วยการรับเงิน การเบิกจ่ายของ อปท.','ระเบียบเฉพาะสำหรับ อปท. ด้านการเงินการคลัง','pm'],
-    ['🌐','มาตรฐาน','มาตรฐานการตรวจสอบภายใน IIA (International Standards for the Professional Practice)','IPPF — กรอบสากลว่าด้วยจรรยาบรรณ มาตรฐาน และแนวปฏิบัติ','pl'],
-    ['🔒','มาตรฐาน','COSO Internal Control Framework','5 องค์ประกอบ: Control Environment, Risk Assessment, Control Activities, Information & Communication, Monitoring','pl'],
-    ['💻','IT','พ.ร.บ.คุ้มครองข้อมูลส่วนบุคคล พ.ศ.2562 (PDPA)','หน้าที่ในการเก็บ ใช้ และเปิดเผยข้อมูลส่วนบุคคลอย่างถูกต้อง','ph2'],
-  ];
+  const filter=document.getElementById('law-cat-filter')?.value||'';
   const custom=db.get('laws_custom',[]);
+  const groups=filter?LAW_GROUPS.filter(g=>g.cat===filter):LAW_GROUPS;
   document.getElementById('laws-con').innerHTML=`
     <div class="alert aw" style="margin-bottom:16px"><strong>ประเด็นที่ สตง. มักตรวจพบ:</strong><br>
     จัดซื้อเฉพาะเจาะจงเกินวงเงิน · ไม่มีงบประมาณรองรับ · เอกสารไม่ครบ · ตรวจรับพัสดุไม่ถูกต้อง · เบิกจ่ายไม่ตรงระเบียบ · ทะเบียนทรัพย์สินไม่เป็นปัจจุบัน · ขาดการติดตามผล</div>
     <div class="card card-sm" style="margin-bottom:16px">
-      <div class="ct2" style="display:flex;align-items:center;justify-content:space-between">
+      <div class="ct2" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
         <span>📚 เพิ่มกฎหมาย ระเบียบ หรือความรู้ใหม่</span>
         <button class="btn btn-sm" id="law-form-btn" onclick="lawFormToggle()">+ เพิ่มรายการ</button>
       </div>
@@ -3123,28 +4044,26 @@ function rLaws(){
         </div>
       </div>
     </div>
-    <div class="g2">
-      <div><div class="sepl">กฎหมายและระเบียบหลัก</div>
-        ${laws.slice(0,5).map(([ic,tag,name,desc,pc])=>`<div class="lc">
-          <div class="lch">${ic} ${name} <span class="pill ${pc}" style="margin-left:auto">${tag}</span></div>
-          <div class="lcb">${desc}</div></div>`).join('')}
-      </div>
-      <div><div class="sepl">มาตรฐานและแนวปฏิบัติ</div>
-        ${laws.slice(5).map(([ic,tag,name,desc,pc])=>`<div class="lc">
-          <div class="lch">${ic} ${name} <span class="pill ${pc}" style="margin-left:auto">${tag}</span></div>
-          <div class="lcb">${desc}</div></div>`).join('')}
-        <div class="sepl" style="margin-top:20px">กรอบ COSO — 5 องค์ประกอบ</div>
-        ${[['สภาพแวดล้อมการควบคุม','ค่านิยม จริยธรรม โครงสร้างองค์กร'],
-           ['การประเมินความเสี่ยง','ระบุ วิเคราะห์ และจัดการความเสี่ยง'],
-           ['กิจกรรมการควบคุม','นโยบายและขั้นตอนลดความเสี่ยง'],
-           ['สารสนเทศและการสื่อสาร','ข้อมูลถูกต้องทันเวลาถึงผู้เกี่ยวข้อง'],
-           ['การติดตามและประเมินผล','ติดตามประสิทธิผลการควบคุมต่อเนื่อง']
-          ].map(([n,d],i)=>`<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)">
-            <span style="font-family:var(--mono);font-weight:800;color:var(--r);min-width:20px;font-size:15px">${i+1}</span>
-            <div><div style="font-weight:600;font-size:13px">${n}</div><div style="font-size:12px;color:var(--t3)">${d}</div></div>
-          </div>`).join('')}
-      </div>
+    <div class="fb" style="margin-bottom:16px">
+      <select id="law-cat-filter" class="fi" onchange="rLaws()">
+        <option value="">ทุกหมวดหมู่ (${LAW_GROUPS.reduce((n,g)=>n+g.items.length,0)} รายการ)</option>
+        ${LAW_GROUPS.map(g=>`<option value="${g.cat}" ${filter===g.cat?'selected':''}>${g.icon} ${g.cat} (${g.items.length})</option>`).join('')}
+      </select>
     </div>
+    ${groups.map(g=>`<div class="sepl" style="margin-top:14px">${g.icon} ${g.cat}</div>
+      ${g.items.map(([ic,name,desc,pcl])=>`<div class="lc">
+        <div class="lch">${ic} ${name} <span class="pill ${pcl}" style="margin-left:auto">${g.cat}</span></div>
+        <div class="lcb">${desc}</div></div>`).join('')}`).join('')}
+    <div class="sepl" style="margin-top:20px">กรอบ COSO — 5 องค์ประกอบ</div>
+    ${[['สภาพแวดล้อมการควบคุม','ค่านิยม จริยธรรม โครงสร้างองค์กร'],
+       ['การประเมินความเสี่ยง','ระบุ วิเคราะห์ และจัดการความเสี่ยง'],
+       ['กิจกรรมการควบคุม','นโยบายและขั้นตอนลดความเสี่ยง'],
+       ['สารสนเทศและการสื่อสาร','ข้อมูลถูกต้องทันเวลาถึงผู้เกี่ยวข้อง'],
+       ['การติดตามและประเมินผล','ติดตามประสิทธิผลการควบคุมต่อเนื่อง']
+      ].map(([n,d],i)=>`<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)">
+        <span style="font-family:var(--mono);font-weight:800;color:var(--r);min-width:20px;font-size:15px">${i+1}</span>
+        <div><div style="font-weight:600;font-size:13px">${n}</div><div style="font-size:12px;color:var(--t3)">${d}</div></div>
+      </div>`).join('')}
     ${custom.length?`<div class="sepl" style="margin-top:20px">📌 เพิ่มเติมโดยผู้ใช้งาน</div>
       ${custom.map(c=>`<div class="lc">
         <div class="lch">${c.icon||'📌'} ${c.name} <span class="pill pcus" style="margin-left:auto">${c.tag||'อื่นๆ'}</span></div>
@@ -3196,6 +4115,7 @@ function saveLaw(){
     fileType:lawPendingFile.type,data:lawPendingFile.data,at:thd()};
   const list=db.get('laws_custom',[]);list.push(item);db.set('laws_custom',list);
   toast(`💾 เพิ่ม "${name}" แล้ว`);
+  fsSyncFile(['ฐานกฎหมาย',item.tag],item.fileName,item.data);
   lawPendingFile=null;
   rLaws();
 }
@@ -3211,6 +4131,92 @@ function delLaw(id){
   db.set('laws_custom',db.get('laws_custom',[]).filter(x=>String(x.id)!==String(id)));
   toast('ลบแล้ว');
   rLaws();
+}
+
+/* ═══ LOCAL FOLDER SYNC (Google Drive Desktop) ═══ */
+/* Real, working folder sync via the File System Access API — links the app to a local
+   folder (e.g. one synced by Google Drive Desktop), so uploaded files are also written
+   there and Drive syncs them to the cloud on its own. No Google account/OAuth involved. */
+const FS_DB='iam_fs_sync';
+function fsIdbOpen(){
+  return new Promise((resolve,reject)=>{
+    const req=indexedDB.open(FS_DB,1);
+    req.onupgradeneeded=()=>{req.result.createObjectStore('h')};
+    req.onsuccess=()=>resolve(req.result);
+    req.onerror=()=>reject(req.error);
+  });
+}
+async function fsIdbSet(k,v){const db=await fsIdbOpen();return new Promise((res,rej)=>{const tx=db.transaction('h','readwrite');tx.objectStore('h').put(v,k);tx.oncomplete=()=>res();tx.onerror=()=>rej(tx.error)})}
+async function fsIdbGet(k){const db=await fsIdbOpen();return new Promise((res,rej)=>{const tx=db.transaction('h','readonly');const rq=tx.objectStore('h').get(k);rq.onsuccess=()=>res(rq.result);rq.onerror=()=>rej(rq.error)})}
+
+let fsDirHandle=null, fsStatus='disconnected';
+function fsSanitize(s){return String(s||'').replace(/[\\/:*?"<>|]/g,'_').trim()||'ไฟล์'}
+
+async function fsInit(){
+  if(typeof window==='undefined'||!window.showDirectoryPicker||typeof indexedDB==='undefined'){fsStatus='unsupported';fsUpdateUI();return}
+  try{
+    const h=await fsIdbGet('dir');
+    if(h){
+      fsDirHandle=h;
+      const perm=await h.queryPermission({mode:'readwrite'});
+      fsStatus=(perm==='granted')?'connected':'reconnect';
+    }
+  }catch(e){}
+  fsUpdateUI();
+}
+async function fsConnect(){
+  if(!window.showDirectoryPicker){toast('⚠️ เบราว์เซอร์นี้ไม่รองรับ ใช้ Chrome หรือ Edge บนคอมพิวเตอร์');return}
+  try{
+    const h=await window.showDirectoryPicker({id:'iam-folder-sync',mode:'readwrite'});
+    fsDirHandle=h;fsStatus='connected';
+    await fsIdbSet('dir',h);
+    toast(`🔗 เชื่อมต่อโฟลเดอร์ "${h.name}" แล้ว — ไฟล์ที่อัพโหลดจะถูกบันทึกไว้ที่นี่ด้วย`);
+    fsUpdateUI();
+  }catch(e){if(e.name!=='AbortError')toast('⚠️ เชื่อมต่อโฟลเดอร์ไม่สำเร็จ')}
+}
+function fsDisconnect(){
+  fsDirHandle=null;fsStatus='disconnected';
+  fsIdbSet('dir',null);
+  toast('ยกเลิกการเชื่อมต่อโฟลเดอร์แล้ว');
+  fsUpdateUI();
+}
+async function fsEnsurePerm(){
+  if(!fsDirHandle)return false;
+  try{
+    let p=await fsDirHandle.queryPermission({mode:'readwrite'});
+    if(p!=='granted')p=await fsDirHandle.requestPermission({mode:'readwrite'});
+    fsStatus=(p==='granted')?'connected':'denied';
+    fsUpdateUI();
+    return p==='granted';
+  }catch(e){return false}
+}
+async function fsSyncFile(pathParts,fileName,dataUrl){
+  if(!fsDirHandle)return false;
+  const ok=await fsEnsurePerm();if(!ok)return false;
+  try{
+    let dir=fsDirHandle;
+    for(const part of pathParts){if(!part)continue;dir=await dir.getDirectoryHandle(fsSanitize(part),{create:true})}
+    const fh=await dir.getFileHandle(fsSanitize(fileName),{create:true});
+    const w=await fh.createWritable();
+    const blob=await (await fetch(dataUrl)).blob();
+    await w.write(blob);await w.close();
+    return true;
+  }catch(e){console.error('fsSyncFile',e);return false}
+}
+function fsUpdateUI(){
+  const el=document.getElementById('sb-fs');if(!el)return;
+  if(fsStatus==='unsupported'){
+    el.innerHTML=`<div style="font-size:10.5px;color:var(--t4);line-height:1.6">☁️ ซิงก์โฟลเดอร์ไม่รองรับในเบราว์เซอร์นี้<br>(ใช้ Chrome หรือ Edge)</div>`;
+  }else if(fsStatus==='connected'){
+    el.innerHTML=`<div style="font-size:11px;color:var(--t2);margin-bottom:6px">☁️ ซิงก์กับโฟลเดอร์:<br><b>${fsDirHandle.name}</b></div>
+      <button class="btn btn-xs" style="width:100%;justify-content:center" onclick="fsDisconnect()">ยกเลิกการเชื่อมต่อ</button>`;
+  }else if(fsStatus==='reconnect'||fsStatus==='denied'){
+    el.innerHTML=`<div style="font-size:11px;color:var(--wa);margin-bottom:6px">⚠️ ต้องอนุญาตโฟลเดอร์${fsDirHandle?` "${fsDirHandle.name}"`:''}อีกครั้ง</div>
+      <button class="btn btn-xs btn-p" style="width:100%;justify-content:center" onclick="fsEnsurePerm()">อนุญาตการเข้าถึง</button>`;
+  }else{
+    el.innerHTML=`<button class="btn btn-xs btn-p" style="width:100%;justify-content:center" onclick="fsConnect()">☁️ เชื่อมต่อโฟลเดอร์ซิงก์</button>
+      <div style="font-size:10px;color:var(--t4);margin-top:5px;line-height:1.5">เลือกโฟลเดอร์ที่ Google Drive ซิงก์ไว้ในเครื่อง — ไฟล์ที่อัพโหลดในระบบจะถูกบันทึกไว้ในนั้นด้วย</div>`;
+  }
 }
 
 /* ═══ UPLOAD PANELS (Google Drive) ═══ */
@@ -3250,10 +4256,6 @@ function rUpPanel(key){
         <div class="upphr">
           ${needsYr?`<input type="number" id="upyr-${key}" class="upyr-input" placeholder="ปีงบ" min="2500" max="2600" value="${upYrSel[key]||''}"
             onclick="event.stopPropagation()" oninput="if(this.value===''||this.value.length===4)upSetYr('${key}',this.value)">`:''}
-          <a href="${folder.url}" target="_blank" class="updl" onclick="event.stopPropagation()">
-            <img src="https://www.gstatic.com/images/branding/product/1x/drive_16dp.png" width="14" height="14" style="vertical-align:middle">
-            เปิดใน Drive
-          </a>
           <span style="font-size:11px;color:rgba(255,255,255,.4)" id="upar-${bid}">▼</span>
         </div>
       </div>
@@ -3290,13 +4292,11 @@ function upList(files,key){
         <div class="upfm">
           ${f.yr?`<span class="upbdg yr">ปีงบ ${f.yr}</span>`:''}
           <span>${fsz(f.size)}</span><span>${f.at}</span>
-          ${f.did?`<a href="https://drive.google.com/file/d/${f.did}/view" target="_blank" style="color:var(--r)">เปิดใน Drive ↗</a><span class="upbdg">✓ Drive</span>`
-                 :`<span class="upbdg sy">💾 Local</span>`}
+          ${f.synced?`<span class="upbdg">☁ ซิงก์แล้ว</span>`:`<span class="upbdg sy">💾 ในเครื่อง</span>`}
         </div>
       </div>
       <div style="display:flex;gap:5px;flex-shrink:0">
-        ${f.did?`<a href="https://drive.google.com/file/d/${f.did}/view" target="_blank" class="btn btn-xs btn-ok">↗ Drive</a>`
-               :`<button class="btn btn-xs btn-ok" onclick="upSync('${f.lid}','${key}')">☁ Sync</button>`}
+        ${f.synced?'':`<button class="btn btn-xs btn-ok" onclick="upSync('${f.lid}','${key}')">☁ ซิงก์</button>`}
         <button class="btn btn-xs btn-del" onclick="upDel('${f.lid}','${key}')">ลบ</button>
       </div>
     </div>`).join('');
@@ -3314,44 +4314,29 @@ function upLoad(files,key){
     reader.onload=e=>{
       const lid='f'+Date.now()+Math.random().toString(36).slice(2);
       const list=db.get('up_'+key,[]);
-      list.push({lid,name:file.name,size:file.size,type:file.type,data:e.target.result,at:thd(),did:null,yr});
+      list.push({lid,name:file.name,size:file.size,type:file.type,data:e.target.result,at:thd(),synced:false,yr});
       db.set('up_'+key,list);
-      upRefresh(key);toast(`📁 บันทึก "${file.name}"${yr?` ปี ${yr}`:''} — กำลัง sync...`);
-      upToDrive(lid,file.name,file.type,e.target.result.split(',')[1],key);
+      upRefresh(key);
+      toast(`📁 บันทึก "${file.name}"${yr?` ปี ${yr}`:''} แล้ว`);
+      upSyncToFolder(lid,file.name,e.target.result,key);
     };reader.readAsDataURL(file);
   });
 }
-async function upToDrive(lid,name,mime,b64,key){
-  const folder=GD.folders[key];if(!folder)return;
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-6',max_tokens:512,
-        messages:[{role:'user',content:`Upload file to Google Drive. Reply ONLY with JSON {"driveId":"<id>"}.
-Name: ${name}, MIME: ${mime}, Folder: ${folder.id}
-Base64: ${b64}
-Use create_file: title="${name}",parentId="${folder.id}",base64Content=<base64>,contentMimeType="${mime}",disableConversionToGoogleType=true`}],
-        mcp_servers:[{type:'url',url:'https://drivemcp.googleapis.com/mcp/v1',name:'gd'}]
-      })
-    });
-    const data=await res.json();let did=null;
-    if(data.content)for(const b of data.content){
-      if(b.type==='mcp_tool_result'&&b.content?.[0]?.text){try{const p=JSON.parse(b.content[0].text);if(p.id)did=p.id}catch{}}
-      if(b.type==='text'&&b.text){try{const p=JSON.parse(b.text);if(p.driveId)did=p.driveId}catch{const m=b.text.match(/"id"\s*:\s*"([^"]+)"/);if(m)did=m[1]}}
-    }
-    if(did){
-      const list=db.get('up_'+key,[]);const idx=list.findIndex(f=>f.lid===lid);
-      if(idx>=0){list[idx].did=did;list[idx].data=null;db.set('up_'+key,list);}
-      upRefresh(key);toast(`✅ "${name}" อัพโหลด Drive สำเร็จ`);
-    }else toast(`⚠️ บันทึก Local แล้ว — Drive sync ไม่สำเร็จ`);
-  }catch{toast(`⚠️ บันทึก Local แล้ว`)}
+async function upSyncToFolder(lid,name,dataUrl,key){
+  if(!fsDirHandle)return;
+  const ok=await fsSyncFile([UPL[key]||key],name,dataUrl);
+  if(ok){
+    const list=db.get('up_'+key,[]);const idx=list.findIndex(f=>f.lid===lid);
+    if(idx>=0){list[idx].synced=true;db.set('up_'+key,list);}
+    upRefresh(key);toast(`☁️ "${name}" ซิงก์กับโฟลเดอร์แล้ว`);
+  }
 }
 async function upSync(lid,key){
   const rec=db.get('up_'+key,[]).find(f=>f.lid===lid);
   if(!rec||!rec.data){toast('ไม่พบข้อมูลไฟล์');return}
-  toast(`☁️ กำลัง Sync "${rec.name}"...`);
-  await upToDrive(lid,rec.name,rec.type,rec.data.split(',')[1],key);
+  if(!fsDirHandle){toast('⚠️ ยังไม่ได้เชื่อมต่อโฟลเดอร์ซิงก์ — เชื่อมต่อได้จากแถบด้านข้าง');return}
+  toast(`☁️ กำลังซิงก์ "${rec.name}"...`);
+  await upSyncToFolder(lid,rec.name,rec.data,key);
 }
 function upDel(lid,key){
   if(!authz())return;
@@ -3425,6 +4410,7 @@ function dcUpload(files) {
       rDocs();
       updateDcBadge();
       toast(`📁 บันทึก "${file.name}" ในหมวด ${cat} แล้ว`);
+      fsSyncFile(['ศูนย์เอกสาร',cat,yr],file.name,e.target.result);
     };
     reader.readAsDataURL(file);
   });
@@ -3690,5 +4676,6 @@ rDash();
 updateBdg();
 updateDcBadge();
 applyRoleUI();
+fsInit();
 setTimeout(()=>Object.keys(GD.folders).forEach(k=>rUpPanel(k)),100);
 </script></body></html>
