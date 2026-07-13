@@ -956,7 +956,12 @@ textarea.fi{resize:vertical;min-height:68px}
       <select id="aul-dp" class="fi" onchange="auRList()"><option value="">ทุกกอง</option></select>
       <select id="aul-lv" class="fi" onchange="auRList()"><option value="">ทุกระดับ</option><option>สูง</option><option>ปานกลาง</option><option>ต่ำ</option></select>
     </div>
-    <div class="tw"><table class="tb"><thead><tr><th>#</th><th>หน่วยงาน</th><th>งาน/กิจกรรม</th><th>คะแนนเฉลี่ย</th><th>ระดับ</th><th>ความถี่</th><th>ปีเริ่มตรวจ</th><th></th></tr></thead><tbody id="aul-body"></tbody></table></div>
+    <div id="au-bulkbar" class="alert aw" style="display:none;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+      <span>เลือกแล้ว <b id="au-bulk-cnt">0</b> รายการ</span>
+      <button class="btn btn-xs btn-del" onclick="auDelSelected()">🗑 ลบที่เลือก</button>
+      <button class="btn btn-xs" onclick="auClearSel()">ยกเลิกการเลือก</button>
+    </div>
+    <div class="tw"><table class="tb"><thead><tr><th style="width:26px"><input type="checkbox" id="au-selall" onchange="auSelAllToggle(this.checked)"></th><th>#</th><th>หน่วยงาน</th><th>งาน/กิจกรรม</th><th>คะแนนเฉลี่ย</th><th>ระดับ</th><th>ความถี่</th><th>ปีเริ่มตรวจ</th><th></th></tr></thead><tbody id="aul-body"></tbody></table></div>
   </div>
 </div>
 
@@ -985,6 +990,12 @@ textarea.fi{resize:vertical;min-height:68px}
   <div class="fb">
     <input type="number" id="pl-yr" class="fi" placeholder="ทุกปี" min="2500" max="2600" oninput="if(this.value===''||this.value.length===4)rPlan()">
     <select id="pl-st" class="fi" onchange="rPlan()"><option value="">ทุกสถานะ</option><option value="planned">วางแผน</option><option value="inprogress">กำลังดำเนินการ</option><option value="done">เสร็จสิ้น</option></select>
+  </div>
+  <div id="plan-bulkbar" class="alert aw" style="display:none;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px"><input type="checkbox" id="plan-selall" onchange="planSelAllToggle(this.checked)"> เลือกทั้งหมด</label>
+    <span>เลือกแล้ว <b id="plan-bulk-cnt">0</b> รายการ</span>
+    <button class="btn btn-xs btn-del" onclick="planDelSelected()">🗑 ลบที่เลือก</button>
+    <button class="btn btn-xs" onclick="planClearSel()">ยกเลิกการเลือก</button>
   </div>
   <div id="plan-list"></div>
   <div id="up-pg-plan"></div>
@@ -1104,6 +1115,12 @@ textarea.fi{resize:vertical;min-height:68px}
   <div class="fb">
     <input type="number" id="rp-yr" class="fi" placeholder="ทุกปี" min="2500" max="2600" oninput="if(this.value===''||this.value.length===4)rRpts()">
     <select id="rp-dp" class="fi" onchange="rRpts()"><option value="">ทุกกอง</option></select>
+  </div>
+  <div id="rpt-bulkbar" class="alert aw" style="display:none;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px"><input type="checkbox" id="rpt-selall" onchange="rptSelAllToggle(this.checked)"> เลือกทั้งหมด</label>
+    <span>เลือกแล้ว <b id="rpt-bulk-cnt">0</b> รายการ</span>
+    <button class="btn btn-xs btn-del" onclick="rptDelSelected()">🗑 ลบที่เลือก</button>
+    <button class="btn btn-xs" onclick="rptClearSel()">ยกเลิกการเลือก</button>
   </div>
   <div id="rpt-list"></div>
   <div id="up-pg-report"></div>
@@ -2725,8 +2742,9 @@ function auRList(){
   list=[...list].sort((a,b)=>b.avg-a.avg);
   const tbody=document.getElementById('aul-body');
   if(!tbody)return;
-  if(!list.length){tbody.innerHTML=`<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--t4)">ไม่มีรายการ</td></tr>`;return}
+  if(!list.length){tbody.innerHTML=`<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--t4)">ไม่มีรายการ</td></tr>`;auUpdBulkBar();return}
   tbody.innerHTML=list.map((x,idx)=>`<tr>
+    <td><input type="checkbox" onchange="auToggleSel(${x.id},this.checked)" ${auSel.has(String(x.id))?'checked':''}></td>
     <td style="color:var(--t4);font-family:var(--mono)">${idx+1}</td>
     <td style="font-size:12px">${x.dept}</td>
     <td><div style="font-weight:600">${x.name}</div>${x.scope?`<div style="font-size:11px;color:var(--t4)">${x.scope.slice(0,60)}${x.scope.length>60?'…':''}</div>`:''}</td>
@@ -2736,6 +2754,52 @@ function auRList(){
     <td style="font-family:var(--mono);font-size:12px">${x.yr||'-'}</td>
     <td style="display:flex;gap:4px"><button class="btn btn-xs" onclick="auEdit(${x.id})">แก้ไข</button><button class="btn btn-xs btn-del" onclick="auDel(${x.id})">ลบ</button></td>
   </tr>`).join('');
+  auUpdBulkBar();
+}
+/* ═══ BULK SELECT/DELETE — Audit Universe ═══ */
+let auSel=new Set();
+function auFilteredList(){
+  const yr=document.getElementById('aul-yr')?.value||'';
+  const dp=document.getElementById('aul-dp')?.value||'';
+  const lvf=document.getElementById('aul-lv')?.value||'';
+  let list=db.get('auditUniverse',[]);
+  if(yr)list=list.filter(x=>String(x.yr)===String(yr));
+  if(dp)list=list.filter(x=>x.dept===dp);
+  if(lvf)list=list.filter(x=>x.level===lvf);
+  return list;
+}
+function auToggleSel(id,checked){
+  const k=String(id);
+  if(checked)auSel.add(k);else auSel.delete(k);
+  auUpdBulkBar();
+}
+function auSelAllToggle(checked){
+  const list=auFilteredList();
+  if(checked)list.forEach(x=>auSel.add(String(x.id)));
+  else auSel.clear();
+  auRList();
+}
+function auClearSel(){auSel.clear();auRList();}
+function auUpdBulkBar(){
+  const bar=document.getElementById('au-bulkbar');if(!bar)return;
+  bar.style.display=auSel.size?'flex':'none';
+  const cnt=document.getElementById('au-bulk-cnt');if(cnt)cnt.textContent=auSel.size;
+  const selall=document.getElementById('au-selall');
+  if(selall){
+    const list=auFilteredList();
+    selall.checked=list.length>0 && list.every(x=>auSel.has(String(x.id)));
+  }
+}
+function auDelSelected(){
+  if(!authz())return;
+  if(!auSel.size)return;
+  if(!confirm(`ยืนยันการลบหน่วยรับตรวจที่เลือก ${auSel.size} รายการ?`))return;
+  let list=db.get('auditUniverse',[]);
+  list=list.filter(x=>!auSel.has(String(x.id)));
+  db.set('auditUniverse',list);
+  auSel.clear();
+  toast('🗑 ลบรายการที่เลือกแล้ว');
+  updateBdg();auRDepts();auRSummary();auRList();
 }
 
 const AUDIT_UNIVERSE_SEED_SRC='audit_universe_seed_2569';
@@ -2899,13 +2963,16 @@ function rPlan(){
   con.innerHTML=plans.map(p=>`
     <div class="pc3 ${p.status==='done'?'dc':''}">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap">
-        <div style="flex:1">
-          <div style="font-size:14px;font-weight:700;margin-bottom:5px">${p.name}</div>
-          <div style="font-size:12px;color:var(--t3);display:flex;gap:12px;flex-wrap:wrap">
-            <span>📁 ${p.dept}</span><span>🔍 ${p.type}</span>
-            <span>📅 ${p.startDate||'-'} → ${p.endDate||'-'}</span><span>👤 ${p.aud||'-'}</span>
+        <div style="display:flex;gap:10px;flex:1">
+          <input type="checkbox" style="margin-top:3px;flex-shrink:0" onchange="planToggleSel(${p.id},this.checked)" ${planSel.has(String(p.id))?'checked':''}>
+          <div style="flex:1">
+            <div style="font-size:14px;font-weight:700;margin-bottom:5px">${p.name}</div>
+            <div style="font-size:12px;color:var(--t3);display:flex;gap:12px;flex-wrap:wrap">
+              <span>📁 ${p.dept}</span><span>🔍 ${p.type}</span>
+              <span>📅 ${p.startDate||'-'} → ${p.endDate||'-'}</span><span>👤 ${p.aud||'-'}</span>
+            </div>
+            ${p.obj?`<div style="font-size:12px;color:var(--t3);margin-top:5px">${p.obj.slice(0,100)}…</div>`:''}
           </div>
-          ${p.obj?`<div style="font-size:12px;color:var(--t3);margin-top:5px">${p.obj.slice(0,100)}…</div>`:''}
         </div>
         <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
           <span class="pill ${stl[p.status]}">${stx[p.status]}</span>
@@ -2916,6 +2983,50 @@ function rPlan(){
         </div>
       </div>
     </div>`).join('');
+  planUpdBulkBar();
+}
+/* ═══ BULK SELECT/DELETE — Plan ═══ */
+let planSel=new Set();
+function planFilteredList(){
+  const yr=document.getElementById('pl-yr')?.value||'';
+  const st=document.getElementById('pl-st')?.value||'';
+  let plans=db.get('plans',[]);
+  if(yr)plans=plans.filter(p=>p.yr===yr);
+  if(st)plans=plans.filter(p=>p.status===st);
+  return plans;
+}
+function planToggleSel(id,checked){
+  const k=String(id);
+  if(checked)planSel.add(k);else planSel.delete(k);
+  planUpdBulkBar();
+}
+function planSelAllToggle(checked){
+  const plans=planFilteredList();
+  if(checked)plans.forEach(p=>planSel.add(String(p.id)));
+  else planSel.clear();
+  rPlan();
+}
+function planClearSel(){planSel.clear();rPlan();}
+function planUpdBulkBar(){
+  const bar=document.getElementById('plan-bulkbar');if(!bar)return;
+  bar.style.display=planSel.size?'flex':'none';
+  const cnt=document.getElementById('plan-bulk-cnt');if(cnt)cnt.textContent=planSel.size;
+  const selall=document.getElementById('plan-selall');
+  if(selall){
+    const plans=planFilteredList();
+    selall.checked=plans.length>0 && plans.every(p=>planSel.has(String(p.id)));
+  }
+}
+function planDelSelected(){
+  if(!authz())return;
+  if(!planSel.size)return;
+  if(!confirm(`ยืนยันการลบแผนการตรวจสอบที่เลือก ${planSel.size} รายการ?`))return;
+  let plans=db.get('plans',[]);
+  plans=plans.filter(p=>!planSel.has(String(p.id)));
+  db.set('plans',plans);
+  planSel.clear();
+  toast('🗑 ลบรายการที่เลือกแล้ว');
+  rPlan();lPlanRefs();
 }
 function cycleP(id){
   if(!authz())return;
@@ -3261,12 +3372,15 @@ function rRpts(){
   const slb={low:'ต่ำ',med:'ปานกลาง',high:'สูง'};
   const sbd={high:'var(--r)',med:'var(--wa)',low:'var(--ok)'};
   const con=document.getElementById('rpt-list');
-  if(!reports.length){con.innerHTML=`<div class="empty"><div class="eic">📄</div><h3>ยังไม่มีรายงาน</h3><p>กด "+ สร้างรายงาน" ด้านบน</p></div>`;return}
+  if(!reports.length){con.innerHTML=`<div class="empty"><div class="eic">📄</div><h3>ยังไม่มีรายงาน</h3><p>กด "+ สร้างรายงาน" ด้านบน</p></div>`;rptUpdBulkBar();return}
   con.innerHTML=[...reports].reverse().map(r=>`
     <div class="card card-sm" style="margin-bottom:11px">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;flex-wrap:wrap;gap:7px">
-        <div><div style="font-size:14px;font-weight:700">${r.subject||r.planName}</div>
-        <div style="font-size:12px;color:var(--t3);margin-top:2px">${r.dept} · ${r.date||'-'} · ผู้จัดทำ: ${r.auth||'-'}</div></div>
+        <div style="display:flex;gap:10px;flex:1">
+          <input type="checkbox" style="margin-top:3px;flex-shrink:0" onchange="rptToggleSel('${r.id}',this.checked)" ${rptSel.has(String(r.id))?'checked':''}>
+          <div><div style="font-size:14px;font-weight:700">${r.subject||r.planName}</div>
+          <div style="font-size:12px;color:var(--t3);margin-top:2px">${r.dept} · ${r.date||'-'} · ผู้จัดทำ: ${r.auth||'-'}</div></div>
+        </div>
         <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
           <span class="pill pdk">${r.yr}</span>
           <button class="btn btn-xs" onclick="editRpt('${r.id}')">✎ แก้ไข</button>
@@ -3282,6 +3396,51 @@ function rRpts(){
           <span class="pill ${spl[f.sev]}" style="margin-top:4px">${slb[f.sev]}</span>
         </div>`).join(''):''}
     </div>`).join('');
+  rptUpdBulkBar();
+}
+function rptFilteredList(){
+  const yr=document.getElementById('rp-yr')?.value||'';
+  const dp=document.getElementById('rp-dp')?.value||'';
+  let reports=db.get('reports',[]);
+  if(yr)reports=reports.filter(r=>r.yr===yr);
+  if(dp)reports=reports.filter(r=>r.dept===dp);
+  return reports;
+}
+/* ═══ BULK SELECT/DELETE — Report ═══ */
+let rptSel=new Set();
+function rptToggleSel(id,checked){
+  const k=String(id);
+  if(checked)rptSel.add(k);else rptSel.delete(k);
+  rptUpdBulkBar();
+}
+function rptSelAllToggle(checked){
+  const reports=rptFilteredList();
+  if(checked)reports.forEach(r=>rptSel.add(String(r.id)));
+  else rptSel.clear();
+  rRpts();
+}
+function rptClearSel(){rptSel.clear();rRpts();}
+function rptUpdBulkBar(){
+  const bar=document.getElementById('rpt-bulkbar');if(!bar)return;
+  bar.style.display=rptSel.size?'flex':'none';
+  const cnt=document.getElementById('rpt-bulk-cnt');if(cnt)cnt.textContent=rptSel.size;
+  const selall=document.getElementById('rpt-selall');
+  if(selall){
+    const reports=rptFilteredList();
+    selall.checked=reports.length>0 && reports.every(r=>rptSel.has(String(r.id)));
+  }
+}
+function rptDelSelected(){
+  if(!authz())return;
+  if(!rptSel.size)return;
+  if(!confirm(`ยืนยันการลบรายงานผลการตรวจสอบที่เลือก ${rptSel.size} รายการ? (รายการติดตามที่เกี่ยวข้องจะยังคงอยู่)`))return;
+  let reports=db.get('reports',[]);
+  reports=reports.filter(r=>!rptSel.has(String(r.id)));
+  db.set('reports',reports);
+  rptSel.clear();
+  toast('🗑 ลบรายการที่เลือกแล้ว');
+  rRpts();updateBdg();rDepts();
+  if(cur==='annual')rAnnual();
 }
 function printRpt(id){
   const reports=db.get('reports',[]);
