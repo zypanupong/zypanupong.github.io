@@ -18,6 +18,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="IAM">
 <meta name="mobile-web-app-capable" content="yes">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -543,6 +544,14 @@ textarea.fi{resize:vertical;min-height:68px}
 /* Coming soon page */
 #pg-comingsoon{display:none;min-height:100vh;min-height:100dvh;width:100%;background:var(--bk);position:relative;overflow:hidden;
   flex-direction:column;align-items:center;justify-content:center;padding:24px}
+/* full-page module overlays (งานควบคุมภายใน / งานบริหารความเสี่ยง) are direct children of <body> which is overflow:hidden,
+   so they need their OWN scroll container or tall content gets clipped and can't scroll (esp. on mobile) */
+#pg-ic,#pg-rm{height:100vh;height:100dvh;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+#gd-sync-btn{position:fixed;left:12px;bottom:12px;z-index:2500;display:inline-flex;align-items:center;gap:6px;font-family:var(--font);font-size:12px;font-weight:600;color:#fff;background:var(--bk);border:1px solid var(--bk4);border-left:3px solid var(--r);border-radius:999px;padding:8px 13px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.28);transition:all .15s}
+#gd-sync-btn:hover{border-color:var(--r)}
+#gd-sync-btn.on{border-left-color:var(--ok)}
+#gd-sync-btn.busy{opacity:.65;cursor:default}
+@media print{#gd-sync-btn{display:none!important}}
 #pg-comingsoon::before{content:'';position:absolute;inset:0;
   background:radial-gradient(circle at 50% 30%,rgba(217,119,6,.12) 0%,transparent 45%),linear-gradient(180deg,var(--bk) 0%,var(--bk2) 100%);
   pointer-events:none}
@@ -575,6 +584,7 @@ textarea.fi{resize:vertical;min-height:68px}
   color:rgba(255,255,255,.32);pointer-events:none;white-space:nowrap}
 </style></head>
 <body>
+<button id="gd-sync-btn" onclick="gdBtnClick()" title="ซิงก์ข้อมูลกับ Google Drive ของคุณ">☁️ <span id="gd-sync-label">เชื่อม Drive</span></button>
 <div id="landing">
   <svg id="landing-art" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <g opacity=".08">
@@ -4891,4 +4901,115 @@ updateDcBadge();
 applyRoleUI();
 fsInit();
 setTimeout(()=>Object.keys(GD.folders).forEach(k=>rUpPanel(k)),100);
+
+/* ═══════════════ GOOGLE DRIVE CLOUD SYNC ═══════════════
+   Google Identity Services (token model) + Drive REST (appDataFolder) keep the
+   whole app data blob (localStorage[K]) in sync across devices under the signed-in
+   user's own Google Drive (hidden per-app folder). Non-breaking if offline. */
+const GDRIVE_CLIENT_ID='746944463408-vd6lhoneg6mntfctfo26klb1brmao5ff.apps.googleusercontent.com';
+const GDRIVE_SCOPE='https://www.googleapis.com/auth/drive.appdata';
+const GDRIVE_FILENAME='iam-cloud-data.json';
+let gdToken=null, gdTokenClient=null, gdConnected=false, gdBusy=false, gdSaveTimer=null;
+
+function gdHasData(blob){
+  if(!blob||typeof blob!=='object') return false;
+  const arrKeys=['auditUniverse','plans','reports','followups','risks','fieldworks','docs','ic_docs','rm_docs','charter_docs','laws_custom'];
+  for(const k of arrKeys){ if(Array.isArray(blob[k])&&blob[k].length) return true; }
+  if(blob['charter']&&typeof blob['charter']==='object'&&Object.keys(blob['charter']).length) return true;
+  for(const k in blob){ if(/^(up_|ar-note-|sig)/.test(k)&&blob[k]) return true; }
+  return false;
+}
+function gdLocalTs(){ try{ return db.load()._ts||0; }catch(e){ return 0; } }
+function gdUpdUI(){
+  const b=document.getElementById('gd-sync-btn'); if(!b) return;
+  const lbl=document.getElementById('gd-sync-label');
+  b.classList.toggle('on', gdConnected && !gdBusy);
+  b.classList.toggle('busy', gdBusy);
+  if(lbl) lbl.textContent = gdBusy ? 'กำลังซิงก์…' : (gdConnected ? 'ซิงก์แล้ว' : 'เชื่อม Drive');
+}
+function gdInit(){
+  if(!GDRIVE_CLIENT_ID) return;
+  if(typeof google==='undefined' || !google.accounts || !google.accounts.oauth2){ return void setTimeout(gdInit,400); }
+  try{
+    gdTokenClient=google.accounts.oauth2.initTokenClient({
+      client_id:GDRIVE_CLIENT_ID, scope:GDRIVE_SCOPE,
+      callback:(resp)=>{ if(resp&&resp.access_token){ gdToken=resp.access_token; gdConnected=true;
+          try{localStorage.setItem('iam_gd_optin','1');}catch(e){} gdUpdUI(); gdReconcile(true); }
+        else { gdBusy=false; gdUpdUI(); } },
+      error_callback:(e)=>{ gdBusy=false; gdUpdUI(); }
+    });
+  }catch(e){ return; }
+  try{ const _origSave=db.save.bind(db);
+    db.save=function(d){ try{ if(d&&typeof d==='object') d._ts=Date.now(); }catch(e){} _origSave(d); if(gdConnected) gdScheduleSave(); };
+  }catch(e){}
+  gdUpdUI();
+  try{ if(localStorage.getItem('iam_gd_optin')==='1'){ gdBusy=true; gdUpdUI(); gdTokenClient.requestAccessToken({prompt:''}); } }catch(e){}
+}
+function gdBtnClick(){
+  if(!gdTokenClient){ toast('กำลังเตรียมการเชื่อมต่อ Google… ลองอีกครั้ง'); gdInit(); return; }
+  if(gdConnected){ gdReconcile(false); }
+  else { gdBusy=true; gdUpdUI(); gdTokenClient.requestAccessToken({prompt:(localStorage.getItem('iam_gd_optin')==='1'?'':'consent')}); }
+}
+async function gdFetch(url, opts, retry){
+  opts=opts||{}; opts.headers=Object.assign({}, opts.headers||{}, {Authorization:'Bearer '+gdToken});
+  const r=await fetch(url, opts);
+  if(r.status===401 && !retry){
+    await new Promise((res)=>{ const prev=gdTokenClient.callback;
+      gdTokenClient.callback=(resp)=>{ gdTokenClient.callback=prev; if(resp&&resp.access_token) gdToken=resp.access_token; res(); };
+      gdTokenClient.requestAccessToken({prompt:''}); });
+    return gdFetch(url, {method:opts.method, headers:opts.headers, body:opts.body}, true);
+  }
+  return r;
+}
+async function gdFindFile(){
+  const q=encodeURIComponent("name='"+GDRIVE_FILENAME+"'");
+  const r=await gdFetch('https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q='+q+'&fields=files(id,modifiedTime)');
+  if(!r.ok) throw new Error('find '+r.status);
+  const j=await r.json(); return (j.files&&j.files[0])||null;
+}
+async function gdDownload(id){
+  const r=await gdFetch('https://www.googleapis.com/drive/v3/files/'+id+'?alt=media');
+  if(!r.ok) throw new Error('download '+r.status);
+  return r.json();
+}
+function gdEnvelope(){ let data={}; try{ data=db.load(); }catch(e){} return {app:'IAM', updatedAt:(data._ts||Date.now()), data:data}; }
+async function gdCreate(env){
+  const boundary='iamsync'+Date.now();
+  const meta={name:GDRIVE_FILENAME, parents:['appDataFolder']};
+  const body='--'+boundary+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+JSON.stringify(meta)+'\r\n--'+boundary+'\r\nContent-Type: application/json\r\n\r\n'+JSON.stringify(env)+'\r\n--'+boundary+'--';
+  const r=await gdFetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id',
+    {method:'POST', headers:{'Content-Type':'multipart/related; boundary='+boundary}, body:body});
+  if(!r.ok) throw new Error('create '+r.status); return r.json();
+}
+async function gdUpdateFile(id, env){
+  const r=await gdFetch('https://www.googleapis.com/upload/drive/v3/files/'+id+'?uploadType=media',
+    {method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify(env)});
+  if(!r.ok) throw new Error('update '+r.status); return r.json();
+}
+async function gdPushLocal(fileId){ const env=gdEnvelope(); if(fileId) await gdUpdateFile(fileId, env); else await gdCreate(env); }
+function gdApplyRemote(remote){ try{ localStorage.setItem(K, JSON.stringify(remote.data||{})); }catch(e){} }
+async function gdReconcile(afterAuth){
+  if(!gdConnected||!gdToken) return;
+  gdBusy=true; gdUpdUI();
+  try{
+    const file=await gdFindFile();
+    const localBlob=(function(){try{return db.load();}catch(e){return {};}})();
+    const localHas=gdHasData(localBlob), localTs=gdLocalTs();
+    if(!file){ await gdPushLocal(null); gdBusy=false; gdUpdUI(); toast('☁️ เชื่อม Google Drive แล้ว — อัปโหลดข้อมูลเครื่องนี้ขึ้น Drive'); return; }
+    const remote=await gdDownload(file.id);
+    const remoteHas=gdHasData(remote&&remote.data), remoteTs=(remote&&remote.updatedAt)||0;
+    if(remoteHas && !localHas){ gdApplyRemote(remote); gdBusy=false; gdUpdUI(); toast('☁️ ดึงข้อมูลจาก Drive แล้ว'); setTimeout(()=>location.reload(),700); return; }
+    if(localHas && !remoteHas){ await gdPushLocal(file.id); gdBusy=false; gdUpdUI(); toast('☁️ อัปโหลดข้อมูลขึ้น Drive แล้ว'); return; }
+    if(remoteTs>localTs){ gdApplyRemote(remote); gdBusy=false; gdUpdUI(); toast('☁️ อัปเดตข้อมูลจาก Drive แล้ว'); setTimeout(()=>location.reload(),700); return; }
+    if(localTs>remoteTs){ await gdPushLocal(file.id); gdBusy=false; gdUpdUI(); toast('☁️ ซิงก์ข้อมูลขึ้น Drive แล้ว'); return; }
+    gdBusy=false; gdUpdUI(); if(!afterAuth) toast('☁️ ข้อมูลตรงกันแล้ว');
+  }catch(e){ gdBusy=false; gdUpdUI(); toast('⚠️ ซิงก์ Drive ไม่สำเร็จ: '+((e&&e.message)||e)); }
+}
+function gdScheduleSave(){
+  if(!gdConnected) return; clearTimeout(gdSaveTimer);
+  gdSaveTimer=setTimeout(async()=>{ if(!gdConnected||!gdToken) return; gdBusy=true; gdUpdUI();
+    try{ const f=await gdFindFile(); await gdPushLocal(f?f.id:null); }catch(e){} gdBusy=false; gdUpdUI(); }, 2500);
+}
+if(typeof window!=='undefined'){ window.addEventListener('load', gdInit); }
+
 </script></body></html>
