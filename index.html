@@ -4,6 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>IAM — ระบบตรวจสอบภายใน อปท.</title>
+<link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16.png">
+<link rel="shortcut icon" href="icons/favicon.ico">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
+<link rel="apple-touch-icon" sizes="167x167" href="icons/icon-167.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
+<link rel="apple-touch-icon" sizes="120x120" href="icons/icon-120.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#C8102E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="IAM">
+<meta name="mobile-web-app-capable" content="yes">
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -32,7 +46,7 @@ input[type=number]{-moz-appearance:textfield}
 ::-webkit-scrollbar-thumb{background:var(--line2);border-radius:4px}
 
 /* APP */
-#app{display:flex;height:100vh;width:100%;overflow:hidden}
+#app{display:flex;height:100vh;height:100dvh;width:100%;overflow:hidden}
 
 /* SIDEBAR */
 #sb{width:var(--navw);background:var(--bk);display:flex;flex-direction:column;flex-shrink:0;height:100%;position:relative}
@@ -419,25 +433,56 @@ textarea.fi{resize:vertical;min-height:68px}
 @media(max-width:900px){
   .mnu-btn{display:flex}
   #sb{position:fixed;left:0;top:0;bottom:0;width:min(280px,82vw);z-index:2000;
-    transform:translateX(-100%);transition:transform .25s ease;box-shadow:0 0 40px rgba(0,0,0,.35)}
+    transform:translateX(-100%);transition:transform .25s ease;box-shadow:0 0 40px rgba(0,0,0,.35);
+    overflow-y:auto;-webkit-overflow-scrolling:touch}
   #sb.mobile-open{transform:translateX(0)}
-  .srow,.g2,.g23{grid-template-columns:1fr}
-  .r3,.r4{grid-template-columns:1fr 1fr}
-  #ct{padding:16px}
-  #tb{height:auto;flex-wrap:wrap;padding:10px 14px;gap:8px}
-  #tb-acts{flex-wrap:wrap;width:100%;margin-left:0}
+  /* sticky, compact top bar so nav + actions are always reachable */
+  #tb{position:sticky;top:0;z-index:1500;height:auto;min-height:var(--hdr);flex-wrap:wrap;padding:8px 14px;gap:8px}
+  #tb-acts{margin-left:auto;flex-wrap:wrap;gap:6px}
   #tb-devtag{display:none}
-  .ic-rm-body{flex-direction:column;padding:16px 14px}
+  #ct{padding:14px 14px 48px}
+  /* grids collapse */
+  .srow,.g2,.g23{grid-template-columns:1fr 1fr}
+  .r3,.r4{grid-template-columns:1fr 1fr}
+  /* tab bars scroll horizontally instead of overflowing off-screen */
+  .tabs{overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tbb{flex-shrink:0;white-space:nowrap}
+  /* filter bars: inputs share the row and grow */
+  .fb .fi,.fb select.fi{flex:1 1 130px;min-width:120px}
+  /* wide tables scroll within their card (not the whole page) */
+  .tw{-webkit-overflow-scrolling:touch}
+  .tb{font-size:12px}
+  .tb th,.tb td{padding:7px 8px}
+  /* internal-control / risk two-column layouts stack */
+  .ic-rm-body{flex-direction:column;padding:16px 14px;gap:16px}
   #ic-tabs,#rm-tabs{width:100%!important}
+  /* comfortable touch targets */
+  .btn{min-height:38px}
+  .fi{min-height:38px}
+  /* prevent iOS/Chrome zoom-on-focus for text inputs */
+  input.fi,textarea.fi,select.fi{font-size:16px}
+  .fb .fi,.fb select.fi{font-size:13px}
+  /* keep the floating toast clear of the screen edge */
+  #toast{left:14px;right:14px;bottom:14px;max-width:none}
 }
-@media(max-width:480px){
+@media(max-width:600px){
+  #tb-title{font-size:14px}
+  #tb-sub{font-size:11px}
+  .tbb{padding:9px 13px;font-size:12.5px}
+  .srow{grid-template-columns:1fr 1fr}
   .r2,.r3,.r4{grid-template-columns:1fr}
+}
+@media(max-width:400px){
+  #ct{padding:12px 10px 48px}
+  .srow{grid-template-columns:1fr}
+  .btn-sm{padding:6px 10px}
 }
 @media print{#sb,#tb,.upp,.fb,.btn{display:none!important}#ct{padding:0}body{overflow:auto}.tb th{background:#000!important;color:#fff!important;-webkit-print-color-adjust:exact}}
 
 /* ═══ LANDING PAGE ═══ */
 #app{display:none}
-#landing{display:flex;min-height:100vh;width:100%;background:var(--bk);position:relative;overflow:hidden;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px}
+#landing{display:flex;min-height:100vh;min-height:100dvh;width:100%;background:var(--bk);position:relative;overflow:hidden;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px}
 #landing::before{content:'';position:absolute;inset:0;
   background:
     radial-gradient(circle at 12% 8%,var(--rglow) 0%,transparent 38%),
@@ -487,7 +532,7 @@ textarea.fi{resize:vertical;min-height:68px}
 @media (max-width:480px){.ld-title{font-size:36px}}
 
 /* Coming soon page */
-#pg-comingsoon{display:none;min-height:100vh;width:100%;background:var(--bk);position:relative;overflow:hidden;
+#pg-comingsoon{display:none;min-height:100vh;min-height:100dvh;width:100%;background:var(--bk);position:relative;overflow:hidden;
   flex-direction:column;align-items:center;justify-content:center;padding:24px}
 #pg-comingsoon::before{content:'';position:absolute;inset:0;
   background:radial-gradient(circle at 50% 30%,rgba(217,119,6,.12) 0%,transparent 45%),linear-gradient(180deg,var(--bk) 0%,var(--bk2) 100%);
@@ -1290,7 +1335,7 @@ textarea.fi{resize:vertical;min-height:68px}
   </div>
 </div>
 </div>
-<div id="pg-ic" style="display:none;min-height:100vh;width:100%;background:var(--bg)">
+<div id="pg-ic" style="display:none;min-height:100vh;min-height:100dvh;width:100%;background:var(--bg)">
   <div class="ic-hero">
     <div class="ic-hero-in">
       <div class="ic-hero-back"><button class="cs-back" style="position:static" onclick="backToLanding()">← กลับหน้าหลัก</button></div>
@@ -1372,7 +1417,7 @@ textarea.fi{resize:vertical;min-height:68px}
     </div>
   </div>
 </div>
-<div id="pg-rm" style="display:none;min-height:100vh;width:100%;background:var(--bg)">
+<div id="pg-rm" style="display:none;min-height:100vh;min-height:100dvh;width:100%;background:var(--bg)">
   <div class="ic-hero">
     <div class="ic-hero-in">
       <div class="ic-hero-back"><button class="cs-back" style="position:static" onclick="backToLanding()">← กลับหน้าหลัก</button></div>
