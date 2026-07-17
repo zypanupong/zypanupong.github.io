@@ -5010,6 +5010,13 @@ function gdScheduleSave(){
   gdSaveTimer=setTimeout(async()=>{ if(!gdConnected||!gdToken) return; gdBusy=true; gdUpdUI();
     try{ const f=await gdFindFile(); await gdPushLocal(f?f.id:null); }catch(e){} gdBusy=false; gdUpdUI(); }, 2500);
 }
-if(typeof window!=='undefined'){ window.addEventListener('load', gdInit); }
+let gdVisTimer=null;
+function gdMaybeAutoSync(){
+  if(gdBusy) return;
+  if(gdConnected){ clearTimeout(gdVisTimer); gdVisTimer=setTimeout(function(){ gdReconcile(true); }, 300); }
+  else if(gdTokenClient && localStorage.getItem('iam_gd_optin')==='1'){ gdBusy=true; gdUpdUI(); try{ gdTokenClient.requestAccessToken({prompt:''}); }catch(e){ gdBusy=false; gdUpdUI(); } }
+}
+if(typeof document!=='undefined'){ document.addEventListener('visibilitychange', function(){ if(!document.hidden) gdMaybeAutoSync(); }); }
+if(typeof window!=='undefined'){ window.addEventListener('focus', gdMaybeAutoSync); window.addEventListener('load', gdInit); }
 
 </script></body></html>
